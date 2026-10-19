@@ -1,0 +1,4603 @@
+{
+  "version": 2,
+  "width": 765,
+  "height": 1280,
+  "mapped_floors": [
+    1,
+    2
+  ],
+  "labels": [
+    {
+      "text": "Block D",
+      "x": 156.0,
+      "y": 841.0,
+      "color": "#833282",
+      "size": 19.0,
+      "align": "end",
+      "bold": true
+    },
+    {
+      "text": "Block D",
+      "x": 755.0,
+      "y": 841.0,
+      "color": "#833282",
+      "size": 18.0,
+      "align": "end",
+      "bold": true
+    },
+    {
+      "text": "Faculty of",
+      "x": 156.0,
+      "y": 872.0,
+      "color": "#833282",
+      "size": 18.0,
+      "align": "end",
+      "bold": false
+    },
+    {
+      "text": "Law & Social",
+      "x": 156.0,
+      "y": 895.0,
+      "color": "#833282",
+      "size": 18.0,
+      "align": "end",
+      "bold": false
+    },
+    {
+      "text": "Sciences",
+      "x": 156.0,
+      "y": 918.0,
+      "color": "#833282",
+      "size": 18.0,
+      "align": "end",
+      "bold": false
+    },
+    {
+      "text": "Block E",
+      "x": 156.0,
+      "y": 656.0,
+      "color": "#851b20",
+      "size": 19.0,
+      "align": "end",
+      "bold": true
+    },
+    {
+      "text": "Block E",
+      "x": 755.0,
+      "y": 656.0,
+      "color": "#851b20",
+      "size": 18.0,
+      "align": "end",
+      "bold": true
+    },
+    {
+      "text": "Faculty of",
+      "x": 156.0,
+      "y": 687.0,
+      "color": "#851b20",
+      "size": 18.0,
+      "align": "end",
+      "bold": false
+    },
+    {
+      "text": "Education &",
+      "x": 156.0,
+      "y": 710.0,
+      "color": "#851b20",
+      "size": 18.0,
+      "align": "end",
+      "bold": false
+    },
+    {
+      "text": "Humanities",
+      "x": 156.0,
+      "y": 733.0,
+      "color": "#851b20",
+      "size": 18.0,
+      "align": "end",
+      "bold": false
+    },
+    {
+      "text": "Block F",
+      "x": 156.0,
+      "y": 475.0,
+      "color": "#303b7d",
+      "size": 19.0,
+      "align": "end",
+      "bold": true
+    },
+    {
+      "text": "Block F",
+      "x": 755.0,
+      "y": 475.0,
+      "color": "#303b7d",
+      "size": 18.0,
+      "align": "end",
+      "bold": true
+    },
+    {
+      "text": "Faculty of",
+      "x": 156.0,
+      "y": 506.0,
+      "color": "#303b7d",
+      "size": 18.0,
+      "align": "end",
+      "bold": false
+    },
+    {
+      "text": "Engineering and",
+      "x": 156.0,
+      "y": 529.0,
+      "color": "#303b7d",
+      "size": 18.0,
+      "align": "end",
+      "bold": false
+    },
+    {
+      "text": "Natural Sciences",
+      "x": 156.0,
+      "y": 552.0,
+      "color": "#303b7d",
+      "size": 18.0,
+      "align": "end",
+      "bold": false
+    },
+    {
+      "text": "Block G",
+      "x": 156.0,
+      "y": 291.0,
+      "color": "#5b733c",
+      "size": 19.0,
+      "align": "end",
+      "bold": true
+    },
+    {
+      "text": "Block G",
+      "x": 755.0,
+      "y": 291.0,
+      "color": "#5b733c",
+      "size": 18.0,
+      "align": "end",
+      "bold": true
+    },
+    {
+      "text": "SDU Business",
+      "x": 156.0,
+      "y": 322.0,
+      "color": "#5b733c",
+      "size": 18.0,
+      "align": "end",
+      "bold": false
+    },
+    {
+      "text": "School",
+      "x": 156.0,
+      "y": 345.0,
+      "color": "#5b733c",
+      "size": 18.0,
+      "align": "end",
+      "bold": false
+    },
+    {
+      "text": "Block H",
+      "x": 156.0,
+      "y": 110.0,
+      "color": "#38769e",
+      "size": 19.0,
+      "align": "end",
+      "bold": true
+    },
+    {
+      "text": "Block H",
+      "x": 755.0,
+      "y": 110.0,
+      "color": "#38769e",
+      "size": 18.0,
+      "align": "end",
+      "bold": true
+    },
+    {
+      "text": "Block A",
+      "x": 128.0,
+      "y": 1262.0,
+      "color": "#87423d",
+      "size": 18.0,
+      "align": "start",
+      "bold": false
+    },
+    {
+      "text": "Block B",
+      "x": 374.0,
+      "y": 1262.0,
+      "color": "#897634",
+      "size": 18.0,
+      "align": "start",
+      "bold": false
+    },
+    {
+      "text": "Block C",
+      "x": 755.0,
+      "y": 1078.0,
+      "color": "#527d69",
+      "size": 18.0,
+      "align": "end",
+      "bold": false
+    }
+  ],
+  "routing_status": "schematic_draft",
+  "routing": {
+    "status": "schematic_draft",
+    "floor": 1,
+    "nodes": {
+      "entrance_c": [
+        590,
+        1072
+      ],
+      "atrium_east": [
+        556,
+        1030
+      ],
+      "atrium": [
+        480,
+        1005
+      ],
+      "lower_hub": [
+        405,
+        1035
+      ],
+      "spine_950": [
+        420,
+        950
+      ],
+      "spine_d": [
+        420,
+        866
+      ],
+      "spine_800": [
+        420,
+        800
+      ],
+      "spine_e": [
+        420,
+        685
+      ],
+      "spine_610": [
+        405,
+        610
+      ],
+      "spine_f": [
+        405,
+        501
+      ],
+      "spine_400": [
+        405,
+        400
+      ],
+      "spine_g": [
+        420,
+        318
+      ],
+      "spine_250": [
+        420,
+        250
+      ],
+      "spine_h": [
+        420,
+        135
+      ],
+      "spine_95": [
+        420,
+        95
+      ],
+      "d_join": [
+        365,
+        866
+      ],
+      "d_101": [
+        365,
+        869
+      ],
+      "d_102": [
+        326.625,
+        869
+      ],
+      "d_lift": [
+        295,
+        867
+      ],
+      "d_103": [
+        288.375,
+        872
+      ],
+      "d_104": [
+        250.125,
+        872
+      ],
+      "d_end": [
+        228,
+        872
+      ],
+      "e_join": [
+        365,
+        685
+      ],
+      "f_join": [
+        365,
+        501
+      ],
+      "f_lift": [
+        295,
+        502
+      ],
+      "g_join": [
+        365,
+        318
+      ],
+      "h_join": [
+        365,
+        139
+      ],
+      "h_lift": [
+        295,
+        139
+      ],
+      "library_approach": [
+        340,
+        1125
+      ],
+      "hall_approach": [
+        210,
+        1085
+      ],
+      "f2_spine_95": [
+        384,
+        95
+      ],
+      "f2_spine_135": [
+        384,
+        135
+      ],
+      "f2_spine_250": [
+        384,
+        250
+      ],
+      "f2_spine_318": [
+        384,
+        318
+      ],
+      "f2_spine_501": [
+        384,
+        501
+      ],
+      "f2_spine_610": [
+        384,
+        610
+      ],
+      "f2_spine_685": [
+        384,
+        685
+      ],
+      "f2_spine_720": [
+        384,
+        720
+      ],
+      "f2_spine_763": [
+        384,
+        763
+      ],
+      "f2_spine_845": [
+        384,
+        845
+      ],
+      "f2_spine_900": [
+        384,
+        900
+      ],
+      "f2_spine_1035": [
+        384,
+        1035
+      ],
+      "f2_spine_1125": [
+        384,
+        1125
+      ],
+      "room_approach_d101": [
+        364.875,
+        866
+      ],
+      "room_approach_d102": [
+        326.625,
+        866
+      ],
+      "room_approach_d103": [
+        288.375,
+        866
+      ],
+      "room_approach_d104": [
+        250.125,
+        866
+      ],
+      "f1_lift_d": [
+        295,
+        866
+      ],
+      "room_approach_d201": [
+        364.875,
+        866
+      ],
+      "room_approach_d202": [
+        326.625,
+        866
+      ],
+      "room_approach_d203": [
+        288.375,
+        866
+      ],
+      "room_approach_d204": [
+        250.125,
+        866
+      ],
+      "f2_lift_d": [
+        295,
+        866
+      ],
+      "room_approach_e101": [
+        364.875,
+        685
+      ],
+      "room_approach_e102": [
+        326.625,
+        685
+      ],
+      "room_approach_e103": [
+        288.375,
+        685
+      ],
+      "room_approach_e104": [
+        250.125,
+        685
+      ],
+      "room_approach_e201": [
+        364.875,
+        685
+      ],
+      "room_approach_e202": [
+        326.625,
+        685
+      ],
+      "room_approach_e203": [
+        288.375,
+        685
+      ],
+      "room_approach_e204": [
+        250.125,
+        685
+      ],
+      "room_approach_f101": [
+        364.875,
+        501
+      ],
+      "room_approach_f102": [
+        326.625,
+        501
+      ],
+      "room_approach_f103": [
+        288.375,
+        501
+      ],
+      "room_approach_f104": [
+        250.125,
+        501
+      ],
+      "f1_lift_f": [
+        295,
+        501
+      ],
+      "room_approach_f201": [
+        364.875,
+        501
+      ],
+      "room_approach_f202": [
+        326.625,
+        501
+      ],
+      "room_approach_f203": [
+        288.375,
+        501
+      ],
+      "room_approach_f204": [
+        250.125,
+        501
+      ],
+      "f2_lift_f": [
+        295,
+        501
+      ],
+      "room_approach_g101": [
+        364.875,
+        318
+      ],
+      "room_approach_g102": [
+        326.625,
+        318
+      ],
+      "room_approach_g103": [
+        288.375,
+        318
+      ],
+      "room_approach_g104": [
+        250.125,
+        318
+      ],
+      "room_approach_g201": [
+        364.875,
+        318
+      ],
+      "room_approach_g202": [
+        326.625,
+        318
+      ],
+      "room_approach_g203": [
+        288.375,
+        318
+      ],
+      "room_approach_g204": [
+        250.125,
+        318
+      ],
+      "room_approach_h101": [
+        364.875,
+        139
+      ],
+      "room_approach_h102": [
+        326.625,
+        139
+      ],
+      "room_approach_h103": [
+        288.375,
+        139
+      ],
+      "room_approach_h104": [
+        250.125,
+        139
+      ],
+      "f1_lift_h": [
+        295,
+        139
+      ],
+      "room_approach_h201": [
+        364.875,
+        139
+      ],
+      "room_approach_h202": [
+        326.625,
+        139
+      ],
+      "room_approach_h203": [
+        288.375,
+        139
+      ],
+      "room_approach_h204": [
+        250.125,
+        139
+      ],
+      "f2_lift_h": [
+        295,
+        139
+      ],
+      "f1_stair_block_d": [
+        216,
+        849
+      ],
+      "f2_stair_block_d": [
+        216,
+        849
+      ],
+      "f1_stair_03": [
+        456.83,
+        920.0
+      ],
+      "f2_stair_03": [
+        457,
+        920
+      ],
+      "f1_stair_04": [
+        498.0,
+        763.0
+      ],
+      "f2_stair_04": [
+        498,
+        763
+      ],
+      "f1_stair_05": [
+        456.83,
+        611.0
+      ],
+      "f2_stair_05": [
+        457,
+        611
+      ],
+      "f1_stair_08": [
+        466.3299999999999,
+        250.0
+      ],
+      "f2_stair_08": [
+        466,
+        250
+      ],
+      "f2_platform": [
+        510,
+        720
+      ],
+      "f2_bochka_1": [
+        521,
+        677
+      ],
+      "f2_bochka_2": [
+        550,
+        775
+      ],
+      "f2_bochka_3": [
+        521,
+        846
+      ],
+      "f2_bochka_4": [
+        550,
+        910
+      ],
+      "f1_spiral": [
+        541,
+        720
+      ],
+      "f2_spiral": [
+        541,
+        720
+      ],
+      "f2_library": [
+        210,
+        1160
+      ],
+      "f2_canteen_stairs": [
+        592,
+        610
+      ],
+      "f3_canteen": [
+        592,
+        610
+      ],
+      "f1_stair_06": [
+        541,
+        385
+      ]
+    },
+    "edges": [
+      {
+        "a": "entrance_c",
+        "b": "atrium_east",
+        "kind": "corridor"
+      },
+      {
+        "a": "atrium_east",
+        "b": "atrium",
+        "kind": "corridor"
+      },
+      {
+        "a": "atrium",
+        "b": "lower_hub",
+        "kind": "corridor"
+      },
+      {
+        "a": "lower_hub",
+        "b": "spine_950",
+        "kind": "corridor"
+      },
+      {
+        "a": "spine_950",
+        "b": "spine_d",
+        "kind": "corridor"
+      },
+      {
+        "a": "spine_d",
+        "b": "spine_800",
+        "kind": "corridor"
+      },
+      {
+        "a": "spine_800",
+        "b": "spine_e",
+        "kind": "corridor"
+      },
+      {
+        "a": "spine_e",
+        "b": "spine_610",
+        "kind": "corridor"
+      },
+      {
+        "a": "spine_610",
+        "b": "spine_f",
+        "kind": "corridor"
+      },
+      {
+        "a": "spine_f",
+        "b": "spine_400",
+        "kind": "corridor"
+      },
+      {
+        "a": "spine_400",
+        "b": "spine_g",
+        "kind": "corridor"
+      },
+      {
+        "a": "spine_g",
+        "b": "spine_250",
+        "kind": "corridor"
+      },
+      {
+        "a": "spine_250",
+        "b": "spine_h",
+        "kind": "corridor"
+      },
+      {
+        "a": "spine_h",
+        "b": "spine_95",
+        "kind": "corridor"
+      },
+      {
+        "a": "spine_d",
+        "b": "d_join",
+        "kind": "corridor"
+      },
+      {
+        "a": "d_join",
+        "b": "d_101",
+        "kind": "corridor"
+      },
+      {
+        "a": "d_101",
+        "b": "d_102",
+        "kind": "corridor"
+      },
+      {
+        "a": "d_102",
+        "b": "d_lift",
+        "kind": "corridor"
+      },
+      {
+        "a": "d_lift",
+        "b": "d_103",
+        "kind": "corridor"
+      },
+      {
+        "a": "d_103",
+        "b": "d_104",
+        "kind": "corridor"
+      },
+      {
+        "a": "d_104",
+        "b": "d_end",
+        "kind": "corridor"
+      },
+      {
+        "a": "spine_e",
+        "b": "e_join",
+        "kind": "corridor"
+      },
+      {
+        "a": "spine_f",
+        "b": "f_join",
+        "kind": "corridor"
+      },
+      {
+        "a": "f_join",
+        "b": "f_lift",
+        "kind": "corridor"
+      },
+      {
+        "a": "spine_g",
+        "b": "g_join",
+        "kind": "corridor"
+      },
+      {
+        "a": "spine_h",
+        "b": "h_join",
+        "kind": "corridor"
+      },
+      {
+        "a": "h_join",
+        "b": "h_lift",
+        "kind": "corridor"
+      },
+      {
+        "a": "lower_hub",
+        "b": "library_approach",
+        "kind": "corridor"
+      },
+      {
+        "a": "lower_hub",
+        "b": "hall_approach",
+        "kind": "corridor"
+      },
+      {
+        "a": "f2_spine_95",
+        "b": "f2_spine_135",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "f2_spine_135",
+        "b": "f2_spine_250",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "f2_spine_250",
+        "b": "f2_spine_318",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "f2_spine_318",
+        "b": "f2_spine_501",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "f2_spine_501",
+        "b": "f2_spine_610",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "f2_spine_610",
+        "b": "f2_spine_685",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "f2_spine_685",
+        "b": "f2_spine_720",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "f2_spine_720",
+        "b": "f2_spine_763",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "f2_spine_763",
+        "b": "f2_spine_845",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "f2_spine_845",
+        "b": "f2_spine_900",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "f2_spine_900",
+        "b": "f2_spine_1035",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "f2_spine_1035",
+        "b": "f2_spine_1125",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "spine_d",
+        "b": "room_approach_d101",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "room_approach_d101",
+        "b": "room_approach_d102",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "room_approach_d102",
+        "b": "room_approach_d103",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "room_approach_d103",
+        "b": "room_approach_d104",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "room_approach_d102",
+        "b": "f1_lift_d",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "f2_spine_900",
+        "b": "room_approach_d201",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "room_approach_d201",
+        "b": "room_approach_d202",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "room_approach_d202",
+        "b": "room_approach_d203",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "room_approach_d203",
+        "b": "room_approach_d204",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "room_approach_d202",
+        "b": "f2_lift_d",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "f1_lift_d",
+        "b": "f2_lift_d",
+        "kind": "lift",
+        "label": "Block D lift"
+      },
+      {
+        "a": "spine_e",
+        "b": "room_approach_e101",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "room_approach_e101",
+        "b": "room_approach_e102",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "room_approach_e102",
+        "b": "room_approach_e103",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "room_approach_e103",
+        "b": "room_approach_e104",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "f2_spine_685",
+        "b": "room_approach_e201",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "room_approach_e201",
+        "b": "room_approach_e202",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "room_approach_e202",
+        "b": "room_approach_e203",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "room_approach_e203",
+        "b": "room_approach_e204",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "spine_f",
+        "b": "room_approach_f101",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "room_approach_f101",
+        "b": "room_approach_f102",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "room_approach_f102",
+        "b": "room_approach_f103",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "room_approach_f103",
+        "b": "room_approach_f104",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "room_approach_f102",
+        "b": "f1_lift_f",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "f2_spine_501",
+        "b": "room_approach_f201",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "room_approach_f201",
+        "b": "room_approach_f202",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "room_approach_f202",
+        "b": "room_approach_f203",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "room_approach_f203",
+        "b": "room_approach_f204",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "room_approach_f202",
+        "b": "f2_lift_f",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "f1_lift_f",
+        "b": "f2_lift_f",
+        "kind": "lift",
+        "label": "Block F lift"
+      },
+      {
+        "a": "spine_g",
+        "b": "room_approach_g101",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "room_approach_g101",
+        "b": "room_approach_g102",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "room_approach_g102",
+        "b": "room_approach_g103",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "room_approach_g103",
+        "b": "room_approach_g104",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "f2_spine_318",
+        "b": "room_approach_g201",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "room_approach_g201",
+        "b": "room_approach_g202",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "room_approach_g202",
+        "b": "room_approach_g203",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "room_approach_g203",
+        "b": "room_approach_g204",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "spine_h",
+        "b": "room_approach_h101",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "room_approach_h101",
+        "b": "room_approach_h102",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "room_approach_h102",
+        "b": "room_approach_h103",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "room_approach_h103",
+        "b": "room_approach_h104",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "room_approach_h102",
+        "b": "f1_lift_h",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "f2_spine_135",
+        "b": "room_approach_h201",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "room_approach_h201",
+        "b": "room_approach_h202",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "room_approach_h202",
+        "b": "room_approach_h203",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "room_approach_h203",
+        "b": "room_approach_h204",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "room_approach_h202",
+        "b": "f2_lift_h",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "f1_lift_h",
+        "b": "f2_lift_h",
+        "kind": "lift",
+        "label": "Block H lift"
+      },
+      {
+        "a": "room_approach_d104",
+        "b": "f1_stair_block_d",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "room_approach_d204",
+        "b": "f2_stair_block_d",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "f1_stair_block_d",
+        "b": "f2_stair_block_d",
+        "kind": "stairs",
+        "label": "Block D end staircase"
+      },
+      {
+        "a": "spine_950",
+        "b": "f1_stair_03",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "f2_spine_900",
+        "b": "f2_stair_03",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "f1_stair_03",
+        "b": "f2_stair_03",
+        "kind": "stairs",
+        "label": "Staircase 3"
+      },
+      {
+        "a": "spine_800",
+        "b": "f1_stair_04",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "f2_spine_763",
+        "b": "f2_stair_04",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "f1_stair_04",
+        "b": "f2_stair_04",
+        "kind": "stairs",
+        "label": "Staircase 4"
+      },
+      {
+        "a": "spine_610",
+        "b": "f1_stair_05",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "f2_spine_610",
+        "b": "f2_stair_05",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "f1_stair_05",
+        "b": "f2_stair_05",
+        "kind": "stairs",
+        "label": "Staircase 5"
+      },
+      {
+        "a": "spine_250",
+        "b": "f1_stair_08",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "f2_spine_250",
+        "b": "f2_stair_08",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "f1_stair_08",
+        "b": "f2_stair_08",
+        "kind": "stairs",
+        "label": "Staircase 8"
+      },
+      {
+        "a": "f2_spine_720",
+        "b": "f2_platform",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "f2_platform",
+        "b": "f2_bochka_1",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "f2_bochka_1",
+        "b": "f2_bochka_2",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "f2_bochka_2",
+        "b": "f2_bochka_3",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "f2_bochka_3",
+        "b": "f2_bochka_4",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "f2_bochka_4",
+        "b": "f2_spine_900",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "spine_e",
+        "b": "f1_spiral",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "f2_platform",
+        "b": "f2_spiral",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "f1_spiral",
+        "b": "f2_spiral",
+        "kind": "stairs",
+        "label": "Bochka spiral stairs"
+      },
+      {
+        "a": "f2_spine_1125",
+        "b": "f2_library",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "f2_spine_610",
+        "b": "f2_canteen_stairs",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "f2_canteen_stairs",
+        "b": "f3_canteen",
+        "kind": "stairs",
+        "label": "Canteen stairs"
+      },
+      {
+        "a": "spine_400",
+        "b": "f1_stair_06",
+        "kind": "corridor",
+        "label": ""
+      },
+      {
+        "a": "f1_stair_06",
+        "b": "f3_canteen",
+        "kind": "stairs",
+        "label": "Staircase 6 (no floor-2 stop)"
+      }
+    ],
+    "attachments": {
+      "entrance_c_main": "entrance_c",
+      "d101": "room_approach_d101",
+      "d102": "room_approach_d102",
+      "d103": "room_approach_d103",
+      "d104": "room_approach_d104",
+      "lift_block_d": "f1_lift_d",
+      "lift_block_f": "f1_lift_f",
+      "lift_block_h": "f1_lift_h",
+      "stair_block_d": "f1_stair_block_d",
+      "library": "library_approach",
+      "red_hall": "hall_approach",
+      "restroom_lower_central": "lower_hub",
+      "wifi_zone": "atrium",
+      "cloakroom": "atrium_east",
+      "d_restroom": "spine_d",
+      "e_restroom": "e_join",
+      "f_restroom": "f_join",
+      "g_restroom": "g_join",
+      "h_restroom": "h_join",
+      "medical_point": "spine_250",
+      "stair_main_03": "f1_stair_03",
+      "stair_main_04": "f1_stair_04",
+      "stair_main_05": "f1_stair_05",
+      "stair_main_08": "f1_stair_08",
+      "bochka_1": "spine_e",
+      "bochka_2": "spine_800",
+      "bochka_3": "spine_d",
+      "bochka_4": "spine_950",
+      "d201": "room_approach_d201",
+      "d202": "room_approach_d202",
+      "d203": "room_approach_d203",
+      "d204": "room_approach_d204",
+      "lift_block_d_floor_2": "f2_lift_d",
+      "e101": "room_approach_e101",
+      "e102": "room_approach_e102",
+      "e103": "room_approach_e103",
+      "e104": "room_approach_e104",
+      "e201": "room_approach_e201",
+      "e202": "room_approach_e202",
+      "e203": "room_approach_e203",
+      "e204": "room_approach_e204",
+      "f101": "room_approach_f101",
+      "f102": "room_approach_f102",
+      "f103": "room_approach_f103",
+      "f104": "room_approach_f104",
+      "f201": "room_approach_f201",
+      "f202": "room_approach_f202",
+      "f203": "room_approach_f203",
+      "f204": "room_approach_f204",
+      "lift_block_f_floor_2": "f2_lift_f",
+      "g101": "room_approach_g101",
+      "g102": "room_approach_g102",
+      "g103": "room_approach_g103",
+      "g104": "room_approach_g104",
+      "g201": "room_approach_g201",
+      "g202": "room_approach_g202",
+      "g203": "room_approach_g203",
+      "g204": "room_approach_g204",
+      "h101": "room_approach_h101",
+      "h102": "room_approach_h102",
+      "h103": "room_approach_h103",
+      "h104": "room_approach_h104",
+      "h201": "room_approach_h201",
+      "h202": "room_approach_h202",
+      "h203": "room_approach_h203",
+      "h204": "room_approach_h204",
+      "lift_block_h_floor_2": "f2_lift_h",
+      "stair_block_d_floor_2": "f2_stair_block_d",
+      "stair_main_03_floor_2": "f2_stair_03",
+      "stair_main_04_floor_2": "f2_stair_04",
+      "stair_main_05_floor_2": "f2_stair_05",
+      "stair_main_08_floor_2": "f2_stair_08",
+      "bochka_1_floor_2": "f2_bochka_1",
+      "bochka_2_floor_2": "f2_bochka_2",
+      "bochka_3_floor_2": "f2_bochka_3",
+      "bochka_4_floor_2": "f2_bochka_4",
+      "stair_spiral_bochkas": "f1_spiral",
+      "stair_spiral_floor_2": "f2_spiral",
+      "library_floor_2": "f2_library",
+      "stair_canteen_23": "f2_canteen_stairs",
+      "canteen_floor_3": "f3_canteen",
+      "stair_main_06": "f1_stair_06"
+    },
+    "node_floors": {
+      "entrance_c": 1,
+      "atrium_east": 1,
+      "atrium": 1,
+      "lower_hub": 1,
+      "spine_950": 1,
+      "spine_d": 1,
+      "spine_800": 1,
+      "spine_e": 1,
+      "spine_610": 1,
+      "spine_f": 1,
+      "spine_400": 1,
+      "spine_g": 1,
+      "spine_250": 1,
+      "spine_h": 1,
+      "spine_95": 1,
+      "d_join": 1,
+      "d_101": 1,
+      "d_102": 1,
+      "d_lift": 1,
+      "d_103": 1,
+      "d_104": 1,
+      "d_end": 1,
+      "e_join": 1,
+      "f_join": 1,
+      "f_lift": 1,
+      "g_join": 1,
+      "h_join": 1,
+      "h_lift": 1,
+      "library_approach": 1,
+      "hall_approach": 1,
+      "f2_spine_95": 2,
+      "f2_spine_135": 2,
+      "f2_spine_250": 2,
+      "f2_spine_318": 2,
+      "f2_spine_501": 2,
+      "f2_spine_610": 2,
+      "f2_spine_685": 2,
+      "f2_spine_720": 2,
+      "f2_spine_763": 2,
+      "f2_spine_845": 2,
+      "f2_spine_900": 2,
+      "f2_spine_1035": 2,
+      "f2_spine_1125": 2,
+      "room_approach_d101": 1,
+      "room_approach_d102": 1,
+      "room_approach_d103": 1,
+      "room_approach_d104": 1,
+      "f1_lift_d": 1,
+      "room_approach_d201": 2,
+      "room_approach_d202": 2,
+      "room_approach_d203": 2,
+      "room_approach_d204": 2,
+      "f2_lift_d": 2,
+      "room_approach_e101": 1,
+      "room_approach_e102": 1,
+      "room_approach_e103": 1,
+      "room_approach_e104": 1,
+      "room_approach_e201": 2,
+      "room_approach_e202": 2,
+      "room_approach_e203": 2,
+      "room_approach_e204": 2,
+      "room_approach_f101": 1,
+      "room_approach_f102": 1,
+      "room_approach_f103": 1,
+      "room_approach_f104": 1,
+      "f1_lift_f": 1,
+      "room_approach_f201": 2,
+      "room_approach_f202": 2,
+      "room_approach_f203": 2,
+      "room_approach_f204": 2,
+      "f2_lift_f": 2,
+      "room_approach_g101": 1,
+      "room_approach_g102": 1,
+      "room_approach_g103": 1,
+      "room_approach_g104": 1,
+      "room_approach_g201": 2,
+      "room_approach_g202": 2,
+      "room_approach_g203": 2,
+      "room_approach_g204": 2,
+      "room_approach_h101": 1,
+      "room_approach_h102": 1,
+      "room_approach_h103": 1,
+      "room_approach_h104": 1,
+      "f1_lift_h": 1,
+      "room_approach_h201": 2,
+      "room_approach_h202": 2,
+      "room_approach_h203": 2,
+      "room_approach_h204": 2,
+      "f2_lift_h": 2,
+      "f1_stair_block_d": 1,
+      "f2_stair_block_d": 2,
+      "f1_stair_03": 1,
+      "f2_stair_03": 2,
+      "f1_stair_04": 1,
+      "f2_stair_04": 2,
+      "f1_stair_05": 1,
+      "f2_stair_05": 2,
+      "f1_stair_08": 1,
+      "f2_stair_08": 2,
+      "f2_platform": 2,
+      "f2_bochka_1": 2,
+      "f2_bochka_2": 2,
+      "f2_bochka_3": 2,
+      "f2_bochka_4": 2,
+      "f1_spiral": 1,
+      "f2_spiral": 2,
+      "f2_library": 2,
+      "f2_canteen_stairs": 2,
+      "f3_canteen": 3,
+      "f1_stair_06": 1
+    }
+  },
+  "places": [
+    {
+      "id": 93946523,
+      "map_key": "red_hall",
+      "name": "Red Hall",
+      "category": "Hall",
+      "block": "Campus spine",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        1
+      ],
+      "has_position": true,
+      "x": 0.21045751633986928,
+      "y": 0.84921875,
+      "geometry": null,
+      "access": "public",
+      "notes": "",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "red hall",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": [
+        1
+      ]
+    },
+    {
+      "id": 88619586,
+      "map_key": "restroom_lower_central",
+      "name": "Restroom — lower central area",
+      "category": "Restroom",
+      "block": "Campus spine",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        1
+      ],
+      "has_position": true,
+      "x": 0.37254901960784315,
+      "y": 0.8328125,
+      "geometry": null,
+      "access": "public",
+      "notes": "",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "restroom lower central",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 92511062,
+      "map_key": "wifi_zone",
+      "name": "WiFi Zone",
+      "category": "Study",
+      "block": "Campus spine",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        1
+      ],
+      "has_position": true,
+      "x": 0.6758169934640523,
+      "y": 0.82734375,
+      "geometry": null,
+      "access": "public",
+      "notes": "",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "Wi-Fi Zone,wifi zone",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 30824187,
+      "map_key": "cloakroom",
+      "name": "Cloakroom",
+      "category": "Service",
+      "block": "Campus spine",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        1
+      ],
+      "has_position": true,
+      "x": 0.7816993464052288,
+      "y": 0.796875,
+      "geometry": null,
+      "access": "public",
+      "notes": "",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "cloakroom",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 1,
+      "map_key": "entrance_c_main",
+      "name": "Main Entrance",
+      "category": "Entrance",
+      "block": "Block C",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        1
+      ],
+      "has_position": true,
+      "x": 0.7869281045751634,
+      "y": 0.84375,
+      "geometry": null,
+      "access": "public",
+      "notes": "",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "entrance c main",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 2,
+      "map_key": "library",
+      "name": "Library",
+      "category": "Study",
+      "block": "Campus spine",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        -1,
+        1,
+        2
+      ],
+      "has_position": true,
+      "x": 0.4444444444444444,
+      "y": 0.9,
+      "geometry": null,
+      "access": "public",
+      "notes": "",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "library",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": [
+        1,
+        2
+      ]
+    },
+    {
+      "id": 32854426,
+      "map_key": "d_staff_restroom",
+      "name": "Block D — staff restroom",
+      "category": "Restroom",
+      "block": "Block D",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        1
+      ],
+      "has_position": true,
+      "x": 0.47843137254901963,
+      "y": 0.6484375,
+      "geometry": null,
+      "access": "staff",
+      "notes": "",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "d staff restroom",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 40456571,
+      "map_key": "d_restroom",
+      "name": "Block D — general restroom",
+      "category": "Restroom",
+      "block": "Block D",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        1
+      ],
+      "has_position": true,
+      "x": 0.47843137254901963,
+      "y": 0.71640625,
+      "geometry": null,
+      "access": "public",
+      "notes": "",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "d restroom",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 12294923,
+      "map_key": "e_staff_restroom",
+      "name": "Block E — staff restroom",
+      "category": "Restroom",
+      "block": "Block E",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        1
+      ],
+      "has_position": true,
+      "x": 0.47843137254901963,
+      "y": 0.50390625,
+      "geometry": null,
+      "access": "staff",
+      "notes": "",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "e staff restroom",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 24286613,
+      "map_key": "e_restroom",
+      "name": "Block E — general restroom",
+      "category": "Restroom",
+      "block": "Block E",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        1
+      ],
+      "has_position": true,
+      "x": 0.47843137254901963,
+      "y": 0.5734375,
+      "geometry": null,
+      "access": "public",
+      "notes": "",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "e restroom",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 96512441,
+      "map_key": "f_staff_restroom",
+      "name": "Block F — staff restroom",
+      "category": "Restroom",
+      "block": "Block F",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        1
+      ],
+      "has_position": true,
+      "x": 0.47843137254901963,
+      "y": 0.3625,
+      "geometry": null,
+      "access": "staff",
+      "notes": "",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "f staff restroom",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 2572438,
+      "map_key": "f_restroom",
+      "name": "Block F — general restroom",
+      "category": "Restroom",
+      "block": "Block F",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        1
+      ],
+      "has_position": true,
+      "x": 0.47843137254901963,
+      "y": 0.43203125,
+      "geometry": null,
+      "access": "public",
+      "notes": "",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "f restroom",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 65399848,
+      "map_key": "g_staff_restroom",
+      "name": "Block G — staff restroom",
+      "category": "Restroom",
+      "block": "Block G",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        1
+      ],
+      "has_position": true,
+      "x": 0.47843137254901963,
+      "y": 0.21875,
+      "geometry": null,
+      "access": "staff",
+      "notes": "",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "g staff restroom",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 60540536,
+      "map_key": "g_restroom",
+      "name": "Block G — general restroom",
+      "category": "Restroom",
+      "block": "Block G",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        1
+      ],
+      "has_position": true,
+      "x": 0.47843137254901963,
+      "y": 0.2890625,
+      "geometry": null,
+      "access": "public",
+      "notes": "",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "g restroom",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 68123746,
+      "map_key": "h_staff_restroom",
+      "name": "Block H — staff restroom",
+      "category": "Restroom",
+      "block": "Block H",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        1
+      ],
+      "has_position": true,
+      "x": 0.47843137254901963,
+      "y": 0.07734375,
+      "geometry": null,
+      "access": "staff",
+      "notes": "",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "h staff restroom",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 71430917,
+      "map_key": "h_restroom",
+      "name": "Block H — general restroom",
+      "category": "Restroom",
+      "block": "Block H",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        1
+      ],
+      "has_position": true,
+      "x": 0.47843137254901963,
+      "y": 0.14609375,
+      "geometry": null,
+      "access": "public",
+      "notes": "",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "h restroom",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 3,
+      "map_key": "main_canteen",
+      "name": "Canteen",
+      "category": "Food",
+      "block": "Campus spine",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        1
+      ],
+      "has_position": true,
+      "x": 0.726797385620915,
+      "y": 0.38046875,
+      "geometry": null,
+      "access": "public",
+      "notes": "",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "main canteen",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 69725006,
+      "map_key": "canteen_shop",
+      "name": "Food / drinks point",
+      "category": "Food",
+      "block": "Campus spine",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        1
+      ],
+      "has_position": true,
+      "x": 0.7019607843137254,
+      "y": 0.45234375,
+      "geometry": null,
+      "access": "public",
+      "notes": "D5 confirmed for inclusion; exact name and service type remain to be confirmed.",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "canteen shop",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 17565222,
+      "map_key": "red_canteen",
+      "name": "Red Canteen",
+      "category": "Food",
+      "block": "Campus spine",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        1
+      ],
+      "has_position": true,
+      "x": 0.7019607843137254,
+      "y": 0.47890625,
+      "geometry": null,
+      "access": "public",
+      "notes": "Seating area mainly used for food bought from the nearby food / drinks point.",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "red canteen",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 6,
+      "map_key": "medical_point",
+      "name": "Medical Point",
+      "category": "Health",
+      "block": "Campus spine",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        1
+      ],
+      "has_position": true,
+      "x": 0.48366013071895425,
+      "y": 0.1890625,
+      "geometry": null,
+      "access": "public",
+      "notes": "",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "medical point",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 42653610,
+      "map_key": "mini_red_hall",
+      "name": "Mini Red Hall",
+      "category": "Hall",
+      "block": "Campus spine",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        1
+      ],
+      "has_position": true,
+      "x": 0.742483660130719,
+      "y": 0.23828125,
+      "geometry": null,
+      "access": "public",
+      "notes": "",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "mini red hall",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 29677019,
+      "map_key": "table_tennis_zone",
+      "name": "Table Tennis Zone",
+      "category": "Recreation",
+      "block": "Campus spine",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        1
+      ],
+      "has_position": true,
+      "x": 0.7477124183006536,
+      "y": 0.29140625,
+      "geometry": null,
+      "access": "public",
+      "notes": "Approximately 2–3 tables; exact count not confirmed.",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "table tennis zone",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 7,
+      "map_key": "print_shop",
+      "name": "Print & Stationery",
+      "category": "Printer",
+      "block": "Campus spine",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        1
+      ],
+      "has_position": true,
+      "x": 0.734640522875817,
+      "y": 0.3140625,
+      "geometry": null,
+      "access": "public",
+      "notes": "",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "stationery,photocopy,printing,print shop",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 44884337,
+      "map_key": "entrance_g",
+      "name": "Entrance near Block G",
+      "category": "Entrance",
+      "block": "Campus spine",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        1
+      ],
+      "has_position": true,
+      "x": 0.8261437908496732,
+      "y": 0.25859375,
+      "geometry": null,
+      "access": "public",
+      "notes": "",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "entrance g",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 62381351,
+      "map_key": "d105",
+      "name": "D105",
+      "category": "Classroom",
+      "block": "Block D",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        1
+      ],
+      "has_position": false,
+      "x": 0,
+      "y": 0,
+      "geometry": null,
+      "access": "public",
+      "notes": "Temporary room number accepted for now; door position and room geometry unresolved.",
+      "position_status": "Not positioned",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "d105",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 89963885,
+      "map_key": "d106",
+      "name": "D106",
+      "category": "Classroom",
+      "block": "Block D",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        1
+      ],
+      "has_position": false,
+      "x": 0,
+      "y": 0,
+      "geometry": null,
+      "access": "public",
+      "notes": "Temporary room number accepted for now; door position and room geometry unresolved.",
+      "position_status": "Not positioned",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "d106",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 12623545,
+      "map_key": "canteen_floor_3",
+      "name": "Canteen — Floor 3",
+      "category": "Food",
+      "block": "Campus spine",
+      "floor": "Floor 3",
+      "map_floor": 3,
+      "floors": [
+        3
+      ],
+      "has_position": false,
+      "x": 0,
+      "y": 0,
+      "geometry": null,
+      "access": "public",
+      "notes": "Reached directly from floor 1 using staircase 6. Third-floor geometry and connections to other spaces remain unresolved.",
+      "position_status": "Not positioned",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "canteen floor 3",
+      "access_via": [
+        "stair_main_06"
+      ],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 40935204,
+      "map_key": "technopark",
+      "name": "Technopark",
+      "category": "Service",
+      "block": "Block F",
+      "floor": "Floor unknown",
+      "map_floor": null,
+      "floors": [],
+      "has_position": false,
+      "x": 0,
+      "y": 0,
+      "geometry": null,
+      "access": "public",
+      "notes": "Known to be in Block F; exact floor and location not recalled.",
+      "position_status": "unknown",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "technopark",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 43401230,
+      "map_key": "d101",
+      "name": "D101",
+      "category": "Classroom",
+      "block": "Block D",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        1
+      ],
+      "has_position": true,
+      "x": 0.4769607843137255,
+      "y": 0.701171875,
+      "geometry": {
+        "x": 345.75,
+        "y": 878,
+        "width": 38.25,
+        "height": 39
+      },
+      "access": "public",
+      "notes": "Room order confirmed; equal widths are schematic. Door positions unresolved.",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "d101",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 5488516,
+      "map_key": "d102",
+      "name": "D102",
+      "category": "Classroom",
+      "block": "Block D",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        1
+      ],
+      "has_position": true,
+      "x": 0.42696078431372547,
+      "y": 0.701171875,
+      "geometry": {
+        "x": 307.5,
+        "y": 878,
+        "width": 38.25,
+        "height": 39
+      },
+      "access": "public",
+      "notes": "Room order confirmed; equal widths are schematic. Door positions unresolved.",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "d102",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 93817074,
+      "map_key": "d103",
+      "name": "D103",
+      "category": "Classroom",
+      "block": "Block D",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        1
+      ],
+      "has_position": true,
+      "x": 0.3769607843137255,
+      "y": 0.701171875,
+      "geometry": {
+        "x": 269.25,
+        "y": 878,
+        "width": 38.25,
+        "height": 39
+      },
+      "access": "public",
+      "notes": "Room order confirmed; equal widths are schematic. Door positions unresolved.",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "d103",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 14649745,
+      "map_key": "d104",
+      "name": "D104",
+      "category": "Classroom",
+      "block": "Block D",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        1
+      ],
+      "has_position": true,
+      "x": 0.3269607843137255,
+      "y": 0.701171875,
+      "geometry": {
+        "x": 231.0,
+        "y": 878,
+        "width": 38.25,
+        "height": 39
+      },
+      "access": "public",
+      "notes": "Room order confirmed; equal widths are schematic. Door positions unresolved.",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "d104",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 94472535,
+      "map_key": "bochka_1",
+      "name": "Bochka 1",
+      "category": "Hall",
+      "block": "Campus spine",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        1
+      ],
+      "has_position": true,
+      "x": 0.681045751633987,
+      "y": 0.52890625,
+      "geometry": null,
+      "access": "public",
+      "notes": "Temporary map order from top to bottom; not official hall numbers. Contains two lecture halls and an upper study space; internal entrances and upper floor are unconfirmed.",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "bochka 1",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 60808893,
+      "map_key": "bochka_2",
+      "name": "Bochka 2",
+      "category": "Hall",
+      "block": "Campus spine",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        1
+      ],
+      "has_position": true,
+      "x": 0.7189542483660131,
+      "y": 0.60546875,
+      "geometry": null,
+      "access": "public",
+      "notes": "Temporary map order from top to bottom; not official hall numbers. Contains two lecture halls and an upper study space; internal entrances and upper floor are unconfirmed.",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "bochka 2",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 31113515,
+      "map_key": "bochka_3",
+      "name": "Bochka 3",
+      "category": "Hall",
+      "block": "Campus spine",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        1
+      ],
+      "has_position": true,
+      "x": 0.681045751633987,
+      "y": 0.6609375,
+      "geometry": null,
+      "access": "public",
+      "notes": "Temporary map order from top to bottom; not official hall numbers. Contains two lecture halls and an upper study space; internal entrances and upper floor are unconfirmed.",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "bochka 3",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 45335240,
+      "map_key": "bochka_4",
+      "name": "Bochka 4",
+      "category": "Hall",
+      "block": "Campus spine",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        1
+      ],
+      "has_position": true,
+      "x": 0.7189542483660131,
+      "y": 0.7109375,
+      "geometry": null,
+      "access": "public",
+      "notes": "Temporary map order from top to bottom; not official hall numbers. Contains two lecture halls and an upper study space; internal entrances and upper floor are unconfirmed.",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "bochka 4",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 95101248,
+      "map_key": "lift_block_d",
+      "name": "Block D corridor lift",
+      "category": "Lift",
+      "block": "Block D",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        -1,
+        1,
+        2,
+        3
+      ],
+      "has_position": true,
+      "x": 0.38562091503267976,
+      "y": 0.67578125,
+      "geometry": null,
+      "access": "public",
+      "notes": "Lift in the middle of the Block D corridor. Relative location confirmed; marker is approximate. Serves floors -1, 1, 2 and 3. Landing positions and step-free approaches are not yet confirmed.",
+      "position_status": "schematic_position_from_confirmed_relative_location",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "lift block d",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 5178716,
+      "map_key": "lift_block_f",
+      "name": "Block F corridor lift",
+      "category": "Lift",
+      "block": "Block F",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        -1,
+        1,
+        2,
+        3
+      ],
+      "has_position": true,
+      "x": 0.38562091503267976,
+      "y": 0.390625,
+      "geometry": null,
+      "access": "public",
+      "notes": "Lift in the middle of the Block F corridor. Relative location confirmed; marker is approximate. Serves floors -1, 1, 2 and 3. Landing positions and step-free approaches are not yet confirmed.",
+      "position_status": "schematic_position_from_confirmed_relative_location",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "lift block f",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 51227483,
+      "map_key": "lift_block_h",
+      "name": "Block H corridor lift",
+      "category": "Lift",
+      "block": "Block H",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        -1,
+        1,
+        2,
+        3
+      ],
+      "has_position": true,
+      "x": 0.38562091503267976,
+      "y": 0.10625,
+      "geometry": null,
+      "access": "public",
+      "notes": "Lift in the middle of the Block H corridor. Relative location confirmed; marker is approximate. Serves floors -1, 1, 2 and 3. Landing positions and step-free approaches are not yet confirmed.",
+      "position_status": "schematic_position_from_confirmed_relative_location",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "lift block h",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 41857959,
+      "map_key": "stair_block_d",
+      "name": "Block D end staircase",
+      "category": "Stairs",
+      "block": "Block D",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        -1,
+        1,
+        2,
+        3
+      ],
+      "has_position": true,
+      "x": 0.2823529411764706,
+      "y": 0.66328125,
+      "geometry": null,
+      "access": "public",
+      "notes": "Serves −1, 1, 2 and 3. Relative location confirmed; marker and landing dimensions are schematic. At the far end when entering D from the main corridor, on the right (upper side of this drawing).",
+      "position_status": "schematic_position_from_confirmed_relative_location",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "stair block d",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 63740689,
+      "map_key": "stair_block_e",
+      "name": "Block E end staircase",
+      "category": "Stairs",
+      "block": "Block E",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        -1,
+        1,
+        2,
+        3
+      ],
+      "has_position": false,
+      "x": 0,
+      "y": 0,
+      "geometry": null,
+      "access": "public",
+      "notes": "Served floors confirmed. Precise staircase position and landings remain unresolved. At the end of the block, on the right when facing the block.",
+      "position_status": "not_positioned",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "stair block e",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 98337659,
+      "map_key": "stair_block_f",
+      "name": "Block F end staircase",
+      "category": "Stairs",
+      "block": "Block F",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        -1,
+        1,
+        2,
+        3
+      ],
+      "has_position": false,
+      "x": 0,
+      "y": 0,
+      "geometry": null,
+      "access": "public",
+      "notes": "Served floors confirmed. Precise staircase position and landings remain unresolved. At the end of the block, on the right when facing the block.",
+      "position_status": "not_positioned",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "stair block f",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 79648237,
+      "map_key": "stair_block_g",
+      "name": "Block G end staircase",
+      "category": "Stairs",
+      "block": "Block G",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        -1,
+        1,
+        2,
+        3
+      ],
+      "has_position": false,
+      "x": 0,
+      "y": 0,
+      "geometry": null,
+      "access": "public",
+      "notes": "Served floors confirmed. Precise staircase position and landings remain unresolved. At the end of the block, on the right when facing the block.",
+      "position_status": "not_positioned",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "stair block g",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 66489980,
+      "map_key": "stair_block_h",
+      "name": "Block H end staircase",
+      "category": "Stairs",
+      "block": "Block H",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        -1,
+        1,
+        2,
+        3
+      ],
+      "has_position": false,
+      "x": 0,
+      "y": 0,
+      "geometry": null,
+      "access": "public",
+      "notes": "Served floors confirmed. Precise staircase position and landings remain unresolved. At the end of the block, on the right when facing the block.",
+      "position_status": "not_positioned",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "stair block h",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 9047442,
+      "map_key": "stair_spiral_bochkas",
+      "name": "Spiral staircase by the Bochkas",
+      "category": "Stairs",
+      "block": "Campus spine",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        -1,
+        1,
+        2
+      ],
+      "has_position": true,
+      "x": 0.7071895424836602,
+      "y": 0.5625,
+      "geometry": null,
+      "access": "public",
+      "notes": "Between the topmost two Bochkas in the supplied image (temporary map IDs bochka_1 and bochka_2).",
+      "position_status": "approximate_from_visible_spiral_shape",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "stair spiral bochkas",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 38152283,
+      "map_key": "library_stairs",
+      "name": "Library staircase",
+      "category": "Stairs",
+      "block": "Campus spine",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        -1,
+        1,
+        2
+      ],
+      "has_position": false,
+      "x": 0,
+      "y": 0,
+      "geometry": null,
+      "access": "public",
+      "notes": "Internal location unresolved. Inside the library; exact position and step-free approach are not confirmed.",
+      "position_status": "illustrative_inside_library_not_verified",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "library stairs",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 85267785,
+      "map_key": "library_lift",
+      "name": "Library lift",
+      "category": "Lift",
+      "block": "Campus spine",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        -1,
+        1,
+        2
+      ],
+      "has_position": false,
+      "x": 0,
+      "y": 0,
+      "geometry": null,
+      "access": "public",
+      "notes": "Inside the library; exact position and step-free approach are not confirmed.",
+      "position_status": "illustrative_inside_library_not_verified",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "library lift",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 94438510,
+      "map_key": "stair_main_03",
+      "name": "Main corridor staircase 3",
+      "category": "Stairs",
+      "block": "Campus spine",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        1,
+        2
+      ],
+      "has_position": true,
+      "x": 0.5971633986928104,
+      "y": 0.71875,
+      "geometry": null,
+      "access": "public",
+      "notes": "Exact stair landing and access positions unresolved. Below D general restroom, left of the bottommost Bochka",
+      "position_status": "approximate_map_position_confirmed_for_inclusion",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "stair main 03",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 56789261,
+      "map_key": "stair_main_04",
+      "name": "Main corridor staircase 4",
+      "category": "Stairs",
+      "block": "Campus spine",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        1,
+        2
+      ],
+      "has_position": true,
+      "x": 0.6509803921568628,
+      "y": 0.59609375,
+      "geometry": null,
+      "access": "public",
+      "notes": "Exact stair landing and access positions unresolved. Opposite the second Bochka from the top",
+      "position_status": "approximate_map_position_confirmed_for_inclusion",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "stair main 04",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 41154459,
+      "map_key": "stair_main_05",
+      "name": "Main corridor staircase 5",
+      "category": "Stairs",
+      "block": "Campus spine",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        1,
+        2
+      ],
+      "has_position": true,
+      "x": 0.5971633986928104,
+      "y": 0.47734375,
+      "geometry": null,
+      "access": "public",
+      "notes": "Exact stair landing and access positions unresolved. Between E and F, beside Red Canteen",
+      "position_status": "approximate_map_position_confirmed_for_inclusion",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "stair main 05",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 5598961,
+      "map_key": "stair_main_06",
+      "name": "Direct staircase to third-floor canteen",
+      "category": "Stairs",
+      "block": "Campus spine",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        1,
+        3
+      ],
+      "has_position": true,
+      "x": 0.7071895424836602,
+      "y": 0.30078125,
+      "geometry": null,
+      "access": "public",
+      "notes": "Direct stairs from floor 1 to the canteen on floor 3, approached from the secondary entrance. No floor 2 landing. Exact landing coordinates and the floor 1 approach path remain unresolved. Below table tennis, above the canteen",
+      "position_status": "approximate_map_position_confirmed_for_inclusion",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "stair main 06",
+      "access_via": [],
+      "skips_floors": [
+        2
+      ],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 27663862,
+      "map_key": "stair_main_08",
+      "name": "Main corridor staircase 8",
+      "category": "Stairs",
+      "block": "Campus spine",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        1,
+        2
+      ],
+      "has_position": true,
+      "x": 0.6095816993464052,
+      "y": 0.1953125,
+      "geometry": null,
+      "access": "public",
+      "notes": "Exact stair landing and access positions unresolved. Above G, beside Mini Red Hall",
+      "position_status": "approximate_map_position_confirmed_for_inclusion",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "stair main 08",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 14479975,
+      "map_key": "d201",
+      "name": "D201",
+      "category": "Classroom",
+      "block": "Block D",
+      "floor": "Floor 2",
+      "map_floor": 2,
+      "floors": [
+        2
+      ],
+      "has_position": true,
+      "x": 0.4769607843137255,
+      "y": 0.701171875,
+      "geometry": {
+        "x": 345.75,
+        "y": 878,
+        "width": 38.25,
+        "height": 39
+      },
+      "access": "public",
+      "notes": "Assumed four-room pattern requested by the user, not individually verified. Door positions and equal room widths are schematic.",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "d201",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 76559021,
+      "map_key": "d202",
+      "name": "D202",
+      "category": "Classroom",
+      "block": "Block D",
+      "floor": "Floor 2",
+      "map_floor": 2,
+      "floors": [
+        2
+      ],
+      "has_position": true,
+      "x": 0.42696078431372547,
+      "y": 0.701171875,
+      "geometry": {
+        "x": 307.5,
+        "y": 878,
+        "width": 38.25,
+        "height": 39
+      },
+      "access": "public",
+      "notes": "Assumed four-room pattern requested by the user, not individually verified. Door positions and equal room widths are schematic.",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "d202",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 31201851,
+      "map_key": "d203",
+      "name": "D203",
+      "category": "Classroom",
+      "block": "Block D",
+      "floor": "Floor 2",
+      "map_floor": 2,
+      "floors": [
+        2
+      ],
+      "has_position": true,
+      "x": 0.3769607843137255,
+      "y": 0.701171875,
+      "geometry": {
+        "x": 269.25,
+        "y": 878,
+        "width": 38.25,
+        "height": 39
+      },
+      "access": "public",
+      "notes": "Assumed four-room pattern requested by the user, not individually verified. Door positions and equal room widths are schematic.",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "d203",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 76989656,
+      "map_key": "d204",
+      "name": "D204",
+      "category": "Classroom",
+      "block": "Block D",
+      "floor": "Floor 2",
+      "map_floor": 2,
+      "floors": [
+        2
+      ],
+      "has_position": true,
+      "x": 0.3269607843137255,
+      "y": 0.701171875,
+      "geometry": {
+        "x": 231.0,
+        "y": 878,
+        "width": 38.25,
+        "height": 39
+      },
+      "access": "public",
+      "notes": "Assumed four-room pattern requested by the user, not individually verified. Door positions and equal room widths are schematic.",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "d204",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 71307785,
+      "map_key": "lift_block_d_floor_2",
+      "name": "Block D lift · Floor 2",
+      "category": "Lift",
+      "block": "Block D",
+      "floor": "Floor 2",
+      "map_floor": 2,
+      "floors": [
+        -1,
+        1,
+        2,
+        3
+      ],
+      "has_position": true,
+      "x": 0.38562091503267976,
+      "y": 0.6765625,
+      "geometry": null,
+      "access": "public",
+      "notes": "Position traced from the user sketch; exact door or landing unverified.",
+      "position_status": "schematic_position_from_confirmed_relative_location",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "block d lift · floor 2",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 57413419,
+      "map_key": "e101",
+      "name": "E101",
+      "category": "Classroom",
+      "block": "Block E",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        1
+      ],
+      "has_position": true,
+      "x": 0.4769607843137255,
+      "y": 0.558203125,
+      "geometry": {
+        "x": 345.75,
+        "y": 695,
+        "width": 38.25,
+        "height": 39
+      },
+      "access": "public",
+      "notes": "Assumed four-room pattern requested by the user, not individually verified. Door positions and equal room widths are schematic.",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "e101",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 28757985,
+      "map_key": "e102",
+      "name": "E102",
+      "category": "Classroom",
+      "block": "Block E",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        1
+      ],
+      "has_position": true,
+      "x": 0.42696078431372547,
+      "y": 0.558203125,
+      "geometry": {
+        "x": 307.5,
+        "y": 695,
+        "width": 38.25,
+        "height": 39
+      },
+      "access": "public",
+      "notes": "Assumed four-room pattern requested by the user, not individually verified. Door positions and equal room widths are schematic.",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "e102",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 53416791,
+      "map_key": "e103",
+      "name": "E103",
+      "category": "Classroom",
+      "block": "Block E",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        1
+      ],
+      "has_position": true,
+      "x": 0.3769607843137255,
+      "y": 0.558203125,
+      "geometry": {
+        "x": 269.25,
+        "y": 695,
+        "width": 38.25,
+        "height": 39
+      },
+      "access": "public",
+      "notes": "Assumed four-room pattern requested by the user, not individually verified. Door positions and equal room widths are schematic.",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "e103",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 42373300,
+      "map_key": "e104",
+      "name": "E104",
+      "category": "Classroom",
+      "block": "Block E",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        1
+      ],
+      "has_position": true,
+      "x": 0.3269607843137255,
+      "y": 0.558203125,
+      "geometry": {
+        "x": 231.0,
+        "y": 695,
+        "width": 38.25,
+        "height": 39
+      },
+      "access": "public",
+      "notes": "Assumed four-room pattern requested by the user, not individually verified. Door positions and equal room widths are schematic.",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "e104",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 27954434,
+      "map_key": "e201",
+      "name": "E201",
+      "category": "Classroom",
+      "block": "Block E",
+      "floor": "Floor 2",
+      "map_floor": 2,
+      "floors": [
+        2
+      ],
+      "has_position": true,
+      "x": 0.4769607843137255,
+      "y": 0.558203125,
+      "geometry": {
+        "x": 345.75,
+        "y": 695,
+        "width": 38.25,
+        "height": 39
+      },
+      "access": "public",
+      "notes": "Assumed four-room pattern requested by the user, not individually verified. Door positions and equal room widths are schematic.",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "e201",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 99290760,
+      "map_key": "e202",
+      "name": "E202",
+      "category": "Classroom",
+      "block": "Block E",
+      "floor": "Floor 2",
+      "map_floor": 2,
+      "floors": [
+        2
+      ],
+      "has_position": true,
+      "x": 0.42696078431372547,
+      "y": 0.558203125,
+      "geometry": {
+        "x": 307.5,
+        "y": 695,
+        "width": 38.25,
+        "height": 39
+      },
+      "access": "public",
+      "notes": "Assumed four-room pattern requested by the user, not individually verified. Door positions and equal room widths are schematic.",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "e202",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 91345182,
+      "map_key": "e203",
+      "name": "E203",
+      "category": "Classroom",
+      "block": "Block E",
+      "floor": "Floor 2",
+      "map_floor": 2,
+      "floors": [
+        2
+      ],
+      "has_position": true,
+      "x": 0.3769607843137255,
+      "y": 0.558203125,
+      "geometry": {
+        "x": 269.25,
+        "y": 695,
+        "width": 38.25,
+        "height": 39
+      },
+      "access": "public",
+      "notes": "Assumed four-room pattern requested by the user, not individually verified. Door positions and equal room widths are schematic.",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "e203",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 4204157,
+      "map_key": "e204",
+      "name": "E204",
+      "category": "Classroom",
+      "block": "Block E",
+      "floor": "Floor 2",
+      "map_floor": 2,
+      "floors": [
+        2
+      ],
+      "has_position": true,
+      "x": 0.3269607843137255,
+      "y": 0.558203125,
+      "geometry": {
+        "x": 231.0,
+        "y": 695,
+        "width": 38.25,
+        "height": 39
+      },
+      "access": "public",
+      "notes": "Assumed four-room pattern requested by the user, not individually verified. Door positions and equal room widths are schematic.",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "e204",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 86751893,
+      "map_key": "f101",
+      "name": "F101",
+      "category": "Classroom",
+      "block": "Block F",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        1
+      ],
+      "has_position": true,
+      "x": 0.4769607843137255,
+      "y": 0.416796875,
+      "geometry": {
+        "x": 345.75,
+        "y": 514,
+        "width": 38.25,
+        "height": 39
+      },
+      "access": "public",
+      "notes": "Assumed four-room pattern requested by the user, not individually verified. Door positions and equal room widths are schematic.",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "f101",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 21356799,
+      "map_key": "f102",
+      "name": "F102",
+      "category": "Classroom",
+      "block": "Block F",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        1
+      ],
+      "has_position": true,
+      "x": 0.42696078431372547,
+      "y": 0.416796875,
+      "geometry": {
+        "x": 307.5,
+        "y": 514,
+        "width": 38.25,
+        "height": 39
+      },
+      "access": "public",
+      "notes": "Assumed four-room pattern requested by the user, not individually verified. Door positions and equal room widths are schematic.",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "f102",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 50405225,
+      "map_key": "f103",
+      "name": "F103",
+      "category": "Classroom",
+      "block": "Block F",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        1
+      ],
+      "has_position": true,
+      "x": 0.3769607843137255,
+      "y": 0.416796875,
+      "geometry": {
+        "x": 269.25,
+        "y": 514,
+        "width": 38.25,
+        "height": 39
+      },
+      "access": "public",
+      "notes": "Assumed four-room pattern requested by the user, not individually verified. Door positions and equal room widths are schematic.",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "f103",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 30595082,
+      "map_key": "f104",
+      "name": "F104",
+      "category": "Classroom",
+      "block": "Block F",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        1
+      ],
+      "has_position": true,
+      "x": 0.3269607843137255,
+      "y": 0.416796875,
+      "geometry": {
+        "x": 231.0,
+        "y": 514,
+        "width": 38.25,
+        "height": 39
+      },
+      "access": "public",
+      "notes": "Assumed four-room pattern requested by the user, not individually verified. Door positions and equal room widths are schematic.",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "f104",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 24869852,
+      "map_key": "f201",
+      "name": "F201",
+      "category": "Classroom",
+      "block": "Block F",
+      "floor": "Floor 2",
+      "map_floor": 2,
+      "floors": [
+        2
+      ],
+      "has_position": true,
+      "x": 0.4769607843137255,
+      "y": 0.416796875,
+      "geometry": {
+        "x": 345.75,
+        "y": 514,
+        "width": 38.25,
+        "height": 39
+      },
+      "access": "public",
+      "notes": "Assumed four-room pattern requested by the user, not individually verified. Door positions and equal room widths are schematic.",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "f201",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 59466550,
+      "map_key": "f202",
+      "name": "F202",
+      "category": "Classroom",
+      "block": "Block F",
+      "floor": "Floor 2",
+      "map_floor": 2,
+      "floors": [
+        2
+      ],
+      "has_position": true,
+      "x": 0.42696078431372547,
+      "y": 0.416796875,
+      "geometry": {
+        "x": 307.5,
+        "y": 514,
+        "width": 38.25,
+        "height": 39
+      },
+      "access": "public",
+      "notes": "Assumed four-room pattern requested by the user, not individually verified. Door positions and equal room widths are schematic.",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "f202",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 20611520,
+      "map_key": "f203",
+      "name": "F203",
+      "category": "Classroom",
+      "block": "Block F",
+      "floor": "Floor 2",
+      "map_floor": 2,
+      "floors": [
+        2
+      ],
+      "has_position": true,
+      "x": 0.3769607843137255,
+      "y": 0.416796875,
+      "geometry": {
+        "x": 269.25,
+        "y": 514,
+        "width": 38.25,
+        "height": 39
+      },
+      "access": "public",
+      "notes": "Assumed four-room pattern requested by the user, not individually verified. Door positions and equal room widths are schematic.",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "f203",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 60105315,
+      "map_key": "f204",
+      "name": "F204",
+      "category": "Classroom",
+      "block": "Block F",
+      "floor": "Floor 2",
+      "map_floor": 2,
+      "floors": [
+        2
+      ],
+      "has_position": true,
+      "x": 0.3269607843137255,
+      "y": 0.416796875,
+      "geometry": {
+        "x": 231.0,
+        "y": 514,
+        "width": 38.25,
+        "height": 39
+      },
+      "access": "public",
+      "notes": "Assumed four-room pattern requested by the user, not individually verified. Door positions and equal room widths are schematic.",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "f204",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 88158863,
+      "map_key": "lift_block_f_floor_2",
+      "name": "Block F lift · Floor 2",
+      "category": "Lift",
+      "block": "Block F",
+      "floor": "Floor 2",
+      "map_floor": 2,
+      "floors": [
+        -1,
+        1,
+        2,
+        3
+      ],
+      "has_position": true,
+      "x": 0.38562091503267976,
+      "y": 0.39140625,
+      "geometry": null,
+      "access": "public",
+      "notes": "Position traced from the user sketch; exact door or landing unverified.",
+      "position_status": "schematic_position_from_confirmed_relative_location",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "block f lift · floor 2",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 46892720,
+      "map_key": "g101",
+      "name": "G101",
+      "category": "Classroom",
+      "block": "Block G",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        1
+      ],
+      "has_position": true,
+      "x": 0.4769607843137255,
+      "y": 0.273828125,
+      "geometry": {
+        "x": 345.75,
+        "y": 331,
+        "width": 38.25,
+        "height": 39
+      },
+      "access": "public",
+      "notes": "Assumed four-room pattern requested by the user, not individually verified. Door positions and equal room widths are schematic.",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "g101",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 45981274,
+      "map_key": "g102",
+      "name": "G102",
+      "category": "Classroom",
+      "block": "Block G",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        1
+      ],
+      "has_position": true,
+      "x": 0.42696078431372547,
+      "y": 0.273828125,
+      "geometry": {
+        "x": 307.5,
+        "y": 331,
+        "width": 38.25,
+        "height": 39
+      },
+      "access": "public",
+      "notes": "Assumed four-room pattern requested by the user, not individually verified. Door positions and equal room widths are schematic.",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "g102",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 63876300,
+      "map_key": "g103",
+      "name": "G103",
+      "category": "Classroom",
+      "block": "Block G",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        1
+      ],
+      "has_position": true,
+      "x": 0.3769607843137255,
+      "y": 0.273828125,
+      "geometry": {
+        "x": 269.25,
+        "y": 331,
+        "width": 38.25,
+        "height": 39
+      },
+      "access": "public",
+      "notes": "Assumed four-room pattern requested by the user, not individually verified. Door positions and equal room widths are schematic.",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "g103",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 59126319,
+      "map_key": "g104",
+      "name": "G104",
+      "category": "Classroom",
+      "block": "Block G",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        1
+      ],
+      "has_position": true,
+      "x": 0.3269607843137255,
+      "y": 0.273828125,
+      "geometry": {
+        "x": 231.0,
+        "y": 331,
+        "width": 38.25,
+        "height": 39
+      },
+      "access": "public",
+      "notes": "Assumed four-room pattern requested by the user, not individually verified. Door positions and equal room widths are schematic.",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "g104",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 84472953,
+      "map_key": "g201",
+      "name": "G201",
+      "category": "Classroom",
+      "block": "Block G",
+      "floor": "Floor 2",
+      "map_floor": 2,
+      "floors": [
+        2
+      ],
+      "has_position": true,
+      "x": 0.4769607843137255,
+      "y": 0.273828125,
+      "geometry": {
+        "x": 345.75,
+        "y": 331,
+        "width": 38.25,
+        "height": 39
+      },
+      "access": "public",
+      "notes": "Assumed four-room pattern requested by the user, not individually verified. Door positions and equal room widths are schematic.",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "g201",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 83553299,
+      "map_key": "g202",
+      "name": "G202",
+      "category": "Classroom",
+      "block": "Block G",
+      "floor": "Floor 2",
+      "map_floor": 2,
+      "floors": [
+        2
+      ],
+      "has_position": true,
+      "x": 0.42696078431372547,
+      "y": 0.273828125,
+      "geometry": {
+        "x": 307.5,
+        "y": 331,
+        "width": 38.25,
+        "height": 39
+      },
+      "access": "public",
+      "notes": "Assumed four-room pattern requested by the user, not individually verified. Door positions and equal room widths are schematic.",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "g202",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 34626213,
+      "map_key": "g203",
+      "name": "G203",
+      "category": "Classroom",
+      "block": "Block G",
+      "floor": "Floor 2",
+      "map_floor": 2,
+      "floors": [
+        2
+      ],
+      "has_position": true,
+      "x": 0.3769607843137255,
+      "y": 0.273828125,
+      "geometry": {
+        "x": 269.25,
+        "y": 331,
+        "width": 38.25,
+        "height": 39
+      },
+      "access": "public",
+      "notes": "Assumed four-room pattern requested by the user, not individually verified. Door positions and equal room widths are schematic.",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "g203",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 88127494,
+      "map_key": "g204",
+      "name": "G204",
+      "category": "Classroom",
+      "block": "Block G",
+      "floor": "Floor 2",
+      "map_floor": 2,
+      "floors": [
+        2
+      ],
+      "has_position": true,
+      "x": 0.3269607843137255,
+      "y": 0.273828125,
+      "geometry": {
+        "x": 231.0,
+        "y": 331,
+        "width": 38.25,
+        "height": 39
+      },
+      "access": "public",
+      "notes": "Assumed four-room pattern requested by the user, not individually verified. Door positions and equal room widths are schematic.",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "g204",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 61344390,
+      "map_key": "h101",
+      "name": "H101",
+      "category": "Classroom",
+      "block": "Block H",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        1
+      ],
+      "has_position": true,
+      "x": 0.4769607843137255,
+      "y": 0.130859375,
+      "geometry": {
+        "x": 345.75,
+        "y": 148,
+        "width": 38.25,
+        "height": 39
+      },
+      "access": "public",
+      "notes": "Assumed four-room pattern requested by the user, not individually verified. Door positions and equal room widths are schematic.",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "h101",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 91858188,
+      "map_key": "h102",
+      "name": "H102",
+      "category": "Classroom",
+      "block": "Block H",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        1
+      ],
+      "has_position": true,
+      "x": 0.42696078431372547,
+      "y": 0.130859375,
+      "geometry": {
+        "x": 307.5,
+        "y": 148,
+        "width": 38.25,
+        "height": 39
+      },
+      "access": "public",
+      "notes": "Assumed four-room pattern requested by the user, not individually verified. Door positions and equal room widths are schematic.",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "h102",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 99017626,
+      "map_key": "h103",
+      "name": "H103",
+      "category": "Classroom",
+      "block": "Block H",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        1
+      ],
+      "has_position": true,
+      "x": 0.3769607843137255,
+      "y": 0.130859375,
+      "geometry": {
+        "x": 269.25,
+        "y": 148,
+        "width": 38.25,
+        "height": 39
+      },
+      "access": "public",
+      "notes": "Assumed four-room pattern requested by the user, not individually verified. Door positions and equal room widths are schematic.",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "h103",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 76370169,
+      "map_key": "h104",
+      "name": "H104",
+      "category": "Classroom",
+      "block": "Block H",
+      "floor": "Floor 1",
+      "map_floor": 1,
+      "floors": [
+        1
+      ],
+      "has_position": true,
+      "x": 0.3269607843137255,
+      "y": 0.130859375,
+      "geometry": {
+        "x": 231.0,
+        "y": 148,
+        "width": 38.25,
+        "height": 39
+      },
+      "access": "public",
+      "notes": "Assumed four-room pattern requested by the user, not individually verified. Door positions and equal room widths are schematic.",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "h104",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 90265775,
+      "map_key": "h201",
+      "name": "H201",
+      "category": "Classroom",
+      "block": "Block H",
+      "floor": "Floor 2",
+      "map_floor": 2,
+      "floors": [
+        2
+      ],
+      "has_position": true,
+      "x": 0.4769607843137255,
+      "y": 0.130859375,
+      "geometry": {
+        "x": 345.75,
+        "y": 148,
+        "width": 38.25,
+        "height": 39
+      },
+      "access": "public",
+      "notes": "Assumed four-room pattern requested by the user, not individually verified. Door positions and equal room widths are schematic.",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "h201",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 20787813,
+      "map_key": "h202",
+      "name": "H202",
+      "category": "Classroom",
+      "block": "Block H",
+      "floor": "Floor 2",
+      "map_floor": 2,
+      "floors": [
+        2
+      ],
+      "has_position": true,
+      "x": 0.42696078431372547,
+      "y": 0.130859375,
+      "geometry": {
+        "x": 307.5,
+        "y": 148,
+        "width": 38.25,
+        "height": 39
+      },
+      "access": "public",
+      "notes": "Assumed four-room pattern requested by the user, not individually verified. Door positions and equal room widths are schematic.",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "h202",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 61632979,
+      "map_key": "h203",
+      "name": "H203",
+      "category": "Classroom",
+      "block": "Block H",
+      "floor": "Floor 2",
+      "map_floor": 2,
+      "floors": [
+        2
+      ],
+      "has_position": true,
+      "x": 0.3769607843137255,
+      "y": 0.130859375,
+      "geometry": {
+        "x": 269.25,
+        "y": 148,
+        "width": 38.25,
+        "height": 39
+      },
+      "access": "public",
+      "notes": "Assumed four-room pattern requested by the user, not individually verified. Door positions and equal room widths are schematic.",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "h203",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 14030384,
+      "map_key": "h204",
+      "name": "H204",
+      "category": "Classroom",
+      "block": "Block H",
+      "floor": "Floor 2",
+      "map_floor": 2,
+      "floors": [
+        2
+      ],
+      "has_position": true,
+      "x": 0.3269607843137255,
+      "y": 0.130859375,
+      "geometry": {
+        "x": 231.0,
+        "y": 148,
+        "width": 38.25,
+        "height": 39
+      },
+      "access": "public",
+      "notes": "Assumed four-room pattern requested by the user, not individually verified. Door positions and equal room widths are schematic.",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "h204",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 56265501,
+      "map_key": "lift_block_h_floor_2",
+      "name": "Block H lift · Floor 2",
+      "category": "Lift",
+      "block": "Block H",
+      "floor": "Floor 2",
+      "map_floor": 2,
+      "floors": [
+        -1,
+        1,
+        2,
+        3
+      ],
+      "has_position": true,
+      "x": 0.38562091503267976,
+      "y": 0.10859375,
+      "geometry": null,
+      "access": "public",
+      "notes": "Position traced from the user sketch; exact door or landing unverified.",
+      "position_status": "schematic_position_from_confirmed_relative_location",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "block h lift · floor 2",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 20525147,
+      "map_key": "stair_block_d_floor_2",
+      "name": "Block D end staircase · Floor 2",
+      "category": "Stairs",
+      "block": "Block D",
+      "floor": "Floor 2",
+      "map_floor": 2,
+      "floors": [
+        -1,
+        1,
+        2,
+        3
+      ],
+      "has_position": true,
+      "x": 0.2823529411764706,
+      "y": 0.66328125,
+      "geometry": null,
+      "access": "public",
+      "notes": "Position traced from the user sketch; exact door or landing unverified.",
+      "position_status": "schematic_position_from_confirmed_relative_location",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "block d end staircase · floor 2",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 54230082,
+      "map_key": "stair_main_03_floor_2",
+      "name": "Staircase 3 · Floor 2",
+      "category": "Stairs",
+      "block": "Campus spine",
+      "floor": "Floor 2",
+      "map_floor": 2,
+      "floors": [
+        1,
+        2
+      ],
+      "has_position": true,
+      "x": 0.5973856209150327,
+      "y": 0.71875,
+      "geometry": null,
+      "access": "public",
+      "notes": "Position traced from the user sketch; exact door or landing unverified.",
+      "position_status": "approximate_map_position_confirmed_for_inclusion",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "staircase 3 · floor 2",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 70158459,
+      "map_key": "stair_main_04_floor_2",
+      "name": "Staircase 4 · Floor 2",
+      "category": "Stairs",
+      "block": "Campus spine",
+      "floor": "Floor 2",
+      "map_floor": 2,
+      "floors": [
+        1,
+        2
+      ],
+      "has_position": true,
+      "x": 0.6509803921568628,
+      "y": 0.59609375,
+      "geometry": null,
+      "access": "public",
+      "notes": "Position traced from the user sketch; exact door or landing unverified.",
+      "position_status": "approximate_map_position_confirmed_for_inclusion",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "staircase 4 · floor 2",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 23819704,
+      "map_key": "stair_main_05_floor_2",
+      "name": "Staircase 5 · Floor 2",
+      "category": "Stairs",
+      "block": "Campus spine",
+      "floor": "Floor 2",
+      "map_floor": 2,
+      "floors": [
+        1,
+        2
+      ],
+      "has_position": true,
+      "x": 0.5973856209150327,
+      "y": 0.47734375,
+      "geometry": null,
+      "access": "public",
+      "notes": "Position traced from the user sketch; exact door or landing unverified.",
+      "position_status": "approximate_map_position_confirmed_for_inclusion",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "staircase 5 · floor 2",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 30257263,
+      "map_key": "stair_main_08_floor_2",
+      "name": "Staircase 8 · Floor 2",
+      "category": "Stairs",
+      "block": "Campus spine",
+      "floor": "Floor 2",
+      "map_floor": 2,
+      "floors": [
+        1,
+        2
+      ],
+      "has_position": true,
+      "x": 0.6091503267973856,
+      "y": 0.1953125,
+      "geometry": null,
+      "access": "public",
+      "notes": "Position traced from the user sketch; exact door or landing unverified.",
+      "position_status": "approximate_map_position_confirmed_for_inclusion",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "staircase 8 · floor 2",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 60603844,
+      "map_key": "bochka_1_floor_2",
+      "name": "Bochka 1 upper platform",
+      "category": "Study",
+      "block": "Campus spine",
+      "floor": "Floor 2",
+      "map_floor": 2,
+      "floors": [
+        2
+      ],
+      "has_position": true,
+      "x": 0.681045751633987,
+      "y": 0.52890625,
+      "geometry": null,
+      "access": "public",
+      "notes": "Position traced from the user sketch; exact door or landing unverified.",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "bochka 1 upper platform",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 2348801,
+      "map_key": "bochka_2_floor_2",
+      "name": "Bochka 2 upper platform",
+      "category": "Study",
+      "block": "Campus spine",
+      "floor": "Floor 2",
+      "map_floor": 2,
+      "floors": [
+        2
+      ],
+      "has_position": true,
+      "x": 0.7189542483660131,
+      "y": 0.60546875,
+      "geometry": null,
+      "access": "public",
+      "notes": "Position traced from the user sketch; exact door or landing unverified.",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "bochka 2 upper platform",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 60375106,
+      "map_key": "bochka_3_floor_2",
+      "name": "Bochka 3 upper platform",
+      "category": "Study",
+      "block": "Campus spine",
+      "floor": "Floor 2",
+      "map_floor": 2,
+      "floors": [
+        2
+      ],
+      "has_position": true,
+      "x": 0.681045751633987,
+      "y": 0.6609375,
+      "geometry": null,
+      "access": "public",
+      "notes": "Position traced from the user sketch; exact door or landing unverified.",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "bochka 3 upper platform",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 23804027,
+      "map_key": "bochka_4_floor_2",
+      "name": "Bochka 4 upper platform",
+      "category": "Study",
+      "block": "Campus spine",
+      "floor": "Floor 2",
+      "map_floor": 2,
+      "floors": [
+        2
+      ],
+      "has_position": true,
+      "x": 0.7189542483660131,
+      "y": 0.7109375,
+      "geometry": null,
+      "access": "public",
+      "notes": "Position traced from the user sketch; exact door or landing unverified.",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "bochka 4 upper platform",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 82905875,
+      "map_key": "stair_spiral_floor_2",
+      "name": "Spiral stairs · Floor 2",
+      "category": "Stairs",
+      "block": "Campus spine",
+      "floor": "Floor 2",
+      "map_floor": 2,
+      "floors": [
+        -1,
+        1,
+        2
+      ],
+      "has_position": true,
+      "x": 0.7071895424836602,
+      "y": 0.5625,
+      "geometry": null,
+      "access": "public",
+      "notes": "Position traced from the user sketch; exact door or landing unverified.",
+      "position_status": "approximate_from_visible_spiral_shape",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "spiral stairs · floor 2",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 58122820,
+      "map_key": "library_floor_2",
+      "name": "Library · Floor 2",
+      "category": "Study",
+      "block": "Block B",
+      "floor": "Floor 2",
+      "map_floor": 2,
+      "floors": [
+        2
+      ],
+      "has_position": true,
+      "x": 0.27450980392156865,
+      "y": 0.90625,
+      "geometry": null,
+      "access": "public",
+      "notes": "Position traced from the user sketch; exact door or landing unverified.",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "library · floor 2",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    },
+    {
+      "id": 18268194,
+      "map_key": "stair_canteen_23",
+      "name": "Canteen stairs · Floors 2–3",
+      "category": "Stairs",
+      "block": "Campus spine",
+      "floor": "Floor 2",
+      "map_floor": 2,
+      "floors": [
+        2,
+        3
+      ],
+      "has_position": true,
+      "x": 0.7738562091503268,
+      "y": 0.4765625,
+      "geometry": null,
+      "access": "public",
+      "notes": "Position traced from the user sketch; exact door or landing unverified.",
+      "position_status": "Approximate schematic marker",
+      "opening_hours": "Not confirmed",
+      "contact": "Not confirmed",
+      "accessible": false,
+      "accessibility_status": "Not verified",
+      "aliases": "canteen stairs · floors 2–3",
+      "access_via": [],
+      "skips_floors": [],
+      "entrances_from_floors": []
+    }
+  ]
+}

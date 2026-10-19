@@ -1,0 +1,97 @@
+# Floor-1 centerline traced from the visible grey areas. Not a site survey.
+status: schematic_draft
+floor: 1
+nodes:
+  entrance_c: [590, 1072]
+  # Skirt the north side of the purple WiFi seating area, rather than cutting across it.
+  atrium_east: [556, 1030]
+  atrium: [480, 1005]
+  lower_hub: [405, 1035]
+  spine_950: [420, 950]
+  spine_d: [420, 866]
+  spine_800: [420, 800]
+  spine_e: [420, 685]
+  spine_610: [405, 610]
+  spine_f: [405, 501]
+  spine_400: [405, 400]
+  spine_g: [420, 318]
+  spine_250: [420, 250]
+  spine_h: [420, 135]
+  spine_95: [420, 95]
+  d_join: [365, 866]
+  d_101: [365, 869]
+  d_102: [326.625, 869]
+  d_lift: [295, 867]
+  d_103: [288.375, 872]
+  d_104: [250.125, 872]
+  d_end: [228, 872]
+  e_join: [365, 685]
+  f_join: [365, 501]
+  f_lift: [295, 502]
+  g_join: [365, 318]
+  h_join: [365, 139]
+  h_lift: [295, 139]
+  library_approach: [340, 1125]
+  hall_approach: [210, 1085]
+edges:
+  - [entrance_c, atrium_east]
+  - [atrium_east, atrium]
+  - [atrium, lower_hub]
+  - [lower_hub, spine_950]
+  - [spine_950, spine_d]
+  - [spine_d, spine_800]
+  - [spine_800, spine_e]
+  - [spine_e, spine_610]
+  - [spine_610, spine_f]
+  - [spine_f, spine_400]
+  - [spine_400, spine_g]
+  - [spine_g, spine_250]
+  - [spine_250, spine_h]
+  - [spine_h, spine_95]
+  - [spine_d, d_join]
+  - [d_join, d_101]
+  - [d_101, d_102]
+  - [d_102, d_lift]
+  - [d_lift, d_103]
+  - [d_103, d_104]
+  - [d_104, d_end]
+  - [spine_e, e_join]
+  - [spine_f, f_join]
+  - [f_join, f_lift]
+  - [spine_g, g_join]
+  - [spine_h, h_join]
+  - [h_join, h_lift]
+  - [lower_hub, library_approach]
+  - [lower_hub, hall_approach]
+# Each terminal connects to a nearby corridor node, NOT a surveyed doorway.
+# Do not auto-attach other places: proximity does not prove walkable access.
+attachments:
+  entrance_c_main: entrance_c
+  d101: d_101
+  d102: d_102
+  d103: d_103
+  d104: d_104
+  lift_block_d: d_lift
+  lift_block_f: f_lift
+  lift_block_h: h_lift
+  stair_block_d: d_end
+  library: library_approach
+  red_hall: hall_approach
+  restroom_lower_central: lower_hub
+  wifi_zone: atrium
+  cloakroom: atrium_east
+  d_restroom: spine_d
+  e_restroom: e_join
+  f_restroom: f_join
+  g_restroom: g_join
+  h_restroom: h_join
+  medical_point: spine_250
+  stair_main_01: spine_950
+  stair_main_03: spine_950
+  stair_main_04: spine_800
+  stair_main_05: spine_610
+  stair_main_08: spine_250
+  bochka_1: spine_e
+  bochka_2: spine_800
+  bochka_3: spine_d
+  bochka_4: spine_950

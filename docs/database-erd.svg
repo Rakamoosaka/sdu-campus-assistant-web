@@ -1,0 +1,256 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1200" viewBox="0 0 1800 1200" role="img" aria-labelledby="title description">
+  <title id="title">SDU Campus Assistant database entity relationship diagram</title>
+  <desc id="description">Visual database schema showing identity, personalisation, campus navigation, schedules, announcements, reports, and analytics entities with their logical relationships.</desc>
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="5" stdDeviation="8" flood-color="#101A4D" flood-opacity="0.10"/>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#68708A"/>
+    </marker>
+    <style>
+      .title { font-family: Arial, Helvetica, sans-serif; font-size: 34px; font-weight: 800; fill: #101A4D; }
+      .subtitle { font-family: Arial, Helvetica, sans-serif; font-size: 16px; font-weight: 500; fill: #68708A; }
+      .group-title { font-family: Arial, Helvetica, sans-serif; font-size: 15px; font-weight: 800; letter-spacing: 1.6px; }
+      .entity-title { font-family: Arial, Helvetica, sans-serif; font-size: 20px; font-weight: 800; fill: #101A4D; }
+      .entity-purpose { font-family: Arial, Helvetica, sans-serif; font-size: 12px; font-weight: 500; fill: #68708A; }
+      .field { font-family: Menlo, Monaco, monospace; font-size: 14px; font-weight: 500; fill: #111827; }
+      .field-muted { font-family: Menlo, Monaco, monospace; font-size: 13px; font-weight: 500; fill: #68708A; }
+      .badge { font-family: Arial, Helvetica, sans-serif; font-size: 10px; font-weight: 800; fill: #FFFFFF; }
+      .relation { fill: none; stroke: #68708A; stroke-width: 2; marker-end: url(#arrow); }
+      .relation-dashed { fill: none; stroke: #D5A14A; stroke-width: 2.5; stroke-dasharray: 8 6; marker-end: url(#arrow); }
+      .card { fill: #FFFFFF; stroke: #DDE3EF; stroke-width: 1.5; filter: url(#shadow); }
+      .divider { stroke: #E4E8F2; stroke-width: 1; }
+      .cardinality { font-family: Arial, Helvetica, sans-serif; font-size: 12px; font-weight: 800; fill: #101A4D; }
+      .legend { font-family: Arial, Helvetica, sans-serif; font-size: 13px; font-weight: 600; fill: #68708A; }
+    </style>
+  </defs>
+
+  <rect width="1800" height="1200" fill="#F5F7FC"/>
+  <text x="48" y="58" class="title">SDU Campus Assistant — Database ERD</text>
+  <text x="48" y="88" class="subtitle">Implemented SQLModel entities and service-layer relationships · PostgreSQL 17</text>
+
+  <g transform="translate(1190 42)">
+    <rect x="0" y="0" width="14" height="14" rx="3" fill="#156DE5"/>
+    <text x="22" y="12" class="legend">Identity</text>
+    <rect x="100" y="0" width="14" height="14" rx="3" fill="#15803D"/>
+    <text x="122" y="12" class="legend">Personalisation</text>
+    <rect x="245" y="0" width="14" height="14" rx="3" fill="#D5A14A"/>
+    <text x="267" y="12" class="legend">Campus data</text>
+    <rect x="368" y="0" width="14" height="14" rx="3" fill="#7C3AED"/>
+    <text x="390" y="12" class="legend">Activity</text>
+  </g>
+
+  <!-- Domain backgrounds -->
+  <rect x="30" y="125" width="430" height="1025" rx="28" fill="#EAF2FF" stroke="#C9DCFA"/>
+  <text x="60" y="166" class="group-title" fill="#156DE5">IDENTITY &amp; ACCESS</text>
+
+  <rect x="490" y="125" width="390" height="435" rx="28" fill="#EAF8EF" stroke="#CAE8D5"/>
+  <text x="520" y="166" class="group-title" fill="#15803D">PERSONALISATION</text>
+
+  <rect x="490" y="585" width="390" height="565" rx="28" fill="#FFF7E7" stroke="#F0DDB7"/>
+  <text x="520" y="626" class="group-title" fill="#9A6717">CAMPUS CORE</text>
+
+  <rect x="910" y="125" width="400" height="435" rx="28" fill="#FFF7E7" stroke="#F0DDB7"/>
+  <text x="940" y="166" class="group-title" fill="#9A6717">NAVIGATION</text>
+
+  <rect x="910" y="585" width="860" height="565" rx="28" fill="#F3EDFF" stroke="#DCCBFA"/>
+  <text x="940" y="626" class="group-title" fill="#6D28D9">SCHEDULES, CONTENT &amp; ANALYTICS</text>
+
+  <!-- Relationships, drawn behind entities -->
+  <path class="relation" d="M245 400 L245 430"/>
+  <text x="255" y="418" class="cardinality">1 : 1</text>
+
+  <path class="relation-dashed" d="M70 715 L52 715 L52 300 L70 300"/>
+  <text x="42" y="520" class="cardinality" transform="rotate(-90 42 520)">ROLE RULE</text>
+
+  <path class="relation" d="M420 270 L525 270"/>
+  <text x="454" y="258" class="cardinality">1 : 0..1</text>
+
+  <path class="relation" d="M420 330 L470 330 L470 465 L525 465"/>
+  <text x="449" y="390" class="cardinality">1 : N</text>
+
+  <path class="relation" d="M685 540 L685 650"/>
+  <text x="698" y="600" class="cardinality">N : 1</text>
+
+  <path class="relation" d="M845 715 L895 715 L895 285 L950 285"/>
+  <text x="902" y="510" class="cardinality">1 : N</text>
+
+  <path class="relation" d="M1110 370 L1110 390"/>
+  <text x="1122" y="385" class="cardinality">1 : N</text>
+
+  <path class="relation" d="M420 365 L445 365 L445 1115 L905 1115 L905 735 L950 735"/>
+  <text x="455" y="1104" class="cardinality">1 : N</text>
+
+  <path class="relation" d="M845 775 L950 775"/>
+  <text x="866" y="763" class="cardinality">1 : N</text>
+
+  <path class="relation" d="M845 820 L1340 820 L1340 735 L1370 735"/>
+  <text x="1320" y="808" class="cardinality">1 : N</text>
+
+  <path class="relation" d="M845 865 L900 865 L900 975 L950 975"/>
+  <text x="871" y="918" class="cardinality">1 : N</text>
+
+  <path class="relation" d="M845 910 L1335 910 L1335 975 L1370 975"/>
+  <text x="1310" y="899" class="cardinality">1 : N</text>
+
+  <!-- Identity entities -->
+  <g>
+    <rect class="card" x="70" y="200" width="350" height="200" rx="18"/>
+    <rect x="70" y="200" width="8" height="200" rx="4" fill="#156DE5"/>
+    <text x="96" y="234" class="entity-title">user</text>
+    <text x="96" y="256" class="entity-purpose">Registered profile and assigned role</text>
+    <line x1="96" y1="272" x2="394" y2="272" class="divider"/>
+    <rect x="96" y="289" width="28" height="17" rx="8" fill="#101A4D"/><text x="103" y="301" class="badge">PK</text>
+    <text x="135" y="302" class="field">id</text>
+    <text x="96" y="329" class="field">full_name · email</text>
+    <text x="96" y="354" class="field">role · faculty · active</text>
+    <text x="96" y="379" class="field-muted">created_at</text>
+  </g>
+
+  <g>
+    <rect class="card" x="70" y="430" width="350" height="170" rx="18"/>
+    <rect x="70" y="430" width="8" height="170" rx="4" fill="#156DE5"/>
+    <text x="96" y="464" class="entity-title">authaccount</text>
+    <text x="96" y="486" class="entity-purpose">SDU ID and password credentials</text>
+    <line x1="96" y1="502" x2="394" y2="502" class="divider"/>
+    <text x="96" y="530" class="field">id · sdu_id [unique]</text>
+    <text x="96" y="555" class="field">password_hash</text>
+    <text x="96" y="580" class="field">user_id [FK, unique]</text>
+  </g>
+
+  <g>
+    <rect class="card" x="70" y="630" width="350" height="170" rx="18"/>
+    <rect x="70" y="630" width="8" height="170" rx="4" fill="#156DE5"/>
+    <text x="96" y="664" class="entity-title">roleoverride</text>
+    <text x="96" y="686" class="entity-purpose">Teacher/admin demonstration assignment</text>
+    <line x1="96" y1="702" x2="394" y2="702" class="divider"/>
+    <text x="96" y="730" class="field">id · email [unique]</text>
+    <text x="96" y="755" class="field">role</text>
+    <text x="96" y="780" class="field-muted">reason</text>
+  </g>
+
+  <g>
+    <rect class="card" x="70" y="830" width="350" height="150" rx="18"/>
+    <rect x="70" y="830" width="8" height="150" rx="4" fill="#156DE5"/>
+    <text x="96" y="864" class="entity-title">guestsession</text>
+    <text x="96" y="886" class="entity-purpose">Anonymous public-access session</text>
+    <line x1="96" y1="902" x2="394" y2="902" class="divider"/>
+    <text x="96" y="930" class="field">id · session_key [unique]</text>
+    <text x="96" y="955" class="field-muted">created_at</text>
+  </g>
+
+  <!-- Personalisation entities -->
+  <g>
+    <rect class="card" x="525" y="200" width="320" height="140" rx="18"/>
+    <rect x="525" y="200" width="8" height="140" rx="4" fill="#15803D"/>
+    <text x="551" y="234" class="entity-title">preference</text>
+    <text x="551" y="256" class="entity-purpose">Saved accessibility setting</text>
+    <line x1="551" y1="272" x2="819" y2="272" class="divider"/>
+    <text x="551" y="300" class="field">id · user_id [FK]</text>
+    <text x="551" y="325" class="field">accessible_routes</text>
+  </g>
+
+  <g>
+    <rect class="card" x="525" y="390" width="320" height="150" rx="18"/>
+    <rect x="525" y="390" width="8" height="150" rx="4" fill="#15803D"/>
+    <text x="551" y="424" class="entity-title">favorite</text>
+    <text x="551" y="446" class="entity-purpose">User-to-location saved-place join</text>
+    <line x1="551" y1="462" x2="819" y2="462" class="divider"/>
+    <text x="551" y="490" class="field">id · user_id [FK]</text>
+    <text x="551" y="515" class="field">location_id [FK]</text>
+  </g>
+
+  <!-- Campus core -->
+  <g>
+    <rect class="card" x="525" y="650" width="320" height="300" rx="18"/>
+    <rect x="525" y="650" width="8" height="300" rx="4" fill="#D5A14A"/>
+    <text x="551" y="684" class="entity-title">location</text>
+    <text x="551" y="706" class="entity-purpose">Central map and search entity</text>
+    <line x1="551" y1="722" x2="819" y2="722" class="divider"/>
+    <rect x="551" y="739" width="28" height="17" rx="8" fill="#101A4D"/><text x="558" y="751" class="badge">PK</text>
+    <text x="590" y="752" class="field">id</text>
+    <text x="551" y="779" class="field">name · category</text>
+    <text x="551" y="804" class="field">block · floor</text>
+    <text x="551" y="829" class="field">x · y</text>
+    <text x="551" y="854" class="field">opening_hours · contact</text>
+    <text x="551" y="879" class="field">accessible</text>
+    <text x="551" y="904" class="field-muted">aliases</text>
+  </g>
+
+  <!-- Navigation -->
+  <g>
+    <rect class="card" x="950" y="200" width="320" height="170" rx="18"/>
+    <rect x="950" y="200" width="8" height="170" rx="4" fill="#D5A14A"/>
+    <text x="976" y="234" class="entity-title">route</text>
+    <text x="976" y="256" class="entity-purpose">Normal or accessible path</text>
+    <line x1="976" y1="272" x2="1244" y2="272" class="divider"/>
+    <text x="976" y="300" class="field">id · start_location_id [FK]</text>
+    <text x="976" y="325" class="field">destination_location_id [FK]</text>
+    <text x="976" y="350" class="field">distance_m · duration_min</text>
+  </g>
+
+  <g>
+    <rect class="card" x="950" y="390" width="320" height="140" rx="18"/>
+    <rect x="950" y="390" width="8" height="140" rx="4" fill="#D5A14A"/>
+    <text x="976" y="424" class="entity-title">routestep</text>
+    <text x="976" y="446" class="entity-purpose">Ordered walking instruction</text>
+    <line x1="976" y1="462" x2="1244" y2="462" class="divider"/>
+    <text x="976" y="490" class="field">id · route_id [FK]</text>
+    <text x="976" y="515" class="field">step_order · instruction</text>
+  </g>
+
+  <!-- Activity entities -->
+  <g>
+    <rect class="card" x="950" y="650" width="350" height="180" rx="18"/>
+    <rect x="950" y="650" width="8" height="180" rx="4" fill="#7C3AED"/>
+    <text x="976" y="684" class="entity-title">campusclass</text>
+    <text x="976" y="706" class="entity-purpose">Student and teacher schedule entry</text>
+    <line x1="976" y1="722" x2="1274" y2="722" class="divider"/>
+    <text x="976" y="750" class="field">id · owner_email [FK]</text>
+    <text x="976" y="775" class="field">course · room · starts_at</text>
+    <text x="976" y="800" class="field">location_id [FK] · kind</text>
+  </g>
+
+  <g>
+    <rect class="card" x="1370" y="650" width="350" height="180" rx="18"/>
+    <rect x="1370" y="650" width="8" height="180" rx="4" fill="#7C3AED"/>
+    <text x="1396" y="684" class="entity-title">announcement</text>
+    <text x="1396" y="706" class="entity-purpose">Public update linked to the map</text>
+    <line x1="1396" y1="722" x2="1694" y2="722" class="divider"/>
+    <text x="1396" y="750" class="field">id · title · body</text>
+    <text x="1396" y="775" class="field">published_at</text>
+    <text x="1396" y="800" class="field">location_id [FK, optional]</text>
+  </g>
+
+  <g>
+    <rect class="card" x="950" y="880" width="350" height="190" rx="18"/>
+    <rect x="950" y="880" width="8" height="190" rx="4" fill="#7C3AED"/>
+    <text x="976" y="914" class="entity-title">inaccuracyreport</text>
+    <text x="976" y="936" class="entity-purpose">Campus-data correction workflow</text>
+    <line x1="976" y1="952" x2="1274" y2="952" class="divider"/>
+    <text x="976" y="980" class="field">id · author</text>
+    <text x="976" y="1005" class="field">location_id [FK, optional]</text>
+    <text x="976" y="1030" class="field">message · status · created_at</text>
+  </g>
+
+  <g>
+    <rect class="card" x="1370" y="880" width="350" height="190" rx="18"/>
+    <rect x="1370" y="880" width="8" height="190" rx="4" fill="#7C3AED"/>
+    <text x="1396" y="914" class="entity-title">searchlog</text>
+    <text x="1396" y="936" class="entity-purpose">Search popularity and selections</text>
+    <line x1="1396" y1="952" x2="1694" y2="952" class="divider"/>
+    <text x="1396" y="980" class="field">id · actor · query</text>
+    <text x="1396" y="1005" class="field">selected_location_id [FK]</text>
+    <text x="1396" y="1030" class="field-muted">created_at</text>
+  </g>
+
+  <g transform="translate(70 1080)">
+    <rect x="0" y="0" width="10" height="10" rx="2" fill="#101A4D"/>
+    <text x="18" y="10" class="legend">PK = primary key</text>
+    <rect x="145" y="0" width="10" height="10" rx="2" fill="#68708A"/>
+    <text x="163" y="10" class="legend">FK = logical foreign key</text>
+    <line x1="350" y1="5" x2="390" y2="5" class="relation-dashed"/>
+    <text x="400" y="10" class="legend">Role assignment rule</text>
+  </g>
+</svg>

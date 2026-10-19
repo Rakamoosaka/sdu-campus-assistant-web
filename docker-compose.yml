@@ -1,0 +1,44 @@
+services:
+  database:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: sdu_campus
+      POSTGRES_USER: sdu
+      POSTGRES_PASSWORD: sdu_demo_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - sdu_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sdu -d sdu_campus"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql+psycopg://sdu:sdu_demo_password@database:5432/sdu_campus
+      JWT_SECRET: ${JWT_SECRET:-sdu-campus-course-demo-secret}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://127.0.0.1:5173,http://localhost:5173}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+    volumes:
+      - ./backend/app:/app/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      database:
+        condition: service_healthy
+
+  pgadmin:
+    image: dpage/pgadmin4:9
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@sdu.edu.kz
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - database
+
+volumes:
+  sdu_postgres_data:

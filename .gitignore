@@ -1,0 +1,26 @@
+# Local environment, credentials and data
+.env*
+!.env.example
+*.pem
+*.key
+*.db
+*.db-*
+*.sqlite*
+.local-run/
+.local-backups/
+
+# Dependencies and generated output
+.venv/
+node_modules/
+dist/
+build/
+coverage/
+*.tsbuildinfo
+__pycache__/
+*.py[cod]
+.pytest_cache/
+test-results/
+playwright-report/
+*.log
+.DS_Store
+.idea/

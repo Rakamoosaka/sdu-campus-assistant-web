@@ -1,0 +1,2 @@
+# Optional: only needed to regenerate supplied map assets
+PyYAML>=6.0,<7
