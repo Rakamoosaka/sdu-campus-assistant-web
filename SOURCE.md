@@ -6,4 +6,4 @@ This repository begins with a fresh Git history and includes only the React fron
 
 The pre-migration checkpoint `83ffd00` and migration commits mentioned in inherited documentation belong to the original repository. Database backups, personal records and the running local application remain there; they are not part of this repository. Historical Flutter paths in inherited technical documentation refer to the original project only. The latest web sections document the current implementation.
 
-No GitHub repository was created, no remote was configured and nothing was pushed or deployed. A future GitHub publication should use a new repository instead of reusing the original smart-navigation remote.
+The initial extraction was local only. On 21 October 2026, the owner authorized creating the private GitHub repository https://github.com/Rakamoosaka/sdu-campus-assistant-web and pushing this standalone project. Its origin is separate from the original smart-navigation repository. No application deployment or database transfer is included.

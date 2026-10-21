@@ -1,6 +1,6 @@
 # Standalone repository verification
 
-19 October 2026. Source snapshot: `64aef8a0e9339546e51ea6068b7bf143863b032f` in the original project. This new repository has independent Git history and no configured remote.
+19 October 2026. Source snapshot: `64aef8a0e9339546e51ea6068b7bf143863b032f` in the original project. This repository has independent Git history. It initially had no remote; the later authorized private GitHub publication is recorded below.
 
 ## Contents and isolation
 
@@ -27,4 +27,4 @@ The E2E suite used disposable servers on ports 8001/5174; the original applicati
 
 Follow the root README to create `.venv` and install backend/web dependencies. This repository starts with no personal data; its first run creates its own SQLite file and presentation accounts. Stop the old project from its own directory before starting this copy on the default ports. launchd job names are derived from each repository path, and Docker Compose uses a distinct default project name/volume. Neither repository's stop command is intended to stop the other.
 
-No GitHub repository, remote, push or deployment was performed.
+The extraction itself did not publish anything. On 21 October 2026, the owner subsequently authorized the separate private GitHub repository https://github.com/Rakamoosaka/sdu-campus-assistant-web and its initial push. No application deployment or database transfer is included.

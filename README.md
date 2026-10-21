@@ -75,11 +75,11 @@ Install the importer dependency with `.venv/bin/pip install -r scripts/requireme
 
 ## Repository and data separation
 
-This is a clean local repository extracted from the verified web migration. Its source and scope are recorded in [SOURCE.md](SOURCE.md). It has its own Git history and no configured GitHub remote. The original project, running services and databases are unchanged. Local databases, accounts, secrets, dependency folders and build output were not copied.
+This is a clean local repository extracted from the verified web migration. Its source and scope are recorded in [SOURCE.md](SOURCE.md). It has its own Git history and a private GitHub remote: [Rakamoosaka/sdu-campus-assistant-web](https://github.com/Rakamoosaka/sdu-campus-assistant-web). The original project, running services and databases are unchanged. Local databases, accounts, secrets, dependency folders and build output were not copied.
 
 Install dependencies using the commands above. The first local startup creates a separate SQLite database with presentation seed accounts; personal accounts/saves from the original database are not transferred. No university authentication or timetable integration is implied. Docker Compose uses this repository's distinct default project name and therefore a separate named database volume; avoid overriding it to the original project's name.
 
-Both repositories use ports 5173/8000 by default. The original app is currently running there. Before running this copy on those ports, stop the original with `make web-stop` **from the original directory**, then run `make web-start` here. Keep databases separate unless you deliberately perform a backed-up data migration. No data migration or remote publication is part of this extraction.
+Both repositories use ports 5173/8000 by default. If the original app is running there, stop it before running this copy on those ports. Stop the original with `make web-stop` **from the original directory**, then run `make web-start` here. Keep databases separate unless you deliberately perform a backed-up data migration. No data migration or remote publication is part of this extraction.
 
 - [Implementation plan](PROJECT_PLAN.md)
 - [Web design system](design-system.md)
