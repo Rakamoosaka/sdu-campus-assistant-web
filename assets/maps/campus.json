@@ -349,6 +349,38 @@
         210,
         1085
       ],
+      "east_250": [
+        480,
+        250
+      ],
+      "east_mini_hall": [
+        480,
+        305
+      ],
+      "east_318": [
+        480,
+        318
+      ],
+      "east_tennis": [
+        480,
+        373
+      ],
+      "east_print": [
+        480,
+        402
+      ],
+      "east_canteen": [
+        480,
+        487
+      ],
+      "east_shop": [
+        480,
+        579
+      ],
+      "east_red_canteen": [
+        480,
+        613
+      ],
       "f2_spine_95": [
         384,
         95
@@ -671,6 +703,61 @@
       ]
     },
     "edges": [
+      {
+        "a": "spine_250",
+        "b": "east_250",
+        "kind": "corridor"
+      },
+      {
+        "a": "east_250",
+        "b": "east_mini_hall",
+        "kind": "corridor"
+      },
+      {
+        "a": "east_mini_hall",
+        "b": "east_318",
+        "kind": "corridor"
+      },
+      {
+        "a": "spine_g",
+        "b": "east_318",
+        "kind": "corridor"
+      },
+      {
+        "a": "east_318",
+        "b": "east_tennis",
+        "kind": "corridor"
+      },
+      {
+        "a": "east_tennis",
+        "b": "east_print",
+        "kind": "corridor"
+      },
+      {
+        "a": "spine_400",
+        "b": "east_print",
+        "kind": "corridor"
+      },
+      {
+        "a": "east_print",
+        "b": "east_canteen",
+        "kind": "corridor"
+      },
+      {
+        "a": "east_canteen",
+        "b": "east_shop",
+        "kind": "corridor"
+      },
+      {
+        "a": "east_shop",
+        "b": "east_red_canteen",
+        "kind": "corridor"
+      },
+      {
+        "a": "east_red_canteen",
+        "b": "spine_610",
+        "kind": "corridor"
+      },
       {
         "a": "entrance_c",
         "b": "atrium_east",
@@ -1386,6 +1473,13 @@
       "bochka_2": "spine_800",
       "bochka_3": "spine_d",
       "bochka_4": "spine_950",
+      "main_canteen": "east_canteen",
+      "canteen_shop": "east_shop",
+      "red_canteen": "east_red_canteen",
+      "mini_red_hall": "east_mini_hall",
+      "table_tennis_zone": "east_tennis",
+      "print_shop": "east_print",
+      "entrance_g": "east_318",
       "d201": "room_approach_d201",
       "d202": "room_approach_d202",
       "d203": "room_approach_d203",
@@ -1472,6 +1566,14 @@
       "h_lift": 1,
       "library_approach": 1,
       "hall_approach": 1,
+      "east_250": 1,
+      "east_mini_hall": 1,
+      "east_318": 1,
+      "east_tennis": 1,
+      "east_print": 1,
+      "east_canteen": 1,
+      "east_shop": 1,
+      "east_red_canteen": 1,
       "f2_spine_95": 2,
       "f2_spine_135": 2,
       "f2_spine_250": 2,

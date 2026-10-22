@@ -1,4 +1,4 @@
-"""Shortest paths over the explicit, schematic floor-1 graph (not metres)."""
+"""Shortest paths over the explicit, schematic multi-floor graph (not metres)."""
 import heapq
 import math
 
@@ -13,10 +13,10 @@ def draft_route(campus: dict, start: int, destination: int, avoid_stairs: bool =
             'points': [], 'segments': [], 'steps': []}
     if not origin or not target:
         return {**base, 'status': 'unmapped', 'message': 'This place is not in the mapped catalogue.'}
-    if any(p['map_key'] not in attachments for p in (origin, target)):
-        return {**base, 'status': 'unmapped', 'message': 'One of these places has no connected approach in the schematic network.'}
     if any(p.get('access', 'public') != 'public' for p in (origin, target)):
         return {**base, 'status': 'restricted', 'message': 'This draft network only includes public approaches.'}
+    if any(p['map_key'] not in attachments for p in (origin, target)):
+        return {**base, 'status': 'unmapped', 'message': 'One of these places has no connected approach in the schematic network.'}
     if avoid_stairs and any(p['category'] == 'Stairs' for p in (origin, target)):
         return {**base, 'status': 'no_step_free_route', 'message': 'A staircase cannot be a step-free endpoint. Choose a corridor lift instead; accessibility remains unverified.'}
     if start == destination:

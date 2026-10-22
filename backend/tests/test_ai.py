@@ -207,3 +207,58 @@ def test_model_wait_does_not_hold_a_database_writer(api_client,monkeypatch):
     assert result['engine']=='openrouter'
     with Session(m.engine) as db:
         assert db.exec(select(m.SearchLog).where(m.SearchLog.actor=='assistant')).one().query=='library'
+
+
+def test_personal_profile_tracks_signed_in_account(api_client, monkeypatch):
+    c = api_client
+    for account in ['240103049', '240103052']:
+        h = login(c, account)
+        expected = c.get('/users/me', headers=h).json()
+        messages = enable(monkeypatch, [call('get_my_profile', {}), finish([], 'Your stored profile.')])
+        response = c.post('/assistant/query', headers=h, json={'question': 'What is my name?'}).json()
+        assert response['engine'] == 'openrouter'
+        profile = json.loads(messages[1][-1]['content'])
+        assert profile['full_name'] == expected['full_name']
+        assert profile['sdu_id'] == account
+        assert not any(secret in json.dumps(messages) for secret in ['password_hash', 'Campus123!', 'access_token'])
+
+
+@pytest.mark.parametrize('tool', ['get_my_profile', 'get_my_saved_places', 'get_my_preferences', 'get_my_schedule', 'get_my_reports'])
+def test_personal_tools_reject_guests_and_owner_arguments(api_client, monkeypatch, tool):
+    messages = enable(monkeypatch, [call(tool, {}), finish([], 'Sign in.')])
+    api_client.post('/assistant/query', json={'question': 'What do you know about me?'})
+    assert json.loads(messages[1][-1]['content'])['status'] == 'login_required'
+    h = login(api_client)
+    messages = enable(monkeypatch, [call(tool, {'user_id': 4}), call('get_my_profile', {}), finish([])])
+    api_client.post('/assistant/query', headers=h, json={'question': 'Read another user'})
+    assert 'error' in json.loads(messages[1][-1]['content'])
+
+
+def test_personal_tools_return_only_owned_records(api_client, monkeypatch):
+    c = api_client; h = login(c)
+    c.post('/favorites/2', headers=h)
+    c.put('/users/me/preferences', headers=h, json={'accessible_routes': True})
+    with Session(m.engine) as session:
+        user = session.exec(select(m.User).where(m.User.email == '240103049@sdu.edu.kz')).first()
+        session.add(m.InaccuracyReport(author='240103049', message='My own report'))
+        session.add(m.InaccuracyReport(author='240103052', message='Other account secret report'))
+        session.commit()
+    for tool, field in [('get_my_saved_places', 'locations'), ('get_my_preferences', 'avoid_stairs'),
+                        ('get_my_schedule', 'lessons'), ('get_my_reports', 'reports')]:
+        messages = enable(monkeypatch, [call(tool, {}), finish([])])
+        response = c.post('/assistant/query', headers=h, json={'question': 'My stored information'}).json()
+        assert response['engine'] == 'openrouter'
+        data = json.loads(messages[1][-1]['content'])
+        assert field in data
+        assert 'Other account secret report' not in json.dumps(data)
+        if tool == 'get_my_reports':
+            assert data['reports'][0]['message'] == 'My own report'
+        if tool == 'get_my_schedule':
+            assert data['sample'] and data['timezone'] == 'Asia/Almaty'
+
+
+def test_name_available_without_provider(api_client):
+    h = login(api_client, '240103052')
+    expected = api_client.get('/users/me', headers=h).json()['full_name']
+    response = api_client.post('/assistant/query', headers=h, json={'question': 'What is my name?'}).json()
+    assert expected in response['answer']

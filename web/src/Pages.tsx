@@ -111,11 +111,6 @@ export function AssistantPage({ person, openPlace }: Props) {
         Ask about rooms, campus services or your next class.
       </PageIntro>
       <div className="assistant-toolbar">
-        <span className="category-tag">
-          {status.data?.configured
-            ? "DeepSeek AI configured · campus tools"
-            : "Basic campus assistant"}
-        </span>
         <Button
           variant="ghost"
           size="sm"
@@ -143,10 +138,6 @@ export function AssistantPage({ person, openPlace }: Props) {
                 : person.full_name?.split(" ")[0] || person.name}
               . Where can I help you go?
             </h2>
-            <p>
-              I use the campus catalogue and schematic map. If something is
-              unconfirmed, I’ll say so.
-            </p>
             <div className="prompt-chips">
               {[
                 "Where is D201?",
@@ -285,7 +276,7 @@ export function AssistantPage({ person, openPlace }: Props) {
           <h3>Grounded in campus data.</h3>
           <p>
             {status.data?.configured
-              ? "DeepSeek interprets your question using campus search, your sample schedule and mapped-route tools. Basic assistance remains available if AI is unavailable."
+              ? "DeepSeek interprets your question using your stored profile, saved places, preferences, sample timetable, reports and campus tools. Basic assistance remains available if AI is unavailable."
               : "This assistant finds catalogue matches and helps you choose when a request is ambiguous. No AI key is configured on this server."}
           </p>
           <hr />

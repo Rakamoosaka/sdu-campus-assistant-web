@@ -59,6 +59,7 @@ export interface Place {
 }
 export interface MapPlace extends Place {
   map_key: string;
+  access: string;
   map_floor: number | null;
   floors: number[];
   has_position: boolean;
@@ -68,6 +69,7 @@ export interface MapPlace extends Place {
   accessibility_status: string;
 }
 export interface CampusMap {
+  routing: { attachments: Record<string, string> };
   width: number;
   height: number;
   places: MapPlace[];

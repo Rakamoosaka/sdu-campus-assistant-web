@@ -33,7 +33,28 @@ nodes:
   h_lift: [295, 139]
   library_approach: [340, 1125]
   hall_approach: [210, 1085]
+  # Explicit floor-1 approaches along the open strip west of the right-side facilities.
+  # Door ends remain approximate; these are map traces, not surveyed doorways.
+  east_250: [480, 250]
+  east_mini_hall: [480, 305]
+  east_318: [480, 318]
+  east_tennis: [480, 373]
+  east_print: [480, 402]
+  east_canteen: [480, 487]
+  east_shop: [480, 579]
+  east_red_canteen: [480, 613]
 edges:
+  - [spine_250, east_250]
+  - [east_250, east_mini_hall]
+  - [east_mini_hall, east_318]
+  - [spine_g, east_318]
+  - [east_318, east_tennis]
+  - [east_tennis, east_print]
+  - [spine_400, east_print]
+  - [east_print, east_canteen]
+  - [east_canteen, east_shop]
+  - [east_shop, east_red_canteen]
+  - [east_red_canteen, spine_610]
   - [entrance_c, atrium_east]
   - [atrium_east, atrium]
   - [atrium, lower_hub]
@@ -95,3 +116,11 @@ attachments:
   bochka_2: spine_800
   bochka_3: spine_d
   bochka_4: spine_950
+  main_canteen: east_canteen
+  canteen_shop: east_shop
+  red_canteen: east_red_canteen
+  mini_red_hall: east_mini_hall
+  table_tennis_zone: east_tennis
+  print_shop: east_print
+  # The entrance marker has no surveyed doorway; retain a dashed final approach.
+  entrance_g: east_318

@@ -766,6 +766,31 @@ def openrouter_answer(question: str, identity: dict | None, session: Session,
         if name == 'get_location':
             item = read_location(args['location_id'])
             return {"location": record(item)} if item else {"error": "Location unavailable or restricted"}
+        if name in {'get_my_profile', 'get_my_saved_places', 'get_my_preferences', 'get_my_schedule', 'get_my_reports'}:
+            user = user_for_identity(identity, session) if identity else None
+            if not user:
+                return {"status": "login_required", "message": "You are using guest mode. Sign in for your personal account information."}
+            if name == 'get_my_profile':
+                account = session.exec(select(AuthAccount).where(AuthAccount.user_id == user.id)).first()
+                return {"full_name": user.full_name, "email": user.email, "sdu_id": account.sdu_id if account else None,
+                        "faculty": user.faculty, "role": user.role, "source": "Stored app profile; no university-system integration"}
+            if name == 'get_my_preferences':
+                pref = session.exec(select(Preference).where(Preference.user_id == user.id)).first()
+                return {"avoid_stairs": pref.accessible_routes if pref else False, "accessibility": "Routes remain unverified"}
+            if name == 'get_my_saved_places':
+                saved = session.exec(select(Favorite).where(Favorite.user_id == user.id)).all()
+                return {"locations": [record(item) for favorite in saved if (item := read_location(favorite.location_id))]}
+            if name == 'get_my_schedule':
+                lessons = lessons_for(identity, session)
+                return {"sample": True, "timezone": "Asia/Almaty", "truncated": len(lessons) > 30,
+                        "lessons": [{"course": lesson.course, "room": lesson.room, "kind": lesson.kind,
+                            "starts_at": as_utc(lesson.starts_at).astimezone(TZ).isoformat(),
+                            "location": record(item) if lesson.location_id and (item := read_location(lesson.location_id)) else None}
+                            for lesson in lessons[:30]]}
+            reports = session.exec(select(InaccuracyReport).where(InaccuracyReport.author == identity['sub'])
+                                   .order_by(InaccuracyReport.created_at.desc()).limit(10)).all()
+            return {"reports": [{"message": r.message, "status": r.status, "created_at": r.created_at.isoformat(),
+                      "location": record(item) if r.location_id and (item := read_location(r.location_id)) else None} for r in reports]}
         if name == 'get_next_class':
             if not identity or identity['role'] == 'guest':
                 return {"status": "login_required", "message": "Log in for your personal sample schedule"}
@@ -842,6 +867,11 @@ def rule_assistant(body: AssistantRequest, identity: dict | None, session: Sessi
         return result(f"Selected {item.name}. Open it on the map or plan a route from your chosen start.", item, action="route" if context.route_intent else "map")
     if not q or len(q) > 500:
         raise HTTPException(422, "Ask a campus question of up to 500 characters")
+    if any(term in q for term in ["my name", "who am i", "my profile", "my account", "about me"]):
+        user = user_for_identity(identity, session) if identity else None
+        if not user:
+            return result("You are using guest mode. Sign in so I can access your stored profile and personal campus information.")
+        return result(f"Your name is {user.full_name}. Your account role is {user.role}, and your faculty is {user.faculty}.")
     if any(term in q for term in ["next class", "next lesson", "my class", "my lesson", "next lecture", "where do i go next"]):
         if not identity or identity['role'] == 'guest':
             return result("Log in to see your personal sample timetable.")

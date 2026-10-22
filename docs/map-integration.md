@@ -31,3 +31,9 @@ Dijkstra stays in `backend/app/routing.py`. `/routes` applies the signed-in acco
 - No live indoor positioning, measured scale, verified step-free access, invented opening hours or contacts.
 
 The web E2E suite verifies D201 floor switching, manual entrance-to-floor-2 routing, lift-only transfers after preference persistence, guest restrictions and mobile controls. Backend tests retain the original graph regression assertions.
+
+## Route coverage update
+
+All 88 positioned public places and the existing floor-3 canteen terminal have explicit graph attachments (89 route endpoints). Floor-1 approaches now cover the canteen, food/drinks point, Red Canteen, Mini Red Hall, table tennis, printing and Block G entrance. New centreline branches follow the schematic open strip west of the right-side facilities; final connections, including the Block G entrance, remain approximate dashed approaches. Unknown room positions and staff-only rooms are not selectable route starts. No new floors, surveyed door positions, measured distances or accessibility claims are added.
+
+The route coverage test checks all 7,921 ordered endpoint pairs, both normally and with stairs excluded (15,842 combinations), including expected stairs-only and same-place states. Browser regressions cover the seven added destinations in both directions, drawing route segments and clearing a route when its destination changes.

@@ -115,15 +115,39 @@ export function MapWorkspace({
     ? search.data || []
     : all.filter((p) => category === "All" || p.category === category);
   const saved = favorites.some((p) => p.id === selected);
+  const routePlaces = all.filter((p) =>
+    map.places.some(
+      (m) =>
+        m.id === p.id &&
+        m.access === "public" &&
+        m.map_key in map.routing.attachments,
+    ),
+  );
+  const canRoute = routePlaces.some((p) => p.id === selected);
+  const routeEndpoints = useRef({ start, selected });
+  routeEndpoints.current = { start, selected };
   const planning = useMutation({
-    mutationFn: () =>
-      get<PathResult>(`/routes?start=${start}&destination=${selected}`),
-    onSuccess: (data) => {
+    mutationFn: (endpoints: { start: number; destination: number }) =>
+      get<PathResult>(
+        `/routes?start=${endpoints.start}&destination=${endpoints.destination}`,
+      ),
+    onSuccess: (data, endpoints) => {
+      if (
+        routeEndpoints.current.start !== endpoints.start ||
+        routeEndpoints.current.selected !== endpoints.destination
+      )
+        return;
       setRoute(data);
       setRouteError("");
       if (data.route_floors?.length) setFloor(data.route_floors[0]);
     },
-    onError: (e) => setRouteError(errorMessage(e)),
+    onError: (e, endpoints) => {
+      if (
+        routeEndpoints.current.start === endpoints.start &&
+        routeEndpoints.current.selected === endpoints.destination
+      )
+        setRouteError(errorMessage(e));
+    },
   });
   const reporting = useMutation({
     mutationFn: () =>
@@ -465,14 +489,6 @@ export function MapWorkspace({
                 </strong>
               </div>
             </div>
-            <p className="position-note">
-              <Info size={15} />
-              <span>
-                {mapPlace?.notes ||
-                  "Added to the catalogue. A mapped approach has not been confirmed."}{" "}
-                Step-free approaches and lift availability are unverified.
-              </span>
-            </p>
             <div className="detail-actions">
               {person.role === "guest" ? (
                 <Button variant="outline" onClick={onLogin}>
@@ -507,16 +523,15 @@ export function MapWorkspace({
                   onChange={(e) => {
                     setStart(Number(e.target.value));
                     setRoute(null);
+                    setRouteError("");
                   }}
                   aria-label="Route start"
                 >
-                  {all
-                    .filter((p) => map.places.some((m) => m.id === p.id))
-                    .map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.name} · {p.floor}
-                      </option>
-                    ))}
+                  {routePlaces.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name} · {p.floor}
+                    </option>
+                  ))}
                 </select>
               </label>
               <div className="route-destination">
@@ -524,14 +539,19 @@ export function MapWorkspace({
               </div>
               <Button
                 className="w-full"
-                disabled={planning.isPending}
-                onClick={() => planning.mutate()}
+                disabled={planning.isPending || !canRoute || selected === null}
+                onClick={() =>
+                  selected !== null &&
+                  planning.mutate({ start, destination: selected })
+                }
               >
                 <Navigation size={16} />
                 {planning.isPending ? "Finding a route…" : "Find route"}
               </Button>
               <p className="route-hint">
-                Choose your start manually. No live indoor positioning.
+                {canRoute
+                  ? "Choose your start manually. No live indoor positioning."
+                  : "This place has no public mapped approach yet. Choose another destination."}
               </p>
               {routeError && (
                 <div role="alert" className="error-box">
@@ -700,6 +720,7 @@ export function MapWorkspace({
                 {floorSegments.map((segment, i) => (
                   <g key={i} pointerEvents="none">
                     <line
+                      className="route-line"
                       x1={segment.from[0]}
                       y1={segment.from[1]}
                       x2={segment.to[0]}

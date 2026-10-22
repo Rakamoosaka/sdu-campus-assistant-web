@@ -329,3 +329,64 @@ test("assistant route handoff opens real server-generated segments on map", asyn
     page.locator('svg[aria-label="Schematic floor 1"] line'),
   ).not.toHaveCount(0);
 });
+
+test("all newly connected services draw routes in both directions", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Continue as guest" }).click();
+  const response = await page.request.get("/api/campus-map");
+  const map = await response.json();
+  const names = [
+    "Canteen",
+    "Food / drinks point",
+    "Red Canteen",
+    "Mini Red Hall",
+    "Table Tennis Zone",
+    "Print & Stationery",
+    "Entrance near Block G",
+  ];
+  for (const name of names) {
+    await search(page, name);
+    await page.getByRole("combobox", { name: "Route start" }).selectOption("1");
+    await page.getByRole("button", { name: "Find route", exact: true }).click();
+    await expect(
+      page.getByRole("region", { name: "Route directions" }),
+    ).toContainText("Your route");
+    await expect(page.locator(".route-line")).not.toHaveCount(0);
+    const target = map.places.find((p: { name: string }) => p.name === name);
+    await search(page, map.places.find((p: { id: number }) => p.id === 1).name);
+    await page
+      .getByRole("combobox", { name: "Route start" })
+      .selectOption(String(target.id));
+    await page.getByRole("button", { name: "Find route", exact: true }).click();
+    await expect(
+      page.getByRole("region", { name: "Route directions" }),
+    ).toContainText(`Start at ${name}`);
+  }
+});
+
+test("unmapped places cannot start a route and changing destination clears it", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Continue as guest" }).click();
+  await search(page, "D201");
+  await page.getByRole("button", { name: "Find route", exact: true }).click();
+  await expect(
+    page.getByRole("region", { name: "Route directions" }),
+  ).toBeVisible();
+  await search(page, "D105");
+  await expect(
+    page.getByRole("region", { name: "Route directions" }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole("button", { name: "Find route", exact: true }),
+  ).toBeDisabled();
+  await expect(
+    page
+      .getByRole("combobox", { name: "Route start" })
+      .locator("option")
+      .filter({ hasText: "D105" }),
+  ).toHaveCount(0);
+});

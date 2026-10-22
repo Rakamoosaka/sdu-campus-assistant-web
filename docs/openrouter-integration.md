@@ -14,7 +14,7 @@ The supplied key is stored only in the ignored root `.env` with owner-only permi
 
 The running local app was switched from the original project to this standalone repository on the same ports 5173/8000. Its local configuration references the existing SQLite file, preserving accounts, sessions, favourites and preferences without copying them into Git. A database backup was made before the additive assistantconversation table was created. The original source repository remains unchanged. Future teammates use their own ignored configuration and database by default.
 
-Questions and relevant tool results are sent to OpenRouter and the model provider. The backend does not include stored account names, SDU IDs, email addresses, passwords or session tokens in model tool results. User-typed text remains part of the question. Signed-in next-class access is account-scoped; guests cannot request another owner's timetable.
+Questions and relevant tool results are sent to OpenRouter and the model provider. Relevant personal questions can send the current account’s stored profile (name, SDU ID, email, role and faculty), saved places, route preference, sample timetable and reports through owner-scoped tools. Passwords and session tokens are never included. User-typed text remains part of the question. Signed-in next-class access is account-scoped; guests cannot request another owner's timetable.
 
 ## Limits and fallback
 
