@@ -472,3 +472,11 @@ Guest personal endpoints (favourites, preferences, reports/history and schedules
 ### Analytics and content
 
 `searchlog` now records actual frontend searches. Ranking uses normalized names/codes, editable aliases, service synonyms and bounded fuzzy matching. SQL GROUP BY/COUNT supplies `/admin/analytics/popular-searches`; an empty log returns an empty list without fallback counts. Location requests default hours/contact to `Not confirmed`. No campus contacts or hours are invented. Announcement create/edit endpoints persist the title/body and optional location. Inaccuracy status accepts only new/reviewing/resolved/rejected.
+
+## 11. OpenRouter assistant (22 October 2026)
+
+`assistantconversation` is an additive SQLModel table: opaque string `id` PK, indexed `actor`, bounded `messages_json`, UTC `expires_at`. It retains the last 12 user/assistant messages (six exchanges), with a 12-hour lifetime. Access checks resolve the current actor before reading a supplied conversation ID. Missing/other-owner IDs return 404; expired IDs return 410. Clarification candidate IDs still use `assistantcontext` with a 30-minute expiry. Old conversations are not automatically pruned yet.
+
+The model has no SQL or write-tool access. Search/location/next-lesson/update/route callbacks use the current Session and server-resolved identity. Next-class calls accept no owner identifier. Route calls use the saved preference. Final map actions must reference location IDs returned by tools in that request. Every turn forces a fresh read before offering the final-response tool, including follow-ups with history. AI searches create real SearchLog records with actor `assistant`. Client responses never contain the API key or raw provider errors.
+
+All existing accounts, favourites, preferences, map IDs and historical schedules remain unchanged. The current local service has been switched to the standalone web repository; its ignored environment configuration references the pre-existing local SQLite file to retain sessions/data, with a pre-AI backup under `.local-backups/`. This local path/key configuration is not distributed in Git.

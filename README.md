@@ -86,3 +86,15 @@ Both repositories use ports 5173/8000 by default. If the original app is running
 - [Database, sessions and migration](database-schema.md)
 - [Map integration](docs/map-integration.md)
 - [Floor-2 source and graph details](docs/floor-2-integration.md)
+
+## Optional DeepSeek AI through OpenRouter
+
+The assistant uses `deepseek/deepseek-v4-flash-0731` when the backend has `OPENROUTER_API_KEY` configured in the ignored root `.env`. Add your own key there; do not put it in `web/.env`, a `VITE_` variable or source control. The `.env.example` contains a blank key and the chosen model ID. `make web-start` loads the configuration; restart with `make web-stop && make web-start` after changing it. Docker Compose forwards the same settings to the API container.
+
+The model calls validated, read-only tools for catalogue search, location details, the current account's next sample lesson, public updates and graph routes. It interprets paraphrases/follow-ups, while the backend resolves identity, applies saved accessibility preferences and validates every returned action ID. Chat choices remain clickable. Route responses open their actual per-floor segments in the map instead of inventing navigation instructions. Campus records and approaches remain schematic/unconfirmed where documented.
+
+`OPENROUTER_TIMEOUT_SECONDS` defaults to 45. Each turn allows at most five provider requests, with three concurrent AI turns per API process; in-memory rate limits default to 10 turns/account/minute, 30/IP/minute and 90/process/minute. This is a local course-project limit, not a distributed deployment quota. API outages, missing credit, invalid keys, timeouts, limits or invalid model actions produce the existing rule-based answer with a visible fallback label. No key means the basic assistant is used directly. There are no automatic paid retries.
+
+Conversation context is stored locally for up to 12 hours, scoped to the signed-in account/guest session and limited to the last six exchanges. **New chat** resets the UI's context. Questions and relevant tool results are sent to OpenRouter and its selected model provider. The backend does not attach passwords, session tokens, SDU IDs, names or email addresses to those tool results; text the user types is naturally part of their question. No university data integration is added.
+
+`make test` and `make test-e2e` do not make paid AI calls. AI protocol tests stub the external provider while exercising real campus tools; browser tests cover the chat contract and real route handoff. Live-provider checks are recorded separately in [docs/openrouter-integration.md](docs/openrouter-integration.md).

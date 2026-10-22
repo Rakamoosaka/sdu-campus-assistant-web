@@ -12,6 +12,7 @@ case "$service_name" in
     exec .venv/bin/python -m uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8000
     ;;
   frontend)
+    unset OPENROUTER_API_KEY JWT_SECRET DATABASE_URL
     export PATH="$(dirname "$node_path"):$PATH"
     cd web
     exec "$node_path" node_modules/vite/bin/vite.js --host 127.0.0.1 --port 5173

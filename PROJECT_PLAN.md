@@ -22,3 +22,14 @@ This standalone web/API project was extracted from the existing campus assistant
 - [x] Create a clean initial local Git commit, without a remote or publication.
 
 Current feature coverage and limitations are in docs/web-coverage.md. Neither schematic routes nor lift approaches are verified on site. Basement/full third-floor plans, real walking distances, live positioning and university-system integration remain unavailable.
+
+## OpenRouter integration · 22 October 2026
+
+- [x] Optional DeepSeek V4 Flash 0731 adapter using the existing httpx dependency.
+- [x] Validated read-only campus search/location/next-class/updates/graph-route tools.
+- [x] Owned, bounded conversation context and existing selectable clarification workflow.
+- [x] Working assistant-to-map route handoff with server-generated segments.
+- [x] Backend-only ignored configuration, bounded requests and visible rule-based fallback.
+- [x] Automated offline-provider protocol tests, browser contract tests and live provider verification.
+
+No changes to map geometry or university integration. No credentials are committed. Current verification evidence and operational limits are recorded in docs/openrouter-integration.md.

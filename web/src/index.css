@@ -2414,3 +2414,23 @@ td button {
     height: calc(100dvh - 114px);
   }
 }
+
+.assistant-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  margin: -12px 0 22px;
+}
+.answer-source {
+  display: block;
+  color: #62728a;
+  font-size: 10px;
+  margin: -4px 0 12px;
+}
+.assistant-message > div > p {
+  white-space: pre-line;
+}
+.assistant-message button {
+  margin: 3px 5px 3px 0;
+}

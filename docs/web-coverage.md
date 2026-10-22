@@ -1,6 +1,6 @@
-# Web replacement coverage · 19 October 2026
+# Web replacement coverage · updated 22 October 2026
 
-Status is based on real API/database behavior and browser execution. There is no public deployment or external AI requirement.
+Status is based on real API/database behavior and browser execution. There is no public deployment. Optional OpenRouter AI is now supported; the app still works without a key.
 
 ## Completed
 
@@ -27,9 +27,9 @@ Status is based on real API/database behavior and browser execution. There is no
 
 | Check | Result |
 |---|---|
-| `PYTHONPATH=backend .venv/bin/pytest backend/tests -q` | 29 tests passed, including Swagger/auth and concurrent save-limit checks |
+| `PYTHONPATH=backend .venv/bin/pytest backend/tests -q` | 47 tests passed, including AI grounding, scoped conversations, provider failure modes and concurrent saves |
 | `npm --prefix web test` | 4 component tests passed |
-| `npm --prefix web run test:e2e` | 9 Chromium browser tests passed against disposable servers/database |
+| `npm --prefix web run test:e2e` | 11 Chromium browser tests passed against disposable servers/database; external AI disabled |
 | `npm --prefix web run build` | TypeScript check and production build passed |
 | npm dependency audit | 0 reported vulnerabilities after updates |
 | Manual browser check | Guest entry, D201 search/floor-2 switch and cross-floor route verified in the running narrow-screen app |
@@ -50,4 +50,8 @@ Browser cases cover login identity/avatar/reload/logout; guest no-save; D201 flo
 
 - Surveyed distances/walking times, live indoor GPS, certified step-free approaches and live lift availability.
 - Basement/full floor-3 plans, missing door/landing positions, unconfirmed parking, missing service hours/contacts and unknown library internal positions.
-- University SSO, real university timetable synchronization, AI credentials, public deployment or GitHub push. Sample data is labelled and editable locally.
+- University SSO, real university timetable synchronization and public deployment. Sample data is labelled and editable locally.
+
+## Optional AI follow-up
+
+DeepSeek V4 Flash 0731 through OpenRouter is implemented and live-verified. See [openrouter-integration.md](openrouter-integration.md) for the read-only tools, privacy boundary, fallbacks, limits and exact distinction between deterministic automated tests and live checks. Keys are local-only and never committed.

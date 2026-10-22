@@ -30,11 +30,12 @@ import {
   type Lesson,
   type Answer,
   type Report,
+  type PathResult,
 } from "./lib/api";
 interface Props {
   person: Person;
   places: Place[];
-  openPlace: (id: number) => void;
+  openPlace: (id: number, route?: PathResult) => void;
   onLogin: () => void;
 }
 export function PageIntro({
@@ -59,7 +60,7 @@ export function PlaceActions({
   openPlace,
 }: {
   place: Place;
-  openPlace: (id: number) => void;
+  openPlace: (id: number, route?: PathResult) => void;
 }) {
   return (
     <Button variant="outline" size="sm" onClick={() => openPlace(place.id)}>
@@ -69,6 +70,12 @@ export function PlaceActions({
   );
 }
 export function AssistantPage({ person, openPlace }: Props) {
+  const [conversationId, setConversationId] = useState<string | undefined>();
+  const status = useQuery({
+    queryKey: ["assistant-status"],
+    queryFn: () =>
+      get<{ configured: boolean; model: string | null }>("/assistant/status"),
+  });
   const [text, setText] = useState(""),
     [messages, setMessages] = useState<{ user?: string; reply?: Answer }[]>([]);
   const send = useMutation({
@@ -76,8 +83,18 @@ export function AssistantPage({ person, openPlace }: Props) {
       question?: string;
       context_id?: string;
       selection_id?: number;
-    }) => api.post<Answer>("/assistant/query", body).then((r) => r.data),
-    onSuccess: (data) => setMessages((m) => [...m, { reply: data }]),
+    }) =>
+      api
+        .post<Answer>(
+          "/assistant/query",
+          { ...body, conversation_id: conversationId },
+          { timeout: 95000 },
+        )
+        .then((r) => r.data),
+    onSuccess: (data) => {
+      setConversationId(data.conversation_id);
+      setMessages((m) => [...m, { reply: data }]);
+    },
   });
   function ask(question: string) {
     if (!question.trim()) return;
@@ -93,6 +110,26 @@ export function AssistantPage({ person, openPlace }: Props) {
       >
         Ask about rooms, campus services or your next class.
       </PageIntro>
+      <div className="assistant-toolbar">
+        <span className="category-tag">
+          {status.data?.configured
+            ? "DeepSeek AI configured · campus tools"
+            : "Basic campus assistant"}
+        </span>
+        <Button
+          variant="ghost"
+          size="sm"
+          disabled={send.isPending}
+          onClick={() => {
+            setConversationId(undefined);
+            setMessages([]);
+            setText("");
+            send.reset();
+          }}
+        >
+          New chat
+        </Button>
+      </div>
       <div className="assistant-layout">
         <section className="chat-panel">
           <div className="assistant-welcome">
@@ -141,12 +178,44 @@ export function AssistantPage({ person, openPlace }: Props) {
                   </span>
                   <div>
                     <p>{message.reply?.answer}</p>
-                    {message.reply?.location && (
-                      <PlaceActions
-                        place={message.reply.location}
-                        openPlace={openPlace}
-                      />
+                    <small className="answer-source">
+                      {message.reply?.engine === "openrouter"
+                        ? "DeepSeek · grounded campus tools"
+                        : "Campus catalogue"}
+                      {message.reply?.fallback_reason
+                        ? " · AI unavailable; basic fallback used"
+                        : ""}
+                    </small>
+                    {message.reply?.route && message.reply.location ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          openPlace(
+                            message.reply!.location!.id,
+                            message.reply!.route,
+                          )
+                        }
+                      >
+                        Open route on map <ArrowUpRight size={14} />
+                      </Button>
+                    ) : (
+                      message.reply?.location && (
+                        <PlaceActions
+                          place={message.reply.location}
+                          openPlace={openPlace}
+                        />
+                      )
                     )}
+                    {message.reply?.locations
+                      ?.filter((p) => p.id !== message.reply?.location?.id)
+                      .map((p) => (
+                        <PlaceActions
+                          key={p.id}
+                          place={p}
+                          openPlace={openPlace}
+                        />
+                      ))}
                     <div className="choice-list">
                       {message.reply?.choices.map((p) => (
                         <Button
@@ -175,7 +244,13 @@ export function AssistantPage({ person, openPlace }: Props) {
               ),
             )}
             {send.isPending && (
-              <StateBox empty="Checking the campus catalogue…" />
+              <StateBox
+                empty={
+                  status.data?.configured
+                    ? "Checking campus data with DeepSeek…"
+                    : "Checking the campus catalogue…"
+                }
+              />
             )}
             {send.isError && (
               <StateBox error={send.error} retry={() => send.reset()} />
@@ -209,8 +284,9 @@ export function AssistantPage({ person, openPlace }: Props) {
           <span className="eyebrow">GOOD TO KNOW</span>
           <h3>Grounded in campus data.</h3>
           <p>
-            No external AI account needed. This assistant finds real catalogue
-            matches and helps you choose when a request is ambiguous.
+            {status.data?.configured
+              ? "DeepSeek interprets your question using campus search, your sample schedule and mapped-route tools. Basic assistance remains available if AI is unavailable."
+              : "This assistant finds catalogue matches and helps you choose when a request is ambiguous. No AI key is configured on this server."}
           </p>
           <hr />
           <p>
@@ -231,7 +307,7 @@ export function SavedPage({
   pending,
 }: {
   person: Person;
-  openPlace: (id: number) => void;
+  openPlace: (id: number, route?: PathResult) => void;
   onLogin: () => void;
   favorites: Place[];
   onSave: (p: Place) => void;

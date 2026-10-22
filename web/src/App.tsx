@@ -39,6 +39,7 @@ import {
   type Person,
   type Place,
   type CampusMap,
+  type PathResult,
 } from "./lib/api";
 import logo from "../../assets/images/sdu_30_logo.png";
 export default function App() {
@@ -90,9 +91,9 @@ export default function App() {
     },
     onError: (e) => setToast(errorMessage(e)),
   });
-  function openPlace(id: number) {
+  function openPlace(id: number, route?: PathResult) {
     setSelected(id);
-    navigate("/map");
+    navigate("/map", { state: route ? { assistantRoute: route } : null });
   }
   function onLogin() {
     setAuthOverride(true);

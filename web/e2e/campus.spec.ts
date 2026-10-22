@@ -240,3 +240,92 @@ test("editable sample timetable persists dates and exposes map action", async ({
   await edited.getByRole("button", { name: "Map", exact: true }).click();
   await expect(page.locator(".location-details h3")).toHaveText("D201");
 });
+
+test("AI conversation ID is carried into follow-ups and new chat resets it", async ({
+  page,
+}) => {
+  await login(page);
+  await page.route("**/api/assistant/status", (route) =>
+    route.fulfill({
+      json: {
+        configured: true,
+        engine: "openrouter",
+        model: "deepseek/deepseek-v4-flash-0731",
+      },
+    }),
+  );
+  const received: Record<string, unknown>[] = [];
+  await page.route("**/api/assistant/query", async (route) => {
+    received.push(route.request().postDataJSON());
+    await route.fulfill({
+      json: {
+        answer: "Library hours are not confirmed.",
+        location: null,
+        choices: [],
+        needs_clarification: false,
+        engine: "openrouter",
+        model: "deepseek/deepseek-v4-flash-0731",
+        conversation_id: "browser-conversation",
+      },
+    });
+  });
+  await page.getByRole("link", { name: "Assistant", exact: true }).click();
+  await page
+    .getByRole("textbox", { name: "Ask the campus assistant" })
+    .fill("Find somewhere quiet");
+  await page.getByRole("button", { name: "Send question" }).click();
+  await expect(page.locator(".assistant-message")).toHaveCount(1);
+  await expect(page.locator(".answer-source")).toContainText("DeepSeek");
+  await page
+    .getByRole("textbox", { name: "Ask the campus assistant" })
+    .fill("When does it close?");
+  await page.getByRole("button", { name: "Send question" }).click();
+  await expect(page.locator(".assistant-message")).toHaveCount(2);
+  expect(received[1].conversation_id).toBe("browser-conversation");
+  await page.getByRole("button", { name: "New chat", exact: true }).click();
+  await expect(page.locator(".assistant-message")).toHaveCount(0);
+  await page
+    .getByRole("textbox", { name: "Ask the campus assistant" })
+    .fill("Library");
+  await page.getByRole("button", { name: "Send question" }).click();
+  await expect(page.locator(".assistant-message")).toHaveCount(1);
+  expect(received[2].conversation_id).toBeUndefined();
+});
+
+test("assistant route handoff opens real server-generated segments on map", async ({
+  page,
+  request,
+}) => {
+  await login(page);
+  const places = await (await request.get("/api/locations")).json();
+  const target = places.find((p: { name: string }) => p.name === "D201");
+  const actualRoute = await (
+    await request.get(`/api/routes?start=1&destination=${target.id}`)
+  ).json();
+  expect(actualRoute.status).toBe("schematic_draft");
+  await page.route("**/api/assistant/query", (route) =>
+    route.fulfill({
+      json: {
+        answer: "This schematic route starts at Main Entrance.",
+        location: target,
+        route: actualRoute,
+        choices: [],
+        needs_clarification: false,
+        engine: "openrouter",
+        conversation_id: "route-conversation",
+      },
+    }),
+  );
+  await page.getByRole("link", { name: "Assistant", exact: true }).click();
+  await page
+    .getByRole("textbox", { name: "Ask the campus assistant" })
+    .fill("Route from entrance to D201");
+  await page.getByRole("button", { name: "Send question" }).click();
+  await page.getByRole("button", { name: "Open route on map" }).click();
+  await expect(
+    page.getByRole("region", { name: "Route directions" }),
+  ).toContainText("floor 1 to floor 2");
+  await expect(
+    page.locator('svg[aria-label="Schematic floor 1"] line'),
+  ).not.toHaveCount(0);
+});

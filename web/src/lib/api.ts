@@ -83,6 +83,8 @@ export interface CampusMap {
   mapped_floors: number[];
 }
 export interface PathResult {
+  start_location_id?: number;
+  destination_location_id?: number;
   status: string;
   message: string;
   steps: string[];
@@ -127,6 +129,12 @@ export interface Report {
   status: string;
 }
 export interface Answer {
+  conversation_id?: string;
+  engine?: "openrouter" | "rules";
+  model?: string;
+  fallback_reason?: string;
+  locations?: Place[];
+  route?: PathResult;
   answer: string;
   location: Place | null;
   needs_clarification: boolean;

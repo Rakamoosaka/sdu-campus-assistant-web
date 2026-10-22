@@ -1,3 +1,4 @@
+import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
@@ -82,12 +83,16 @@ export function MapWorkspace({
   onLogin,
   savePending,
 }: MapProps) {
-  const [floor, setFloor] = useState(1),
+  const location = useLocation(),
+    navigate = useNavigate();
+  const incomingRoute = location.state?.assistantRoute as
+    PathResult | undefined;
+  const [floor, setFloor] = useState(incomingRoute?.route_floors?.[0] || 1),
     [query, setQuery] = useState(""),
     [debounced, setDebounced] = useState(""),
     [category, setCategory] = useState("All"),
-    [start, setStart] = useState(1),
-    [route, setRoute] = useState<PathResult | null>(null),
+    [start, setStart] = useState(incomingRoute?.start_location_id || 1),
+    [route, setRoute] = useState<PathResult | null>(incomingRoute || null),
     [routeError, setRouteError] = useState(""),
     [panelOpen, setPanelOpen] = useState(false),
     [reportOpen, setReportOpen] = useState(false),
@@ -95,6 +100,10 @@ export function MapWorkspace({
   const zoom = useRef<ReactZoomPanPinchRef>(null),
     viewport = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.5);
+  useEffect(() => {
+    if (incomingRoute)
+      navigate(location.pathname, { replace: true, state: null });
+  }, []);
   const selectedPlace = all.find((p) => p.id === selected),
     mapPlace = map.places.find((p) => p.id === selected);
   const search = useQuery({
@@ -159,7 +168,8 @@ export function MapWorkspace({
   }, [scale]);
   useEffect(() => {
     if (selected === null) return;
-    if (mapPlace?.map_floor) setFloor(mapPlace.map_floor);
+    if (mapPlace?.map_floor && route?.destination_location_id !== selected)
+      setFloor(mapPlace.map_floor);
     setPanelOpen(true);
   }, [selected]);
   const floorSegments = useMemo(

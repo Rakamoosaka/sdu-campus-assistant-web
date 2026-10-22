@@ -10,6 +10,9 @@ from app import main
 
 @pytest.fixture(autouse=True)
 def isolated_database(tmp_path, monkeypatch):
+    monkeypatch.delenv('OPENROUTER_API_KEY', raising=False)
+    from app import ai_assistant
+    ai_assistant._requests.clear()
     test_engine = create_engine(f'sqlite:///{tmp_path / "campus.db"}', connect_args={'check_same_thread': False})
     monkeypatch.setattr(main, 'engine', test_engine)
     main.seed_database()

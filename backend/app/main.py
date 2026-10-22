@@ -9,6 +9,7 @@ import secrets
 import json
 import zlib
 from .routing import draft_route
+from . import ai_assistant
 from pathlib import Path
 from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
@@ -52,6 +53,13 @@ class AssistantContext(SQLModel, table=True):
     actor: str
     choices_json: str
     route_intent: bool = False
+    expires_at: datetime
+
+
+class AssistantConversation(SQLModel, table=True):
+    id: str = Field(primary_key=True)
+    actor: str = Field(index=True)
+    messages_json: str = "[]"
     expires_at: datetime
 
 
@@ -210,6 +218,7 @@ class ReportRequest(BaseModel):
 
 class AssistantRequest(BaseModel):
     question: str = ""
+    conversation_id: str | None = None
     context_id: str | None = None
     selection_id: int | None = None
 
@@ -639,9 +648,13 @@ def get_route(request: Request, session: DbSession, destination: int, start: int
     if user:
         pref = session.exec(select(Preference).where(Preference.user_id == user.id)).first()
         accessible = pref.accessible_routes if pref else False
+    return route_for_user(session, start, destination, accessible)
+
+
+def route_for_user(session: Session, start: int, destination: int, accessible: bool = False) -> dict:
     # Use current database metadata; preserve explicit graph attachments and geometry.
     campus = {**CAMPUS_MAP, "places": [{**p, **(session.get(Location, p['id']).model_dump() if session.get(Location, p['id']) else {})} for p in CAMPUS_MAP['places']]}
-    return draft_route(campus, start, destination, accessible)
+    return {**draft_route(campus, start, destination, accessible), "start_location_id": start, "destination_location_id": destination}
 
 
 def lessons_for(identity: dict, session: Session) -> list[SampleLesson]:
@@ -656,10 +669,168 @@ def upcoming_lesson(identity: dict, session: Session, now: datetime | None = Non
     return next((lesson for lesson in lessons_for(identity, session) if as_utc(lesson.starts_at) >= now), None)
 
 
+@app.get("/assistant/status", tags=["Assistant"])
+def assistant_status():
+    config = ai_assistant.settings()
+    return {"configured": bool(config.key), "engine": "openrouter" if config.key else "rules",
+            "model": config.model if config.key else None}
+
+
 @app.post("/assistant/query", tags=["Assistant"])
 def assistant(body: AssistantRequest, request: Request, session: DbSession) -> dict:
     identity = resolve_identity(request, session, required=False)
     actor = identity['sub'] if identity else "public"
+    if not body.selection_id and (not body.question.strip() or len(body.question) > 500):
+        raise HTTPException(422, "Ask a campus question of up to 500 characters")
+    conversation = None
+    if body.conversation_id:
+        conversation = session.get(AssistantConversation, body.conversation_id)
+        if not conversation or conversation.actor != actor:
+            raise HTTPException(404, "Conversation not found. Start a new chat.")
+        if as_utc(conversation.expires_at) <= datetime.now(timezone.utc):
+            raise HTTPException(410, "This chat has expired. Start a new chat.")
+    config = ai_assistant.settings()
+    answer = None
+    reason = None
+    if config.key and body.selection_id is None:
+        try:
+            ai_assistant.check_rate(actor, request.client.host if request.client else "local", config.requests_per_minute)
+            answer = openrouter_answer(body.question, identity, session, conversation, config)
+            answer.update(engine="openrouter", model=config.model)
+        except ai_assistant.AIUnavailable as exc:
+            reason = exc.reason
+    if answer is None:
+        answer = rule_assistant(body, identity, session)
+        answer["engine"] = "rules"
+        if reason:
+            answer["fallback_reason"] = reason
+    if config.key or conversation:
+        if conversation is None:
+            conversation = AssistantConversation(id=secrets.token_urlsafe(24), actor=actor,
+                         expires_at=datetime.now(timezone.utc)+timedelta(hours=12))
+        history = json.loads(conversation.messages_json)
+        question = body.question or "Selected " + str(body.selection_id)
+        ids = [p.id for p in answer.get('choices', [])]
+        if answer.get('location'):
+            ids.append(answer['location'].id)
+        history.extend([{"role": "user", "content": question}, {"role": "assistant", "content": json.dumps(
+            {"answer": answer['answer'], "location_ids": ids}, ensure_ascii=False)}])
+        conversation.messages_json = json.dumps(history[-12:], ensure_ascii=False)
+        conversation_id = conversation.id
+        session.add(conversation)
+        # Serialize models before commit expires SQLModel fields.
+        serialized = json.loads(json.dumps(answer, default=lambda obj: obj.model_dump(mode='json') if isinstance(obj, SQLModel) else str(obj)))
+        session.commit()
+        return {**serialized, "conversation_id": conversation_id}
+    return answer
+
+
+def openrouter_answer(question: str, identity: dict | None, session: Session,
+                      conversation: AssistantConversation | None, config: ai_assistant.Settings) -> dict:
+    observed: dict[int, Location] = {}
+    routes: list[dict] = []
+    evidence = []
+    searched_queries = []
+
+    def record(item: Location) -> dict:
+        observed[item.id] = item
+        metadata = MAP_LOCATIONS.get(item.id, {})
+        return {"id": item.id, "name": item.name, "category": item.category, "block": item.block,
+                "floor": item.floor, "opening_hours": item.opening_hours, "contact": item.contact,
+                "mapped": metadata.get('has_position', False), "notes": metadata.get('notes', ''),
+                "accessibility": "Unverified"}
+
+    def read_location(location_id: int) -> Location | None:
+        if type(location_id) is not int or location_id in RETIRED_LOCATION_IDS:
+            return None
+        metadata = MAP_LOCATIONS.get(location_id, {})
+        if metadata.get('access', 'public') != 'public':
+            return None
+        return session.get(Location, location_id)
+
+    def execute(name: str, args: dict) -> dict:
+        schema = next((tool['function']['parameters'] for tool in ai_assistant.TOOLS if tool['function']['name'] == name), None)
+        if not schema or set(args) != set(schema['required']):
+            raise ValueError('Unsupported tool or arguments')
+        for key, value in args.items():
+            expected = schema['properties'][key]['type']
+            if expected == 'integer' and type(value) is not int or expected == 'string' and (not isinstance(value, str) or not value.strip() or len(value) > 200):
+                raise ValueError('Invalid arguments')
+        evidence.append(name)
+        if name == 'search_campus':
+            searched_queries.append(args['query'].strip().lower())
+            matches = ranked_locations(args['query'], session)
+            exact = [item for item in matches if normalized(item.name) == normalized(args['query'])]
+            matches = exact if len(exact) == 1 else matches[:8]
+            return {"locations": [record(p) for p in matches if read_location(p.id)], "ambiguous": len(matches) > 1}
+        if name == 'get_location':
+            item = read_location(args['location_id'])
+            return {"location": record(item)} if item else {"error": "Location unavailable or restricted"}
+        if name == 'get_next_class':
+            if not identity or identity['role'] == 'guest':
+                return {"status": "login_required", "message": "Log in for your personal sample schedule"}
+            lesson = upcoming_lesson(identity, session)
+            if not lesson:
+                return {"status": "empty", "sample": True, "timezone": "Asia/Almaty"}
+            item = read_location(lesson.location_id) if lesson.location_id else None
+            return {"sample": True, "course": lesson.course, "room": lesson.room,
+                    "starts_at": as_utc(lesson.starts_at).astimezone(TZ).isoformat(), "timezone": "Asia/Almaty",
+                    "location": record(item) if item else None}
+        if name == 'get_campus_updates':
+            updates = session.exec(select(Announcement).order_by(Announcement.published_at.desc()).limit(5)).all()
+            return {"updates": [{"title": n.title, "body": n.body, "published_at": n.published_at.isoformat(),
+                     "location": record(item) if (item := read_location(n.location_id)) else None}
+                    for n in updates], "note": "Seeded announcements are sample data"}
+        if name == 'plan_route':
+            start, target = read_location(args['start_location_id']), read_location(args['destination_location_id'])
+            if not start or not target:
+                return {"status": "unmapped", "message": "Start or destination unavailable or restricted"}
+            record(start); record(target)
+            user = user_for_identity(identity, session) if identity else None
+            pref = session.exec(select(Preference).where(Preference.user_id == user.id)).first() if user else None
+            path = route_for_user(session, start.id, target.id, pref.accessible_routes if pref else False)
+            routes.append(path)
+            return {k: v for k, v in path.items() if k not in {'points', 'node_path', 'segments'}}
+        raise ValueError('Unsupported tool')
+
+    def present(args: dict) -> dict:
+        if set(args) != {'answer', 'location_ids', 'needs_clarification', 'route_requested'} or not evidence:
+            raise ai_assistant.AIUnavailable('invalid_response')
+        ids = args['location_ids']
+        if (not isinstance(args['answer'], str) or not args['answer'].strip() or len(args['answer']) > 1800
+            or not isinstance(ids, list) or len(ids) > 8 or any(type(i) is not int or i not in observed for i in ids)
+            or type(args['needs_clarification']) is not bool or type(args['route_requested']) is not bool):
+            raise ai_assistant.AIUnavailable('invalid_response')
+        ids = list(dict.fromkeys(ids))
+        selected = [observed[i] for i in ids]
+        clarification = args['needs_clarification'] and len(selected) > 1
+        response = {"answer": args['answer'].strip(), "location": selected[0] if selected and not clarification else None,
+                    "locations": selected if not clarification else [], "choices": selected if clarification else [],
+                    "needs_clarification": clarification}
+        if clarification:
+            context = AssistantContext(id=secrets.token_urlsafe(24), actor=identity['sub'] if identity else 'public',
+                choices_json=json.dumps(ids), route_intent=args['route_requested'],
+                expires_at=datetime.now(timezone.utc)+timedelta(minutes=30))
+            session.add(context)
+            session.flush()
+            response['context_id'] = context.id
+        if routes and not clarification:
+            response['route'] = routes[-1]
+            target = observed.get(routes[-1]['destination_location_id'])
+            response['location'] = target
+        return response
+
+    history = json.loads(conversation.messages_json) if conversation else []
+    try:
+        return ai_assistant.run(question, history, execute, present, config)
+    finally:
+        # Do not hold a database writer while waiting on a remote model response.
+        for query in searched_queries:
+            session.add(SearchLog(actor='assistant', query=query))
+
+
+def rule_assistant(body: AssistantRequest, identity: dict | None, session: Session) -> dict:
+    actor = identity['sub'] if identity else 'public'
     q = body.question.lower().strip()
     def result(answer, item=None, **extra):
         return {"answer": answer, "location": item, "needs_clarification": False, "choices": [], **extra}

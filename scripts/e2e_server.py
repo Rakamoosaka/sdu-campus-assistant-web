@@ -4,6 +4,8 @@ import tempfile
 from pathlib import Path
 import sys
 import uvicorn
+# Browser regression tests never make paid model calls.
+os.environ.pop("OPENROUTER_API_KEY", None)
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'backend'))
 with tempfile.TemporaryDirectory(prefix='sdu-web-e2e-') as folder:
     os.environ['DATABASE_URL'] = f'sqlite:///{folder}/e2e.db'
