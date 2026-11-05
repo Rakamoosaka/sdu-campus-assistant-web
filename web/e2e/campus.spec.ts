@@ -390,3 +390,146 @@ test("unmapped places cannot start a route and changing destination clears it", 
       .filter({ hasText: "D105" }),
   ).toHaveCount(0);
 });
+
+test("a shared room opens for a new mobile visitor and an invalid link offers search", async ({
+  page,
+  browser,
+  context,
+  baseURL,
+}) => {
+  await login(page);
+  await search(page, "D201");
+  await page.getByRole("button", { name: "Share destination" }).click();
+  const url = await page.getByLabel("Destination link").inputValue();
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  await page.getByRole("button", { name: "Copy link" }).click();
+  await expect(page.getByRole("status")).toHaveText("Link copied");
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(url);
+
+  const visitor = await browser.newPage({
+    viewport: { width: 390, height: 844 },
+  });
+  try {
+    await visitor.goto(url);
+    await expect(
+      visitor.getByRole("button", { name: "Floor 2", exact: true }),
+    ).toHaveAttribute("aria-pressed", "true");
+    await visitor.getByRole("button", { name: /D201.*View details/ }).click();
+    await expect(visitor.locator(".location-details h3")).toHaveText("D201");
+
+    await visitor.goto(new URL("/map?place=bad-id", baseURL).href);
+    await expect(visitor.getByRole("alert")).toContainText(
+      "This destination is unavailable",
+    );
+    await visitor
+      .getByRole("button", { name: "Search campus", exact: true })
+      .click();
+    await expect(
+      visitor.getByRole("textbox", { name: "Search campus" }),
+    ).toBeFocused();
+  } finally {
+    await visitor.close();
+  }
+});
+
+test("offline map survives a failed update and reopens a shared room without a network", async ({
+  page,
+  context,
+  baseURL,
+}) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Continue as guest" }).click();
+  await search(page, "D201");
+  await page.getByRole("button", { name: "Share destination" }).click();
+  const url = await page.getByLabel("Destination link").inputValue();
+  await page.getByRole("button", { name: "Close", exact: true }).click();
+
+  await page.getByRole("button", { name: "Offline map" }).click();
+  const dialog = page.getByRole("dialog", { name: "Offline map" });
+  await page.route("**/api/campus-map", () => {});
+  const request = page.waitForRequest("**/api/campus-map");
+  await dialog.getByRole("button", { name: "Download campus map" }).click();
+  await request;
+  await dialog.getByRole("button", { name: "Cancel download" }).click();
+  await expect(
+    dialog.getByRole("button", { name: "Download campus map" }),
+  ).toBeEnabled();
+  await expect(dialog.getByText("Ready offline", { exact: true })).toHaveCount(
+    0,
+  );
+  await page.unroute("**/api/campus-map");
+  await dialog.getByRole("button", { name: "Download campus map" }).click();
+  await expect(dialog.getByRole("status")).toHaveText("Ready offline");
+  await page.route("**/api/campus-map", (route) => route.abort());
+  await dialog.getByRole("button", { name: "Update download" }).click();
+  await expect(dialog.getByRole("alert")).toContainText("Cannot reach");
+  await expect(
+    dialog.getByText("Ready offline", { exact: true }),
+  ).toBeVisible();
+  await page.unroute("**/api/campus-map");
+
+  await page.close();
+  await context.setOffline(true);
+  const offlinePage = await context.newPage();
+  await offlinePage.goto(url);
+  await expect(offlinePage.getByRole("status")).toContainText(
+    "Offline · Using map saved",
+  );
+  await expect(offlinePage.locator(".location-details h3")).toHaveText("D201");
+  await expect(
+    offlinePage.getByRole("button", { name: "Floor 2", exact: true }),
+  ).toHaveAttribute("aria-pressed", "true");
+  await expect(
+    offlinePage.getByRole("button", { name: "Find route" }),
+  ).toBeDisabled();
+  await offlinePage
+    .getByRole("link", { name: "Assistant", exact: true })
+    .click();
+  await expect(
+    offlinePage
+      .getByText("The assistant needs a connection.", { exact: true })
+      .last(),
+  ).toBeVisible();
+  await context.setOffline(false);
+  await expect(
+    offlinePage.getByRole("button", { name: "Find route" }),
+  ).toBeEnabled();
+  await expect(offlinePage.locator(".location-details h3")).toHaveText("D201");
+  await context.setOffline(true);
+  await expect(
+    offlinePage.getByRole("button", { name: "Find route" }),
+  ).toBeDisabled();
+  const searchBox = offlinePage.getByRole("textbox", { name: "Search campus" });
+  for (const [query, expected] of [
+    ["d 201", "D201"],
+    ["printer", "Print & Stationery"],
+    ["libary", "Library"],
+  ]) {
+    await searchBox.fill(query);
+    await expect(
+      offlinePage.locator(".location-list button").first(),
+    ).toContainText(expected);
+  }
+
+  await offlinePage.goto(new URL("/map?place=999999999", baseURL).href);
+  await expect(offlinePage.getByRole("alert")).toContainText(
+    "isn’t in your saved map",
+  );
+  await offlinePage.getByRole("button", { name: "Offline map" }).click();
+  const offlineDialog = offlinePage.getByRole("dialog", {
+    name: "Offline map",
+  });
+  await offlineDialog.getByRole("button", { name: "Remove download" }).click();
+  await offlineDialog.getByRole("button", { name: "Remove download" }).click();
+  await expect(
+    offlinePage.getByRole("heading", {
+      name: "No offline map is saved on this device",
+    }),
+  ).toBeVisible();
+  await offlinePage.reload();
+  await expect(
+    offlinePage.getByRole("heading", {
+      name: "No offline map is saved on this device",
+    }),
+  ).toBeVisible();
+});

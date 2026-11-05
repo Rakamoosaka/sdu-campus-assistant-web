@@ -1,5 +1,5 @@
-import { useLocation, useNavigate } from "react-router-dom";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   TransformWrapper,
@@ -26,6 +26,8 @@ import {
 } from "lucide-react";
 import { Button } from "./components/ui/button";
 import { Dialog } from "./components/ui/dialog";
+import { ShareDestination } from "./components/MapActions";
+import { searchSavedMap } from "./lib/offlineMap";
 import {
   get,
   api,
@@ -71,6 +73,10 @@ export interface MapProps {
   onSave: (place: Place) => void;
   onLogin: () => void;
   savePending: boolean;
+  sharedDestination: boolean;
+  offlineDate?: string;
+  onRetryConnection?: () => void;
+  offlineControl: ReactNode;
 }
 export function MapWorkspace({
   person,
@@ -82,6 +88,10 @@ export function MapWorkspace({
   onSave,
   onLogin,
   savePending,
+  sharedDestination,
+  offlineDate,
+  onRetryConnection,
+  offlineControl,
 }: MapProps) {
   const location = useLocation(),
     navigate = useNavigate();
@@ -106,13 +116,17 @@ export function MapWorkspace({
   }, []);
   const selectedPlace = all.find((p) => p.id === selected),
     mapPlace = map.places.find((p) => p.id === selected);
+  const offline = !!offlineDate;
+  const searchInput = useRef<HTMLInputElement>(null);
   const search = useQuery({
     queryKey: ["search", debounced],
     queryFn: () => get<Place[]>("/search?q=" + encodeURIComponent(debounced)),
-    enabled: debounced.length > 0,
+    enabled: !offline && debounced.length > 0,
   });
   const results = debounced
-    ? search.data || []
+    ? offline
+      ? searchSavedMap(all, debounced)
+      : search.data || []
     : all.filter((p) => category === "All" || p.category === category);
   const saved = favorites.some((p) => p.id === selected);
   const routePlaces = all.filter((p) =>
@@ -124,6 +138,7 @@ export function MapWorkspace({
     ),
   );
   const canRoute = routePlaces.some((p) => p.id === selected);
+  const previousSelected = useRef(selected);
   const routeEndpoints = useRef({ start, selected });
   routeEndpoints.current = { start, selected };
   const planning = useMutation({
@@ -191,17 +206,22 @@ export function MapWorkspace({
     fit();
   }, [scale]);
   useEffect(() => {
+    if (selected !== previousSelected.current) {
+      setRoute(null);
+      setRouteError("");
+      previousSelected.current = selected;
+    }
     if (selected === null) return;
     if (mapPlace?.map_floor && route?.destination_location_id !== selected)
       setFloor(mapPlace.map_floor);
-    setPanelOpen(true);
-  }, [selected]);
+    setPanelOpen(!sharedDestination);
+  }, [selected, sharedDestination, mapPlace?.map_floor]);
   const floorSegments = useMemo(
-    () => route?.segments.filter((s) => s.floor === floor) || [],
-    [route, floor],
+    () => (!offline && route?.segments.filter((s) => s.floor === floor)) || [],
+    [route, floor, offline],
   );
   useEffect(() => {
-    if (!route && mapPlace?.has_position) {
+    if ((!route || offline) && mapPlace?.has_position) {
       const timer = setTimeout(
         () =>
           zoom.current?.zoomToElement(
@@ -213,7 +233,7 @@ export function MapWorkspace({
       );
       return () => clearTimeout(timer);
     }
-  }, [selected, floor, scale]);
+  }, [selected, floor, scale, offline, mapPlace?.has_position]);
   useEffect(() => {
     if (floorSegments.length) {
       const timer = setTimeout(
@@ -221,10 +241,10 @@ export function MapWorkspace({
         150,
       );
       return () => clearTimeout(timer);
-    } else if (route) {
+    } else if (route && !offline) {
       fit();
     }
-  }, [route, floor, scale]);
+  }, [route, floor, scale, offline]);
   const routeBounds = useMemo(() => {
     const points = floorSegments.flatMap((s) => [s.from, s.to]);
     if (!points.length) return null;
@@ -247,6 +267,7 @@ export function MapWorkspace({
     if (!live) return null;
     const active = selected === p.id;
     const isSaved = favorites.some((item) => item.id === p.id);
+    const isStair = p.category === "Stairs";
     const geometry = p.geometry;
     const x = live.x * map.width,
       y = live.y * map.height;
@@ -298,24 +319,33 @@ export function MapWorkspace({
             <circle
               cx={x}
               cy={y}
-              r={active ? 14 : 11}
+              r={active ? 14 : isStair ? 13 : 11}
               fill={active ? "#2662df" : "#fff"}
               stroke={isSaved ? "#b69247" : "#364e75"}
               strokeWidth={active ? 3 : 1.7}
             />
-            <text
-              x={x}
-              y={y + 3}
-              textAnchor="middle"
-              fill={active ? "#fff" : "#30476c"}
-              fontSize={8}
-              fontWeight={700}
-            >
-              {p.category === "Stairs"
-                ? p.map_key.match(/stair_main_0?(\d+)/)
-                  ? `S${Number(p.map_key.match(/stair_main_0?(\d+)/)![1])}`
-                  : "S"
-                : p.category === "Lift"
+            {isStair ? (
+              <path
+                className="stair-icon"
+                d="M-8 5h5V0h5v-5h6"
+                transform={`translate(${x} ${y})`}
+                fill="none"
+                stroke={active ? "#fff" : "#30476c"}
+                strokeWidth={2.6}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              />
+            ) : (
+              <text
+                x={x}
+                y={y + 3}
+                textAnchor="middle"
+                fill={active ? "#fff" : "#30476c"}
+                fontSize={8}
+                fontWeight={700}
+              >
+                {p.category === "Lift"
                   ? "L"
                   : p.category === "Entrance"
                     ? "↗"
@@ -328,7 +358,8 @@ export function MapWorkspace({
                           : p.category === "Printer"
                             ? "P"
                             : "•"}
-            </text>
+              </text>
+            )}
             {(active ||
               ["Entrance", "Study", "Health", "Printer", "Food"].includes(
                 p.category,
@@ -370,6 +401,7 @@ export function MapWorkspace({
         <div className="search-field">
           <Search size={19} />
           <input
+            ref={searchInput}
             aria-label="Search campus"
             placeholder="Room, place or service…"
             value={query}
@@ -414,9 +446,9 @@ export function MapWorkspace({
               <span>{results.length} places</span>
             </div>
             <div className="location-list">
-              {search.isFetching && debounced ? (
+              {!offline && search.isFetching && debounced ? (
                 <StateBox />
-              ) : search.isError && debounced ? (
+              ) : !offline && search.isError && debounced ? (
                 <StateBox error={search.error} retry={() => search.refetch()} />
               ) : results.length === 0 ? (
                 <StateBox empty="No places found. Try a room code like D201 or a service name." />
@@ -450,9 +482,13 @@ export function MapWorkspace({
               <div>
                 <strong>A question about campus?</strong>
                 <p>Ask the assistant to point you in the right direction.</p>
-                <a href="/assistant">
-                  Meet your assistant <ArrowUpRight size={14} />
-                </a>
+                {offline ? (
+                  <p>The assistant needs a connection.</p>
+                ) : (
+                  <Link to="/assistant">
+                    Meet your assistant <ArrowUpRight size={14} />
+                  </Link>
+                )}
               </div>
             </div>
           </>
@@ -485,26 +521,33 @@ export function MapWorkspace({
               <div>
                 <span>Map position</span>
                 <strong>
-                  {mapPlace?.has_position ? "Schematic" : "Not mapped"}
+                  {mapPlace?.has_position
+                    ? "Schematic"
+                    : "Map position unavailable"}
                 </strong>
               </div>
             </div>
             <div className="detail-actions">
-              {person.role === "guest" ? (
-                <Button variant="outline" onClick={onLogin}>
-                  <Bookmark size={16} /> Log in to save
-                </Button>
-              ) : (
-                <Button
-                  variant={saved ? "secondary" : "outline"}
-                  disabled={savePending || (!saved && favorites.length >= 5)}
-                  onClick={() => onSave(selectedPlace)}
-                >
-                  <Bookmark size={16} fill={saved ? "currentColor" : "none"} />
-                  {saved ? "Remove saved" : "Save place"}{" "}
-                  <span className="count">{favorites.length}/5</span>
-                </Button>
-              )}
+              <ShareDestination key={selectedPlace.id} place={selectedPlace} />
+              {!offline &&
+                (person.role === "guest" ? (
+                  <Button variant="outline" onClick={onLogin}>
+                    <Bookmark size={16} /> Log in to save
+                  </Button>
+                ) : (
+                  <Button
+                    variant={saved ? "secondary" : "outline"}
+                    disabled={savePending || (!saved && favorites.length >= 5)}
+                    onClick={() => onSave(selectedPlace)}
+                  >
+                    <Bookmark
+                      size={16}
+                      fill={saved ? "currentColor" : "none"}
+                    />
+                    {saved ? "Remove saved" : "Save place"}{" "}
+                    <span className="count">{favorites.length}/5</span>
+                  </Button>
+                ))}
               {!saved && favorites.length >= 5 && (
                 <p className="muted text-xs">
                   All five slots are filled. Remove a place in Saved to make
@@ -519,6 +562,7 @@ export function MapWorkspace({
               <label>
                 Start from
                 <select
+                  disabled={offline}
                   value={start}
                   onChange={(e) => {
                     setStart(Number(e.target.value));
@@ -539,7 +583,7 @@ export function MapWorkspace({
               </div>
               <Button
                 className="w-full"
-                disabled={planning.isPending || !canRoute || selected === null}
+                disabled={offline || planning.isPending || !canRoute || selected === null}
                 onClick={() =>
                   selected !== null &&
                   planning.mutate({ start, destination: selected })
@@ -549,17 +593,17 @@ export function MapWorkspace({
                 {planning.isPending ? "Finding a route…" : "Find route"}
               </Button>
               <p className="route-hint">
-                {canRoute
+                {offline ? "Reconnect to find a route." : canRoute
                   ? "Choose your start manually. No live indoor positioning."
                   : "This place has no public mapped approach yet. Choose another destination."}
               </p>
-              {routeError && (
+              {!offline && routeError && (
                 <div role="alert" className="error-box">
                   {routeError}
                 </div>
               )}
             </div>
-            {route && (
+            {!offline && route && (
               <section className="route-result" aria-label="Route directions">
                 <div className="flex justify-between items-center">
                   <strong>
@@ -637,7 +681,7 @@ export function MapWorkspace({
             className="mobile-explore"
             onClick={() => setPanelOpen(true)}
           >
-            <Search size={16} /> Explore
+            <Search size={16} /> {selectedPlace ? "Place details" : "Explore"}
           </Button>
           <div className="floor-switch" aria-label="Select map floor">
             <Layers size={17} />
@@ -651,7 +695,62 @@ export function MapWorkspace({
               </button>
             ))}
           </div>
+          <div className="offline-map-control">{offlineControl}</div>
+          {(offline || (sharedDestination && !selectedPlace)) && (
+            <div className="map-notices">
+              {offline && (
+                <p role="status">
+                  Offline · Using map saved on{" "}
+                  {new Date(offlineDate!).toLocaleDateString()}
+                  {onRetryConnection && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={onRetryConnection}
+                    >
+                      Retry connection
+                    </Button>
+                  )}
+                </p>
+              )}
+              {sharedDestination && !selectedPlace && (
+                <div role="alert">
+                  {offline
+                    ? "This destination isn’t in your saved map."
+                    : "This destination is unavailable."}
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      setPanelOpen(true);
+                      requestAnimationFrame(() => searchInput.current?.focus());
+                    }}
+                  >
+                    {offline ? "Browse saved map" : "Search campus"}
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
+        {sharedDestination && selectedPlace && !panelOpen && (
+          <button
+            className="shared-place-card"
+            onClick={() => setPanelOpen(true)}
+          >
+            <MapPin size={17} />
+            <span>
+              <strong>{selectedPlace.name}</strong>
+              <small>
+                {selectedPlace.floor} ·{" "}
+                {mapPlace?.has_position
+                  ? "View details"
+                  : "Map position unavailable"}
+              </small>
+            </span>
+            <ChevronRight size={17} />
+          </button>
+        )}
         <div ref={viewport} className="map-viewport">
           <TransformWrapper
             ref={zoom}
@@ -815,7 +914,7 @@ export function MapWorkspace({
             <i className="legend-service" />
             Campus service
           </span>
-          {route && (
+          {!offline && route && (
             <>
               <span>
                 <i className="legend-route" />

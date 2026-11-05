@@ -21,7 +21,7 @@ export default defineConfig({
       timeout: 30000,
     },
     {
-      command: "npm run dev -- --port 5174",
+      command: "npm run build && npm run preview -- --port 5174 --strictPort",
       url: "http://127.0.0.1:5174",
       env: { API_PROXY_TARGET: "http://127.0.0.1:8001" },
       reuseExistingServer: false,

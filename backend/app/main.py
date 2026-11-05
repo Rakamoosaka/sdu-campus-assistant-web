@@ -9,7 +9,7 @@ import secrets
 import json
 import zlib
 from .routing import draft_route
-from . import ai_assistant
+from . import ai_assistant, assistant_scope, assistant_answers
 from pathlib import Path
 from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
@@ -690,9 +690,12 @@ def assistant(body: AssistantRequest, request: Request, session: DbSession) -> d
         if as_utc(conversation.expires_at) <= datetime.now(timezone.utc):
             raise HTTPException(410, "This chat has expired. Start a new chat.")
     config = ai_assistant.settings()
-    answer = None
+    answer = (assistant_scope.response("out_of_scope")
+              if body.selection_id is None and assistant_scope.clearly_unrelated(body.question) else None)
+    if answer is not None:
+        answer["engine"] = "rules"
     reason = None
-    if config.key and body.selection_id is None:
+    if answer is None and config.key and body.selection_id is None:
         try:
             ai_assistant.check_rate(actor, request.client.host if request.client else "local", config.requests_per_minute)
             answer = openrouter_answer(body.question, identity, session, conversation, config)
@@ -730,6 +733,7 @@ def openrouter_answer(question: str, identity: dict | None, session: Session,
     observed: dict[int, Location] = {}
     routes: list[dict] = []
     evidence = []
+    tool_results = []
     searched_queries = []
 
     def record(item: Location) -> dict:
@@ -749,6 +753,11 @@ def openrouter_answer(question: str, identity: dict | None, session: Session,
         return session.get(Location, location_id)
 
     def execute(name: str, args: dict) -> dict:
+        result = execute_tool(name, args)
+        tool_results.append((name, result))
+        return result
+
+    def execute_tool(name: str, args: dict) -> dict:
         schema = next((tool['function']['parameters'] for tool in ai_assistant.TOOLS if tool['function']['name'] == name), None)
         if not schema or set(args) != set(schema['required']):
             raise ValueError('Unsupported tool or arguments')
@@ -819,6 +828,9 @@ def openrouter_answer(question: str, identity: dict | None, session: Session,
         raise ValueError('Unsupported tool')
 
     def present(args: dict) -> dict:
+        intent = args.pop("_intent", None)
+        if intent not in assistant_scope.INTENTS:
+            raise ai_assistant.AIUnavailable('invalid_response')
         if set(args) != {'answer', 'location_ids', 'needs_clarification', 'route_requested'} or not evidence:
             raise ai_assistant.AIUnavailable('invalid_response')
         ids = args['location_ids']
@@ -829,7 +841,7 @@ def openrouter_answer(question: str, identity: dict | None, session: Session,
         ids = list(dict.fromkeys(ids))
         selected = [observed[i] for i in ids]
         clarification = args['needs_clarification'] and len(selected) > 1
-        response = {"answer": args['answer'].strip(), "location": selected[0] if selected and not clarification else None,
+        response = {"answer": assistant_answers.render(intent, [record(item) for item in selected], clarification, routes, tool_results), "location": selected[0] if selected and not clarification else None,
                     "locations": selected if not clarification else [], "choices": selected if clarification else [],
                     "needs_clarification": clarification}
         if clarification:
@@ -857,6 +869,8 @@ def openrouter_answer(question: str, identity: dict | None, session: Session,
 def rule_assistant(body: AssistantRequest, identity: dict | None, session: Session) -> dict:
     actor = identity['sub'] if identity else 'public'
     q = body.question.lower().strip()
+    if body.selection_id is None and assistant_scope.clearly_unrelated(body.question):
+        return assistant_scope.response("out_of_scope")
     def result(answer, item=None, **extra):
         return {"answer": answer, "location": item, "needs_clarification": False, "choices": [], **extra}
     if body.selection_id is not None:
@@ -867,6 +881,17 @@ def rule_assistant(body: AssistantRequest, identity: dict | None, session: Sessi
         return result(f"Selected {item.name}. Open it on the map or plan a route from your chosen start.", item, action="route" if context.route_intent else "map")
     if not q or len(q) > 500:
         raise HTTPException(422, "Ask a campus question of up to 500 characters")
+    if not assistant_scope.fallback_allowed(q):
+        # Bare room codes, names, and aliases remain valid searches.
+        matches = ranked_locations(q, session)
+        if not matches:
+            return assistant_scope.response("clarify")
+        exact = [item for item in matches if normalized(q) in {
+            normalized(item.name), normalized(item.category),
+            *[normalized(alias) for alias in item.aliases.split(",") if not alias.startswith("[")],
+        }]
+        if not exact:
+            return assistant_scope.response("clarify")
     if any(term in q for term in ["my name", "who am i", "my profile", "my account", "about me"]):
         user = user_for_identity(identity, session) if identity else None
         if not user:

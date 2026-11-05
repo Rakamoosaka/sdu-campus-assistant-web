@@ -1,24 +1,31 @@
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
-import type { ReactNode } from "react";
+import type { ComponentProps, ReactNode } from "react";
 export function Dialog({
   open,
   onOpenChange,
   title,
   description,
   children,
+  onCloseAutoFocus,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title: string;
   description?: string;
   children: ReactNode;
+  onCloseAutoFocus?: ComponentProps<
+    typeof DialogPrimitive.Content
+  >["onCloseAutoFocus"];
 }) {
   return (
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="dialog-overlay" />
-        <DialogPrimitive.Content className="dialog-content">
+        <DialogPrimitive.Content
+          className="dialog-content"
+          onCloseAutoFocus={onCloseAutoFocus}
+        >
           <DialogPrimitive.Title className="text-xl font-bold text-primary">
             {title}
           </DialogPrimitive.Title>

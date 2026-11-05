@@ -15,7 +15,8 @@ case "$service_name" in
     unset OPENROUTER_API_KEY JWT_SECRET DATABASE_URL
     export PATH="$(dirname "$node_path"):$PATH"
     cd web
-    exec "$node_path" node_modules/vite/bin/vite.js --host 127.0.0.1 --port 5173
+    npm run build
+    exec "$node_path" node_modules/vite/bin/vite.js preview --host 127.0.0.1 --port 5173 --strictPort
     ;;
   *) echo 'Unknown service' >&2; exit 1 ;;
 esac

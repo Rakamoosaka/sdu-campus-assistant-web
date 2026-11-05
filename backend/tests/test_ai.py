@@ -24,11 +24,32 @@ def finish(ids, answer='Found in the campus catalogue.', clarification=False, ro
                 'needs_clarification': clarification, 'route_requested': route})
 
 
-def enable(monkeypatch, replies):
+def scope_call(intent="location", status="in_scope"):
+    return call("assess_campus_request", {"status": status, "intent": intent})
+
+
+def has_assessment(history):
+    return any(item.get("name") == "assess_campus_request" for item in history)
+
+
+def enable(monkeypatch, replies, intent=None):
     monkeypatch.setenv('OPENROUTER_API_KEY', 'unit-test-key')
+    if intent is None:
+        tool_intents = {"get_my_profile": "profile", "get_my_saved_places": "profile",
+                        "get_my_preferences": "profile", "get_my_schedule": "profile",
+                        "get_my_reports": "profile", "get_next_class": "next_class",
+                        "plan_route": "route"}
+        # Skip intentionally malformed calls that exercise backend argument validation.
+        names = [item.get("function", {}) for reply in replies for item in reply.get("tool_calls", [])]
+        valid = next((item for item in names
+                      if item.get("name") in {"search_campus", "get_location", *tool_intents}
+                      and "user_id" not in item.get("arguments", "")), {})
+        intent = tool_intents.get(valid.get("name"), "location")
     queue = iter(replies)
     messages = []
     def complete(config, history, remaining):
+        if not has_assessment(history):
+            return scope_call(intent)
         messages.append(json.loads(json.dumps(history)))
         return next(queue)
     monkeypatch.setattr(ai, 'request_completion', complete)
@@ -160,28 +181,38 @@ def test_expired_ai_conversation_requires_new_chat(api_client,monkeypatch):
 
 def test_ai_call_budget_and_unsupported_response_are_bounded(monkeypatch):
     count=[]
-    def complete(*args):
-        count.append(1);return call('search_campus',{'query':'Library'})
+    def complete(config, history, remaining):
+        count.append(1)
+        if not has_assessment(history):
+            return scope_call()
+        return call('search_campus',{'query':'Library'})
     monkeypatch.setattr(ai,'request_completion',complete)
     with pytest.raises(ai.AIUnavailable,match='invalid_response'):
         ai.run('Library',[],lambda *args:{'locations':[]},lambda args:{},ai.Settings('fake'))
-    assert len(count)==5
+    assert len(count)==6
     monkeypatch.setattr(ai,'request_completion',lambda *args:{'role':'assistant','content':'Ungrounded invented answer'})
     with pytest.raises(ai.AIUnavailable,match='invalid_response'):
         ai.run('Library',[],lambda *args:{},lambda args:{},ai.Settings('fake'))
 
 
-def test_final_tool_is_only_offered_after_a_fresh_tool_result(monkeypatch):
+def test_scope_is_required_before_tools_and_final_requires_fresh_evidence(monkeypatch):
+    offered = []
     def transport(request):
-        body=json.loads(request.content)
-        names=[tool['function']['name'] for tool in body['tools']]
-        has_result=any(msg['role']=='tool' for msg in body['messages'])
-        assert ('present_answer' in names)==has_result
-        return httpx.Response(200,json={'choices':[{'message':call('get_location',{'location_id':2})}]})
-    monkeypatch.setattr(ai,'_make_client',lambda timeout:httpx.Client(transport=httpx.MockTransport(transport)))
-    config=ai.Settings('fake')
-    ai.request_completion(config,[{'role':'user','content':'When does it close?'}],3)
-    ai.request_completion(config,[{'role':'tool','content':'{"opening_hours":"Not confirmed"}'}],3)
+        body = json.loads(request.content)
+        offered.append([tool['function']['name'] for tool in body['tools']])
+        return httpx.Response(200, json={'choices': [{'message': scope_call()}]})
+    monkeypatch.setattr(ai, '_make_client', lambda timeout: httpx.Client(transport=httpx.MockTransport(transport)))
+    config = ai.Settings('fake')
+    messages = [{'role': 'user', 'content': 'Where is the library?'}]
+    ai.request_completion(config, messages, 3)
+    assessment = {'role': 'tool', 'name': 'assess_campus_request',
+                  'content': json.dumps({'status': 'in_scope', 'intent': 'location'})}
+    ai.request_completion(config, [*messages, assessment], 3)
+    ai.request_completion(config, [*messages, assessment, {'role': 'tool', 'content': '{}'}], 3)
+    assert offered[0] == ['assess_campus_request']
+    assert 'present_answer' not in offered[1]
+    assert 'present_answer' in offered[2]
+    assert 'get_my_profile' not in offered[1]
 
 
 def test_malformed_provider_tool_call_falls_back_without_server_error(api_client,monkeypatch):
@@ -195,6 +226,8 @@ def test_model_wait_does_not_hold_a_database_writer(api_client,monkeypatch):
     monkeypatch.setenv('OPENROUTER_API_KEY','fake')
     calls=[]
     def complete(config,history,remaining):
+        if not has_assessment(history):
+            return scope_call()
         calls.append(1)
         if len(calls)==1:return call('search_campus',{'query':'Library'})
         # Another request can write while this conversation waits on the provider.
@@ -245,7 +278,7 @@ def test_personal_tools_return_only_owned_records(api_client, monkeypatch):
         session.commit()
     for tool, field in [('get_my_saved_places', 'locations'), ('get_my_preferences', 'avoid_stairs'),
                         ('get_my_schedule', 'lessons'), ('get_my_reports', 'reports')]:
-        messages = enable(monkeypatch, [call(tool, {}), finish([])])
+        messages = enable(monkeypatch, [call(tool, {}), finish([])], intent={'get_my_saved_places':'saved_places', 'get_my_preferences':'preferences', 'get_my_schedule':'schedule', 'get_my_reports':'reports'}[tool])
         response = c.post('/assistant/query', headers=h, json={'question': 'My stored information'}).json()
         assert response['engine'] == 'openrouter'
         data = json.loads(messages[1][-1]['content'])

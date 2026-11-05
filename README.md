@@ -20,7 +20,7 @@ If `.venv` and the dependencies already exist, use `make web-start` directly. Ke
 - API/Swagger: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 - Health: [http://127.0.0.1:8000/health](http://127.0.0.1:8000/health)
 
-Stop with `make web-stop`. On macOS, the launcher submits current-login launchd jobs so servers survive the end of a Codex command/chat turn; it does not install boot/login startup items. The stop command removes those jobs. Logs, errors and recorded service PIDs live in ignored `.local-run/`. If you instead start `make backend-local` and `make web-dev` in separate terminals, stop each with Ctrl-C. `make web-build` checks TypeScript and produces `web/dist/`. Vite's development proxy makes `/api` requests to FastAPI with same-origin browser cookies. A future production host needs an equivalent `/api` reverse proxy and SPA history fallback; `vite preview` alone does not provide an API proxy. No public hosting is configured.
+Stop with `make web-stop`. On macOS, the launcher submits current-login launchd jobs so servers survive the end of a Codex command/chat turn; it does not install boot/login startup items. The stop command removes those jobs. Logs, errors and recorded service PIDs live in ignored `.local-run/`. If you instead start `make backend-local` and `make web-dev` in separate terminals, stop each with Ctrl-C. `make web-build` checks TypeScript and produces `web/dist/`. The launcher builds the app and serves it with Vite preview. Both Vite modes proxy `/api` requests to FastAPI with same-origin browser cookies. Use `make web-dev` for hot reload. A production host needs an equivalent `/api` reverse proxy and SPA history fallback. No public hosting is configured.
 
 ## PostgreSQL and Docker
 
@@ -39,7 +39,8 @@ pgAdmin remains at [http://127.0.0.1:5050](http://127.0.0.1:5050), login `admin@
 - Real HttpOnly browser sessions, CSRF checks, restricted CORS, server-side logout and session restoration.
 - Supplied anniversary identity; desktop navigation, mobile sheet, zoom/pan, explicit zoom/fit and floor buttons.
 - Search with exact room ranking, normalized spacing, aliases and typo tolerance; searches are logged in the database.
-- Stable mapped locations, details, five persisted saved places per account, reports tied to selected locations.
+- Stable mapped locations, details, five persisted saved places per account, reports tied to selected locations. Share links open the selected destination directly, including for visitors without an account.
+- The built app supports downloading public floor plans and the place catalogue for offline browsing and search. Offline mode requires HTTPS or localhost and a completed download in that browser. Routing and the assistant require the API.
 - Existing Dijkstra graph, floor-specific route segments, route framing, ordered transfers and saved avoid-stairs preference (Profile only).
 - Grounded rule-based assistant: service recommendations, next-class lookup, selectable ambiguity resolution and map actions.
 - Editable sample student/teacher schedules, UTC storage and explicit Asia/Almaty display/selection of the next upcoming lesson. New accounts start with empty schedules and can add lessons.
@@ -79,7 +80,7 @@ This is a clean local repository extracted from the verified web migration. Its 
 
 Install dependencies using the commands above. The first local startup creates a separate SQLite database with presentation seed accounts; personal accounts/saves from the original database are not transferred. No university authentication or timetable integration is implied. Docker Compose uses this repository's distinct default project name and therefore a separate named database volume; avoid overriding it to the original project's name.
 
-Both repositories use ports 5173/8000 by default. If the original app is running there, stop it before running this copy on those ports. Stop the original with `make web-stop` **from the original directory**, then run `make web-start` here. Keep databases separate unless you deliberately perform a backed-up data migration. No data migration or remote publication is part of this extraction.
+This is the main campus app checkout. It combines the AI assistant, current mapped routes, destination sharing, staircase icons and offline maps. Run it on ports 5173/8000 with `make web-start` here. The earlier Project Management checkout is retained as historical source and should stay stopped.
 
 - [Implementation plan](PROJECT_PLAN.md)
 - [Web design system](design-system.md)
@@ -93,8 +94,10 @@ The assistant uses `deepseek/deepseek-v4-flash-0731` when the backend has `OPENR
 
 The model calls validated, read-only tools for catalogue search, location details, the current account's next sample lesson, public updates and graph routes. It interprets paraphrases/follow-ups, while the backend resolves identity, applies saved accessibility preferences and validates every returned action ID. Chat choices remain clickable. Route responses open their actual per-floor segments in the map instead of inventing navigation instructions. Campus records and approaches remain schematic/unconfirmed where documented.
 
-`OPENROUTER_TIMEOUT_SECONDS` defaults to 45. Each turn allows at most five provider requests, with three concurrent AI turns per API process; in-memory rate limits default to 10 turns/account/minute, 30/IP/minute and 90/process/minute. This is a local course-project limit, not a distributed deployment quota. API outages, missing credit, invalid keys, timeouts, limits or invalid model actions produce the existing rule-based answer with a visible fallback label. No key means the basic assistant is used directly. There are no automatic paid retries.
+`OPENROUTER_TIMEOUT_SECONDS` defaults to 45. Each turn allows at most six provider requests, including the scope assessment, with three concurrent AI turns per API process; in-memory rate limits default to 10 turns/account/minute, 30/IP/minute and 90/process/minute. This is a local course-project limit, not a distributed deployment quota. API outages, missing credit, invalid keys, timeouts, limits or invalid model actions produce the existing rule-based answer with a visible fallback label. No key means the basic assistant is used directly. There are no automatic paid retries.
 
 Conversation context is stored locally for up to 12 hours, scoped to the signed-in account/guest session and limited to the last six exchanges. **New chat** resets the UI's context. Questions and relevant tool results are sent to OpenRouter and its selected model provider. Relevant personal questions can send the signed-in account’s stored name, email, SDU ID, role, faculty, saved places, preferences, sample timetable and reports through account-scoped tools. Passwords and session tokens are never included; user-typed text is part of the question. No university data integration is added.
 
 `make test` and `make test-e2e` do not make paid AI calls. AI protocol tests stub the external provider while exercising real campus tools; browser tests cover the chat contract and real route handoff. Live-provider checks are recorded separately in [docs/openrouter-integration.md](docs/openrouter-integration.md).
+
+The assistant first classifies requests into supported campus intents, redirects unrelated tasks and asks for clarification when the reference is unclear. Tool access is limited to the assessed intent. Displayed answers are assembled by the backend from verified tool results, so model-authored prose cannot become the final answer. Existing conversation ownership checks, read-only tools and account isolation still apply. If AI is unavailable, the fallback accepts explicit campus questions and exact room/service names.
