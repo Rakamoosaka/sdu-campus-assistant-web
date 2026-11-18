@@ -49,9 +49,9 @@ def render(intent: str, places: list[dict], clarification: bool,
             for item in personal["reports"]
         )) if personal["reports"] else "You have no submitted campus reports."
     if intent == "updates" and personal:
-        return ("Latest campus updates (seeded updates are sample data):\n" + "\n".join(
+        return ("Current campus announcements (seeded announcements are sample data):\n" + "\n".join(
             f"{item['title']} · {item['published_at']}\n{item['body']}" for item in personal["updates"]
-        )) if personal["updates"] else "There are no stored campus updates."
+        )) if personal["updates"] else "There are no campus announcements right now."
     if places:
         text = "\n\n".join(
             f"{place['name']} · {place['block']} · {place['floor']}.\n"

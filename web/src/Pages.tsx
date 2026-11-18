@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowUpRight,
@@ -7,18 +7,16 @@ import {
   Check,
   ChevronRight,
   Clock,
-  LogOut,
   MapPin,
   Plus,
   Send,
-  ShieldCheck,
   Sparkles,
   UserRound,
-  Accessibility,
 } from "lucide-react";
 import { Button } from "./components/ui/button";
 import { Dialog } from "./components/ui/dialog";
 import { StateBox } from "./MapWorkspace";
+import { features } from "./features";
 import {
   api,
   get,
@@ -33,6 +31,7 @@ import {
   type PathResult,
   type PathClosure,
   STEP_FREE_STATES,
+  almatyInputValue,
   reportStatusLabel,
 } from "./lib/api";
 interface Props {
@@ -111,7 +110,8 @@ export function AssistantPage({ person, openPlace }: Props) {
         label="A LITTLE LOCAL KNOWLEDGE"
         title="A hand finding your way."
       >
-        Ask about rooms, campus services or your next class.
+        Ask about rooms and campus services
+        {features.timetable && " or your next class"}.
       </PageIntro>
       <div className="assistant-toolbar">
         <Button
@@ -146,7 +146,7 @@ export function AssistantPage({ person, openPlace }: Props) {
                 "Where is D201?",
                 "I feel sick",
                 "Where can I print?",
-                "Where is my next class?",
+                ...(features.timetable ? ["Where is my next class?"] : []),
               ].map((q) => (
                 <button
                   key={q}
@@ -279,7 +279,7 @@ export function AssistantPage({ person, openPlace }: Props) {
           <h3>Grounded in campus data.</h3>
           <p>
             {status.data?.configured
-              ? "DeepSeek interprets your question using your stored profile, saved places, preferences, sample timetable, reports and campus tools. Basic assistance remains available if AI is unavailable."
+              ? `DeepSeek interprets your question using your stored profile, saved places, preferences, ${features.timetable ? "sample timetable, " : ""}reports and campus tools. Basic assistance remains available if AI is unavailable.`
               : "This assistant finds catalogue matches and helps you choose when a request is ambiguous. No AI key is configured on this server."}
           </p>
           <hr />
@@ -363,7 +363,8 @@ export function LoginPrompt({ onLogin }: { onLogin: () => void }) {
       <UserRound size={30} />
       <h2>Make campus yours.</h2>
       <p>
-        Sign in for saved places, personal schedules and account preferences.
+        Sign in for saved places
+        {features.timetable && ", personal schedules"} and account preferences.
       </p>
       <Button onClick={onLogin}>
         Log in or create an account
@@ -372,7 +373,7 @@ export function LoginPrompt({ onLogin }: { onLogin: () => void }) {
     </div>
   );
 }
-export function UpdatesPage({ openPlace, person }: Props) {
+export function AnnouncementsPage({ openPlace }: Props) {
   const news = useQuery({
     queryKey: ["news"],
     queryFn: () => get<News[]>("/announcements"),
@@ -380,15 +381,15 @@ export function UpdatesPage({ openPlace, person }: Props) {
   return (
     <div className="content-page">
       <PageIntro label="AROUND THE CAMPUS" title="Stay in the loop.">
-        Announcements and events from the campus catalogue. Seeded presentation
-        content is sample data.
+        News, events and service changes on campus. Seeded presentation content
+        is sample data.
       </PageIntro>
       {news.isPending ? (
         <StateBox />
       ) : news.isError ? (
         <StateBox error={news.error} retry={() => news.refetch()} />
       ) : !news.data.length ? (
-        <StateBox empty="No campus updates have been published yet." />
+        <StateBox empty="There are no announcements right now." />
       ) : (
         <div className="news-grid">
           {news.data.map((n, i) => (
@@ -397,11 +398,14 @@ export function UpdatesPage({ openPlace, person }: Props) {
               key={n.id}
             >
               <div className="news-meta">
-                <span>{i === 0 ? "LATEST UPDATE" : "CAMPUS UPDATE"}</span>
-                <span>{localTime(n.published_at)}</span>
+                <span>{i === 0 ? "LATEST" : "ANNOUNCEMENT"}</span>
+                <span>{localTime(n.starts_at || n.published_at)}</span>
               </div>
               <h2>{n.title}</h2>
               <p>{n.body}</p>
+              {n.ends_at && (
+                <p className="muted text-xs">Until {localTime(n.ends_at)}</p>
+              )}
               {n.location_id && (
                 <Button
                   variant="outline"
@@ -553,7 +557,7 @@ export function SchedulePage({ person, onLogin, openPlace, places }: Props) {
           if (!open) setEditing(undefined);
         }}
         title={editing ? "Edit sample lesson" : "Add sample lesson"}
-        description="All entered dates and times are in Asia/Almaty (UTC+5). This is your editable course-project timetable."
+        description="All entered dates and times are in Asia/Almaty (UTC+5). This is your editable timetable."
       >
         <form
           onSubmit={(e) => {
@@ -628,104 +632,42 @@ export function SchedulePage({ person, onLogin, openPlace, places }: Props) {
     </div>
   );
 }
-export function ProfilePage({
-  person,
-  onLogin,
-  onLogout,
-}: Props & { onLogout: () => void }) {
+export function MyReportsPage({ person }: Props) {
   const qc = useQueryClient();
-  const guest = person.role === "guest";
-  const [draftPref, setDraftPref] = useState<boolean | null>(null);
-  const pref = useQuery({
-    queryKey: ["preferences"],
-    queryFn: () => get<{ accessible_routes: boolean }>("/users/me/preferences"),
-  });
+  const [fresh, setFresh] = useState<number[] | null>(null),
+    [confirmWithdraw, setConfirmWithdraw] = useState<number | null>(null);
   const myReports = useQuery({
     queryKey: ["my-reports"],
     queryFn: () => get<Report[]>("/reports/me"),
   });
-  const save = useMutation({
-    mutationFn: (value: boolean) =>
-      api.put("/users/me/preferences", { accessible_routes: value }),
-    onSettled: async () => {
-      await qc.invalidateQueries({ queryKey: ["preferences"] });
-      setDraftPref(null);
+  useEffect(() => {
+    // Remember which reports were new on arrival, then clear the sidebar badge.
+    if (!myReports.data || fresh !== null) return;
+    const unread = myReports.data.filter((r) => r.reporter_unread);
+    setFresh(unread.map((r) => r.id));
+    if (unread.length)
+      api.post("/reports/me/seen").then(() =>
+        qc.setQueryData<Report[]>(["my-reports"], (rows) =>
+          rows?.map((r) => ({ ...r, reporter_unread: false })),
+        ),
+      );
+  }, [myReports.data]);
+  const withdraw = useMutation({
+    mutationFn: (id: number) => api.post(`/reports/${id}/withdraw`),
+    onSuccess: () => {
+      setConfirmWithdraw(null);
+      qc.invalidateQueries({ queryKey: ["my-reports"] });
+      qc.invalidateQueries({ queryKey: ["path-states"] });
     },
   });
   return (
     <div className="content-page">
-      <PageIntro label="A CAMPUS THAT FITS YOU" title="Your profile." />
-      <div className="profile-grid">
-        {guest ? (
-          <LoginPrompt onLogin={onLogin} />
-        ) : (
-          <section className="profile-card">
-            <div className="large-avatar">{initials(person)}</div>
-            <h2>{person.full_name || person.name}</h2>
-            <p>{person.sdu_id}</p>
-            <span className="role-badge">{roleLabel(person.role)}</span>
-            <hr />
-            <p>
-              SDU Campus Assistant account
-              <br />
-              <small>A course project · No university integration</small>
-            </p>
-            <Button variant="outline" onClick={onLogout}>
-              <LogOut size={16} /> Log out
-            </Button>
-          </section>
-        )}
-        <section className="preferences-card">
-          <span className="eyebrow">NAVIGATION PREFERENCES</span>
-          <h2>Find a route that suits you.</h2>
-          <div className="preference-row">
-            <span className="location-icon">
-              <Accessibility size={22} />
-            </span>
-            <label htmlFor="stairs-pref">
-              <strong>Avoid stairs and use lifts</strong>
-              <p>
-                {guest
-                  ? "Applies to every route you plan in this guest session."
-                  : "Applies to every route you plan while signed in."}
-              </p>
-            </label>
-            <input
-              id="stairs-pref"
-              type="checkbox"
-              role="switch"
-              checked={draftPref ?? pref.data?.accessible_routes ?? false}
-              disabled={pref.isPending || pref.isError || save.isPending}
-              onChange={(e) => {
-                setDraftPref(e.target.checked);
-                save.mutate(e.target.checked);
-              }}
-            />
-          </div>
-          {pref.isError && (
-            <StateBox error={pref.error} retry={() => pref.refetch()} />
-          )}
-          {save.isError && <StateBox error={save.error} />}
-          {save.isSuccess && !save.isPending && (
-            <p className="success-text">
-              <Check size={15} /> Preference saved to your{" "}
-              {guest ? "guest session" : "account"}
-            </p>
-          )}
-          <div className="info-note">
-            <ShieldCheck size={19} />
-            <p>
-              Routes use only corridors and mapped lifts. Places marked as not
-              step-free and paths reported as closed are avoided. If no
-              suitable route exists, the route panel explains why. Doorways
-              and lift operation remain unverified.
-            </p>
-          </div>
-        </section>
-      </div>
+      <PageIntro label="YOUR REPORTS" title="Problems you reported.">
+        Follow what the campus team did about each report. To report something
+        new, open a place on the map and choose Report a problem.
+      </PageIntro>
       <section className="report-list" aria-label="Your reports">
-        <span className="eyebrow">YOUR REPORTS</span>
-        <h2>Problems you reported.</h2>
+        {withdraw.isError && <StateBox error={withdraw.error} />}
         {myReports.isError ? (
           <StateBox
             error={myReports.error}
@@ -734,14 +676,20 @@ export function ProfilePage({
         ) : myReports.isPending ? (
           <StateBox />
         ) : !myReports.data.length ? (
-          <StateBox empty="No reports yet. Use Report a problem on any place in the map." />
+          <StateBox empty="No reports yet. Open any place on the map and choose Report a problem." />
         ) : (
           myReports.data.map((r) => (
-            <article className="report-card" key={r.id}>
+            <article
+              className={"report-card " + (fresh?.includes(r.id) ? "fresh" : "")}
+              key={r.id}
+            >
               <header>
                 <strong>
                   #{r.id} ·{" "}
                   {r.kind === "path" ? "Blocked path" : "Location information"}
+                  {fresh?.includes(r.id) && (
+                    <span className="new-tag">New update</span>
+                  )}
                 </strong>
                 <span className={"report-status " + r.status}>
                   {reportStatusLabel(r.status)}
@@ -757,8 +705,11 @@ export function ProfilePage({
               {r.path_status && (
                 <p className="muted">
                   {r.path_status.state === "closed"
-                    ? "Routes currently avoid this path."
-                    : "Step-free routes currently avoid this path."}
+                    ? "Routes currently go around this path"
+                    : "Step-free routes currently avoid this path"}
+                  {r.path_status.reopens_at
+                    ? ` until ${localTime(r.path_status.reopens_at)}.`
+                    : "."}
                 </p>
               )}
               {r.resolution_note && (
@@ -766,13 +717,43 @@ export function ProfilePage({
                   <strong>Campus team:</strong> {r.resolution_note}
                 </p>
               )}
+              {["new", "reviewing"].includes(r.status) &&
+                (confirmWithdraw === r.id ? (
+                  <div className="row-actions start">
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      disabled={withdraw.isPending}
+                      onClick={() => withdraw.mutate(r.id)}
+                    >
+                      Withdraw report
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setConfirmWithdraw(null)}
+                    >
+                      Keep it
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="row-actions start">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setConfirmWithdraw(r.id)}
+                    >
+                      Withdraw
+                    </Button>
+                  </div>
+                ))}
             </article>
           ))
         )}
-        {guest && (
+        {person.role === "guest" && (
           <p className="muted text-xs">
-            Guest reports can be tracked for as long as this guest session
-            lasts.
+            You're using guest mode. Sign in on this device and these reports
+            move to your account, so you can keep following them.
           </p>
         )}
       </section>
@@ -803,11 +784,15 @@ export function roleLabel(role: string) {
 export function AdminPage({ places }: Props) {
   const qc = useQueryClient();
   const [tab, setTab] = useState("Locations"),
-    [editing, setEditing] = useState<Place | null | undefined>(undefined),
+    [editing, setEditing] = useState<Place | null>(null),
     [newsEdit, setNewsEdit] = useState<News | null | undefined>(undefined),
     [message, setMessage] = useState(""),
     [filter, setFilter] = useState(""),
-    [notes, setNotes] = useState<Record<number, string>>({});
+    [notes, setNotes] = useState<Record<number, string>>({}),
+    [confirmDelete, setConfirmDelete] = useState<number | null>(null),
+    [fixing, setFixing] = useState<Report | null>(null),
+    [reportFilter, setReportFilter] = useState("open"),
+    [reopenAt, setReopenAt] = useState<Record<number, string>>({});
   const analytics = useQuery({
     queryKey: ["analytics"],
     queryFn: () =>
@@ -828,8 +813,9 @@ export function AdminPage({ places }: Props) {
     queryFn: () => get<Person[]>("/admin/users"),
   });
   const news = useQuery({
-    queryKey: ["news"],
-    queryFn: () => get<News[]>("/announcements"),
+    queryKey: ["admin-news"],
+    queryFn: () => get<News[]>("/admin/announcements"),
+    enabled: features.announcements,
   });
   const update = useMutation({
     mutationFn: ({
@@ -842,9 +828,12 @@ export function AdminPage({ places }: Props) {
       method?: "put" | "post" | "delete";
     }) => (method === "delete" ? api.delete(url) : api[method](url, data)),
     onSuccess: () => {
-      setEditing(undefined);
+      setEditing(null);
+      setFixing(null);
+      setReopenAt({});
       setNewsEdit(undefined);
       setNotes({});
+      setConfirmDelete(null);
       setMessage("Changes saved to the database.");
       qc.invalidateQueries();
     },
@@ -852,18 +841,13 @@ export function AdminPage({ places }: Props) {
   });
   function saveLocation(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const form = new FormData(e.currentTarget);
-    const values = Object.fromEntries(form);
-    const body = {
-      ...values,
-      x: Number(values.x),
-      y: Number(values.y),
-      accessible: editing?.accessible || false,
-    };
+    if (!editing) return;
     update.mutate({
-      url: editing ? `/admin/locations/${editing.id}` : "/admin/locations",
-      data: body,
-      method: editing ? "put" : "post",
+      url: `/admin/locations/${editing.id}`,
+      data: {
+        ...Object.fromEntries(new FormData(e.currentTarget)),
+        report_id: fixing?.id ?? null,
+      },
     });
   }
   function saveNews(e: React.FormEvent<HTMLFormElement>) {
@@ -877,6 +861,8 @@ export function AdminPage({ places }: Props) {
       data: {
         ...values,
         location_id: values.location_id ? Number(values.location_id) : null,
+        starts_at: values.starts_at ? values.starts_at + ":00+05:00" : null,
+        ends_at: values.ends_at ? values.ends_at + ":00+05:00" : null,
       },
     });
   }
@@ -906,7 +892,13 @@ export function AdminPage({ places }: Props) {
         </div>
       </div>
       <div className="admin-tabs">
-        {["Locations", "Updates", "Reports", "Search analytics", "Roles"].map(
+        {[
+          "Locations",
+          ...(features.announcements ? ["Announcements"] : []),
+          "Reports",
+          "Search analytics",
+          "Roles",
+        ].map(
           (t) => (
             <button
               className={tab === t ? "selected" : ""}
@@ -938,15 +930,12 @@ export function AdminPage({ places }: Props) {
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
             />
-            <Button
-              onClick={() => {
-                setEditing(null);
-                update.reset();
-              }}
-            >
-              <Plus size={16} /> Add location
-            </Button>
           </div>
+          <p className="muted">
+            Edit the details people see for each place. Places, their
+            categories, map positions and route connections come from the
+            campus map file and can't be changed here.
+          </p>
           <div className="table-wrap">
             <table>
               <thead>
@@ -995,7 +984,7 @@ export function AdminPage({ places }: Props) {
           </div>
         </section>
       )}
-      {tab === "Updates" && (
+      {tab === "Announcements" && (
         <section className="admin-section">
           <Button
             onClick={() => {
@@ -1003,31 +992,79 @@ export function AdminPage({ places }: Props) {
               update.reset();
             }}
           >
-            <Plus size={16} /> Publish update
+            <Plus size={16} /> New announcement
           </Button>
           {news.isError ? (
             <StateBox error={news.error} retry={() => news.refetch()} />
           ) : news.isPending ? (
             <StateBox />
           ) : !news.data.length ? (
-            <StateBox empty="No updates yet." />
+            <StateBox empty="No announcements yet." />
           ) : (
             news.data.map((n) => (
               <div className="admin-list-row" key={n.id}>
                 <div>
+                  <span className={"window-state " + n.state}>
+                    {n.state === "scheduled"
+                      ? "Scheduled"
+                      : n.state === "expired"
+                        ? "Ended"
+                        : "Showing"}
+                  </span>
                   <h3>{n.title}</h3>
                   <p>{n.body}</p>
-                  <small>{localTime(n.published_at)}</small>
+                  <small>
+                    {n.starts_at
+                      ? `From ${localTime(n.starts_at)}`
+                      : `Published ${localTime(n.published_at)}`}
+                    {n.ends_at
+                      ? ` · until ${localTime(n.ends_at)}`
+                      : " · no end date"}
+                    {n.location_id &&
+                      ` · ${places.find((p) => p.id === n.location_id)?.name || "Linked place"}`}
+                  </small>
                 </div>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setNewsEdit(n);
-                    update.reset();
-                  }}
-                >
-                  Edit
-                </Button>
+                <div className="row-actions">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setNewsEdit(n);
+                      setConfirmDelete(null);
+                      update.reset();
+                    }}
+                  >
+                    Edit
+                  </Button>
+                  {confirmDelete === n.id ? (
+                    <>
+                      <Button
+                        variant="destructive"
+                        disabled={update.isPending}
+                        onClick={() =>
+                          update.mutate({
+                            url: `/admin/announcements/${n.id}`,
+                            method: "delete",
+                          })
+                        }
+                      >
+                        Delete permanently
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        onClick={() => setConfirmDelete(null)}
+                      >
+                        Cancel
+                      </Button>
+                    </>
+                  ) : (
+                    <Button
+                      variant="ghost"
+                      onClick={() => setConfirmDelete(n.id)}
+                    >
+                      Delete
+                    </Button>
+                  )}
+                </div>
               </div>
             ))
           )}
@@ -1051,6 +1088,9 @@ export function AdminPage({ places }: Props) {
                     {c.state === "closed"
                       ? "Closed · all routes avoid it"
                       : "Not step-free · step-free routes avoid it"}
+                    {c.reopens_at
+                      ? ` · reopens ${localTime(c.reopens_at)}`
+                      : " · until reopened"}
                     {c.report_id && ` · from report #${c.report_id}`}
                   </small>
                 </div>
@@ -1064,145 +1104,220 @@ export function AdminPage({ places }: Props) {
                     })
                   }
                 >
-                  Reopen path
+                  Reopen now
                 </Button>
               </div>
             ))
           )}
           <h2>Submitted reports</h2>
+          <div className="filter-chips" role="group" aria-label="Filter reports">
+            {[
+              ["open", "Open"],
+              ["resolved", "Resolved"],
+              ["rejected", "Not changed"],
+              ["withdrawn", "Withdrawn"],
+              ["all", "All"],
+            ].map(([value, label]) => (
+              <button
+                key={value}
+                aria-pressed={reportFilter === value}
+                onClick={() => setReportFilter(value)}
+              >
+                {label}
+                {value === "open" &&
+                  ` (${reports.data?.filter((r) => ["new", "reviewing"].includes(r.status)).length ?? 0})`}
+              </button>
+            ))}
+          </div>
           {reports.isError ? (
             <StateBox error={reports.error} retry={() => reports.refetch()} />
           ) : reports.isPending ? (
             <StateBox />
-          ) : !reports.data.length ? (
-            <StateBox empty="No problems have been reported." />
           ) : (
-            reports.data.map((r) => {
-              const place = places.find((p) => p.id === r.location_id);
-              const note = notes[r.id] ?? r.resolution_note;
-              const closePath = (state: string) =>
-                update.mutate({
-                  url: "/admin/path-status",
-                  method: "post",
-                  data: {
-                    edge_a: r.edge_a,
-                    edge_b: r.edge_b,
-                    state,
-                    report_id: r.id,
-                  },
-                });
-              return (
-                <div className="admin-list-row" key={r.id}>
-                  <div>
-                    <span className="category-tag">
-                      {r.kind === "path"
-                        ? "Blocked path"
-                        : "Location information"}
-                    </span>
-                    <h3>
-                      {(r.kind === "path"
-                        ? r.connection_label
-                        : r.location_name) || "Campus report"}
-                    </h3>
-                    {r.route && <small>Reported on route {r.route}</small>}
-                    <p>{r.message}</p>
-                    <small>
-                      #{r.id} · Submitted by {r.author} ·{" "}
-                      {localTime(r.created_at)}
-                    </small>
-                  </div>
-                  <div className="admin-report-actions">
-                    <select
-                      aria-label={`Report ${r.id} status`}
-                      value={r.status}
-                      disabled={update.isPending}
-                      onChange={(e) =>
-                        update.mutate({
-                          url: `/admin/reports/${r.id}`,
-                          data: { status: e.target.value, resolution_note: note },
-                        })
-                      }
-                    >
-                      {["new", "reviewing", "resolved", "rejected"].map((s) => (
-                        <option key={s} value={s}>
-                          {reportStatusLabel(s)}
-                        </option>
-                      ))}
-                    </select>
-                    <textarea
-                      aria-label={`Report ${r.id} update for the reporter`}
-                      placeholder="Update visible to the reporter…"
-                      maxLength={1000}
-                      value={note}
-                      onChange={(e) =>
-                        setNotes({ ...notes, [r.id]: e.target.value })
-                      }
-                    />
-                    <div className="row">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        disabled={update.isPending || note === r.resolution_note}
-                        onClick={() =>
-                          update.mutate({
-                            url: `/admin/reports/${r.id}`,
-                            data: { status: r.status, resolution_note: note },
-                          })
-                        }
-                      >
-                        Save update
-                      </Button>
-                      {r.kind === "location" && place && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            setEditing(place);
-                            update.reset();
-                          }}
-                        >
-                          Edit location
-                        </Button>
+            (() => {
+              const shown = reports.data.filter((r) =>
+                reportFilter === "all"
+                  ? true
+                  : reportFilter === "open"
+                    ? ["new", "reviewing"].includes(r.status)
+                    : r.status === reportFilter,
+              );
+              if (!shown.length)
+                return <StateBox empty="No reports here." />;
+              return shown.map((r) => {
+                const place = places.find((p) => p.id === r.location_id);
+                const note = notes[r.id] ?? r.resolution_note;
+                const open = ["new", "reviewing"].includes(r.status);
+                const closePath = (state: string) =>
+                  update.mutate({
+                    url: "/admin/path-status",
+                    method: "post",
+                    data: {
+                      edge_a: r.edge_a,
+                      edge_b: r.edge_b,
+                      state,
+                      report_id: r.id,
+                      reopens_at: reopenAt[r.id]
+                        ? reopenAt[r.id] + ":00+05:00"
+                        : null,
+                    },
+                  });
+                return (
+                  <div className="admin-list-row" key={r.id}>
+                    <div>
+                      <span className="category-tag">
+                        {r.kind === "path"
+                          ? "Blocked path"
+                          : "Location information"}
+                      </span>
+                      {open && r.similar_open.length > 0 && (
+                        <span className="window-state scheduled">
+                          Same problem in {r.similar_open.length} other open
+                          report{r.similar_open.length > 1 ? "s" : ""} (#
+                          {r.similar_open.join(", #")})
+                        </span>
                       )}
-                      {r.kind === "path" && r.edge_a && !r.path_status && (
+                      <h3>
+                        {(r.kind === "path"
+                          ? r.connection_label
+                          : r.location_name) || "Campus report"}
+                      </h3>
+                      {r.route && <small>Reported on route {r.route}</small>}
+                      <p>{r.message}</p>
+                      <small>
+                        #{r.id} · Submitted by {r.author} ·{" "}
+                        {localTime(r.created_at)}
+                      </small>
+                    </div>
+                    <div className="admin-report-actions">
+                      {r.status === "withdrawn" ? (
+                        <span className="report-status">
+                          Withdrawn by the reporter
+                        </span>
+                      ) : (
                         <>
-                          <Button
-                            size="sm"
-                            disabled={update.isPending}
-                            onClick={() => closePath("closed")}
-                          >
-                            Close path
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            disabled={update.isPending}
-                            onClick={() => closePath("not_step_free")}
-                          >
-                            Mark not step-free
-                          </Button>
+                          {r.kind === "location" && place && open && (
+                            <Button
+                              onClick={() => {
+                                setFixing(r);
+                                setEditing(place);
+                                update.reset();
+                              }}
+                            >
+                              Fix details and resolve
+                            </Button>
+                          )}
+                          {r.kind === "path" && r.edge_a && !r.path_status && (
+                            <>
+                              <label className="reopen-field">
+                                Reopen automatically (optional)
+                                <input
+                                  type="datetime-local"
+                                  value={reopenAt[r.id] || ""}
+                                  onChange={(e) =>
+                                    setReopenAt({
+                                      ...reopenAt,
+                                      [r.id]: e.target.value,
+                                    })
+                                  }
+                                />
+                              </label>
+                              <div className="row">
+                                <Button
+                                  size="sm"
+                                  disabled={update.isPending}
+                                  onClick={() => closePath("closed")}
+                                >
+                                  Close path
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  disabled={update.isPending}
+                                  onClick={() => closePath("not_step_free")}
+                                >
+                                  Mark not step-free
+                                </Button>
+                              </div>
+                              {r.similar_open.length > 0 && (
+                                <small className="muted">
+                                  Closing it resolves the other reports about
+                                  this path too.
+                                </small>
+                              )}
+                            </>
+                          )}
+                          {r.path_status && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              disabled={update.isPending}
+                              onClick={() =>
+                                update.mutate({
+                                  url: `/admin/path-status/${r.path_status!.id}`,
+                                  method: "delete",
+                                })
+                              }
+                            >
+                              Reopen path
+                            </Button>
+                          )}
+                          <details className="report-more">
+                            <summary>Other answer</summary>
+                            <select
+                              aria-label={`Report ${r.id} status`}
+                              value={r.status}
+                              disabled={update.isPending}
+                              onChange={(e) =>
+                                update.mutate({
+                                  url: `/admin/reports/${r.id}`,
+                                  data: {
+                                    status: e.target.value,
+                                    resolution_note: note,
+                                  },
+                                })
+                              }
+                            >
+                              {["new", "reviewing", "resolved", "rejected"].map(
+                                (st) => (
+                                  <option key={st} value={st}>
+                                    {reportStatusLabel(st)}
+                                  </option>
+                                ),
+                              )}
+                            </select>
+                            <textarea
+                              aria-label={`Report ${r.id} update for the reporter`}
+                              placeholder="Message to the reporter…"
+                              maxLength={1000}
+                              value={note}
+                              onChange={(e) =>
+                                setNotes({ ...notes, [r.id]: e.target.value })
+                              }
+                            />
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              disabled={
+                                update.isPending || note === r.resolution_note
+                              }
+                              onClick={() =>
+                                update.mutate({
+                                  url: `/admin/reports/${r.id}`,
+                                  data: { status: r.status, resolution_note: note },
+                                })
+                              }
+                            >
+                              Send message
+                            </Button>
+                          </details>
                         </>
-                      )}
-                      {r.path_status && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          disabled={update.isPending}
-                          onClick={() =>
-                            update.mutate({
-                              url: `/admin/path-status/${r.path_status!.id}`,
-                              method: "delete",
-                            })
-                          }
-                        >
-                          Reopen path
-                        </Button>
                       )}
                     </div>
                   </div>
-                </div>
-              );
-            })
+                );
+              });
+            })()
           )}
         </section>
       )}
@@ -1282,118 +1397,105 @@ export function AdminPage({ places }: Props) {
         </section>
       )}
       <Dialog
-        open={editing !== undefined}
+        open={editing !== null}
         onOpenChange={(open) => {
-          if (!open) setEditing(undefined);
+          if (!open) {
+            setEditing(null);
+            setFixing(null);
+          }
         }}
-        title={editing ? "Edit campus location" : "Add catalogue location"}
-        description="Preserve known positions. Adding a record does not create a mapped route or verify its doorway."
+        title={fixing ? `Fix report #${fixing.id}` : "Edit location details"}
+        description={
+          editing
+            ? `${editing.category} · ${editing.floor}. Category, map position and route connections come from the campus map file.`
+            : undefined
+        }
       >
-        <form onSubmit={saveLocation} className="admin-form">
-          <label>
-            Name
-            <input name="name" required defaultValue={editing?.name} />
-          </label>
-          <div className="form-grid">
+        {editing && (
+          <form
+            key={editing.id}
+            onSubmit={saveLocation}
+            className="admin-form"
+          >
             <label>
-              Category
-              <input
-                name="category"
-                required
-                defaultValue={editing?.category || "Service"}
-              />
+              Name
+              <input name="name" required defaultValue={editing.name} />
             </label>
-            <label>
-              Block
-              <input
-                name="block"
-                required
-                defaultValue={editing?.block || "Campus spine"}
-              />
-            </label>
-            <label>
-              Floor
-              <input
-                name="floor"
-                required
-                defaultValue={editing?.floor || "Floor unknown"}
-              />
-            </label>
-            <label>
-              Aliases
-              <input name="aliases" defaultValue={editing?.aliases || ""} />
-            </label>
-            <label>
-              Step-free access
-              <select
-                name="step_free_access"
-                defaultValue={editing?.step_free_access || "Not verified"}
-              >
-                {STEP_FREE_STATES.map((state) => (
-                  <option key={state}>{state}</option>
-                ))}
-              </select>
-            </label>
-          </div>
-          <label>
-            Opening hours
-            <input
-              name="opening_hours"
-              required
-              defaultValue={editing?.opening_hours || "Not confirmed"}
-            />
-          </label>
-          <label>
-            Contact
-            <input
-              name="contact"
-              required
-              defaultValue={editing?.contact || "Not confirmed"}
-            />
-          </label>
-          <details>
-            <summary>Schematic coordinates (0–1)</summary>
             <div className="form-grid">
               <label>
-                X
-                <input
-                  type="number"
-                  min="0"
-                  max="1"
-                  step="any"
-                  name="x"
-                  required
-                  defaultValue={editing?.x || 0}
-                />
+                Block
+                <input name="block" required defaultValue={editing.block} />
               </label>
               <label>
-                Y
+                Floor label
+                <input name="floor" required defaultValue={editing.floor} />
+              </label>
+              <label>
+                Step-free access
+                <select
+                  name="step_free_access"
+                  defaultValue={editing.step_free_access || "Not verified"}
+                >
+                  {STEP_FREE_STATES.map((state) => (
+                    <option key={state}>{state}</option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                Search aliases
                 <input
-                  type="number"
-                  min="0"
-                  max="1"
-                  step="any"
-                  name="y"
-                  required
-                  defaultValue={editing?.y || 0}
+                  name="aliases"
+                  placeholder="Comma-separated, e.g. books, reading room"
+                  defaultValue={editing.aliases
+                    .split(",")
+                    .filter((alias) => !alias.startsWith("["))
+                    .join(", ")}
                 />
               </label>
             </div>
-          </details>
-          {update.isError && <StateBox error={update.error} />}
-          <Button type="submit" disabled={update.isPending}>
-            Save location
-          </Button>
-        </form>
+            <label>
+              Opening hours
+              <input
+                name="opening_hours"
+                required
+                defaultValue={editing.opening_hours}
+              />
+            </label>
+            <label>
+              Contact
+              <input name="contact" required defaultValue={editing.contact} />
+            </label>
+            {fixing && (
+              <>
+                <p className="report-note">
+                  <strong>Reported:</strong> {fixing.message}
+                </p>
+                <label>
+                  Message to the reporter
+                  <textarea
+                    name="resolution_note"
+                    maxLength={1000}
+                    defaultValue={`We updated the details for ${editing.name}. Thanks for reporting it!`}
+                  />
+                </label>
+              </>
+            )}
+            {update.isError && <StateBox error={update.error} />}
+            <Button type="submit" disabled={update.isPending}>
+              {fixing ? "Save and resolve report" : "Save details"}
+            </Button>
+          </form>
+        )}
       </Dialog>
       <Dialog
         open={newsEdit !== undefined}
         onOpenChange={(open) => {
           if (!open) setNewsEdit(undefined);
         }}
-        title={newsEdit ? "Edit update" : "Publish campus update"}
+        title={newsEdit ? "Edit announcement" : "New announcement"}
+        description="Times are in Asia/Almaty (UTC+5). Leave both empty to show it now, with no end date."
       >
-        <form onSubmit={saveNews}>
+        <form key={newsEdit?.id ?? "new"} onSubmit={saveNews}>
           <label>
             Title
             <input name="title" required defaultValue={newsEdit?.title} />
@@ -1402,13 +1504,31 @@ export function AdminPage({ places }: Props) {
             Message
             <textarea name="body" required defaultValue={newsEdit?.body} />
           </label>
+          <div className="form-grid">
+            <label>
+              Show from
+              <input
+                name="starts_at"
+                type="datetime-local"
+                defaultValue={almatyInputValue(newsEdit?.starts_at ?? null)}
+              />
+            </label>
+            <label>
+              Show until
+              <input
+                name="ends_at"
+                type="datetime-local"
+                defaultValue={almatyInputValue(newsEdit?.ends_at ?? null)}
+              />
+            </label>
+          </div>
           <label>
-            Associated location
+            Place it's about
             <select
               name="location_id"
               defaultValue={newsEdit?.location_id || ""}
             >
-              <option value="">No location</option>
+              <option value="">No specific place</option>
               {places.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.name}
@@ -1418,7 +1538,7 @@ export function AdminPage({ places }: Props) {
           </label>
           {update.isError && <StateBox error={update.error} />}
           <Button type="submit" disabled={update.isPending}>
-            Save update
+            {newsEdit ? "Save announcement" : "Publish announcement"}
           </Button>
         </form>
       </Dialog>

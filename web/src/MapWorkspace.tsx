@@ -29,6 +29,8 @@ import {
 import { Button } from "./components/ui/button";
 import { Dialog } from "./components/ui/dialog";
 import { ShareDestination } from "./components/MapActions";
+import { PathPicker } from "./components/PathPicker";
+import { features } from "./features";
 import { searchSavedMap } from "./lib/offlineMap";
 import {
   get,
@@ -40,7 +42,11 @@ import {
   type MapPlace,
   type PathResult,
   type Report,
+  type News,
+  type PathPart,
+  type PathState,
   reportStatusLabel,
+  localTime,
 } from "./lib/api";
 import floor1 from "../../assets/maps/floor-1-background.svg?url";
 import floor2 from "../../assets/maps/floor-2-background.svg?url";
@@ -174,6 +180,29 @@ export function MapWorkspace({
         setRouteError(errorMessage(e));
     },
   });
+  const placeNews = useQuery({
+    queryKey: ["news", "place", selected],
+    queryFn: () => get<News[]>(`/announcements?location_id=${selected}`),
+    enabled: features.announcements && !offline && selected !== null,
+  });
+  const nearbyPaths = useQuery({
+    queryKey: ["nearby-paths", selected],
+    queryFn: () => get<PathPart[]>(`/locations/${selected}/nearby-paths`),
+    enabled: reportOpen && selected !== null,
+  });
+  const pathStates = useQuery({
+    queryKey: ["path-states"],
+    queryFn: () => get<PathState[]>("/paths/status"),
+    enabled: reportOpen,
+  });
+  const routeParts =
+    route?.destination_location_id === selected ? route?.connections || [] : [];
+  const nearbyParts = (nearbyPaths.data || []).filter(
+    (n) =>
+      !routeParts.some(
+        (r) => (r.a === n.a && r.b === n.b) || (r.a === n.b && r.b === n.a),
+      ),
+  );
   const pref = useQuery({
     queryKey: ["preferences"],
     queryFn: () => get<{ accessible_routes: boolean }>("/users/me/preferences"),
@@ -213,6 +242,7 @@ export function MapWorkspace({
       setReportDone(result.data);
       setReport("");
       qc.invalidateQueries({ queryKey: ["my-reports"] });
+      qc.invalidateQueries({ queryKey: ["path-states"] });
     },
   });
   function openReport(kind: "location" | "path") {
@@ -581,8 +611,29 @@ export function MapWorkspace({
                 </strong>
               </div>
             </div>
+            {features.announcements && !offline && !!placeNews.data?.length && (
+              <section
+                className="place-announcements"
+                aria-label="Announcements for this place"
+              >
+                {placeNews.data.map((n) => (
+                  <article key={n.id}>
+                    <strong>{n.title}</strong>
+                    {n.body}
+                    {n.ends_at && (
+                      <small className="muted"> · Until {localTime(n.ends_at)}</small>
+                    )}
+                  </article>
+                ))}
+              </section>
+            )}
             <div className="detail-actions">
               <ShareDestination key={selectedPlace.id} place={selectedPlace} />
+              {!offline && (
+                <Button variant="outline" onClick={() => openReport("location")}>
+                  <Flag size={16} /> Report a problem
+                </Button>
+              )}
               {!offline &&
                 (person.role === "guest" ? (
                   <Button variant="outline" onClick={onLogin}>
@@ -741,21 +792,11 @@ export function MapWorkspace({
                       size="sm"
                       onClick={() => openReport("path")}
                     >
-                      <Flag size={14} /> Report a blocked path on this route
+                      <Flag size={14} /> Report a blocked path
                     </Button>
                   </>
                 )}
               </section>
-            )}
-            {!offline && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="mt-4"
-                onClick={() => openReport("location")}
-              >
-                <Flag size={14} /> Report a problem
-              </Button>
             )}
           </div>
         )}
@@ -1080,15 +1121,12 @@ export function MapWorkspace({
             </>
           )}
         </div>
-        <div className="map-attribution">
-          SDU CAMPUS ASSISTANT <span>·</span> COURSE PROJECT
-        </div>
       </section>
       <Dialog
         open={reportOpen}
         onOpenChange={setReportOpen}
-        title="Help keep campus navigation reliable"
-        description={`Report a problem at or near ${selectedPlace?.name}.`}
+        title="Report a problem"
+        description={`About ${selectedPlace?.name}. The campus team reviews every report.`}
       >
         {reportDone ? (
           <div className="report-done" role="status">
@@ -1097,9 +1135,9 @@ export function MapWorkspace({
               {reportStatusLabel(reportDone.status)}
             </p>
             <p>
-              Follow its progress under <Link to="/profile">Profile → Your reports</Link>.
+              Follow its progress in <Link to="/reports">My reports</Link>.
               {person.role === "guest" &&
-                " As a guest, you can track it for as long as this guest session lasts."}
+                " If you sign in on this device later, it moves to your account."}
             </p>
             <Button onClick={() => setReportOpen(false)}>Done</Button>
           </div>
@@ -1111,7 +1149,7 @@ export function MapWorkspace({
             }}
           >
             <fieldset className="report-kind">
-              <legend>What is wrong?</legend>
+              <legend>What's the problem?</legend>
               <label>
                 <input
                   type="radio"
@@ -1119,7 +1157,10 @@ export function MapWorkspace({
                   checked={reportKind === "location"}
                   onChange={() => setReportKind("location")}
                 />
-                Location information is incorrect
+                <span>
+                  Wrong information about {selectedPlace?.name}
+                  <small>Name, opening hours, contact, step-free access…</small>
+                </span>
               </label>
               <label>
                 <input
@@ -1128,42 +1169,44 @@ export function MapWorkspace({
                   checked={reportKind === "path"}
                   onChange={() => setReportKind("path")}
                 />
-                A path is blocked or not usable
+                <span>
+                  A corridor, staircase or lift is blocked
+                  <small>Closed, under repair, or not usable</small>
+                </span>
               </label>
             </fieldset>
             {reportKind === "path" &&
-              (route?.connections?.length ? (
-                <label>
-                  Which part of your route?
-                  <select
-                    required
-                    value={reportEdge}
-                    onChange={(e) => setReportEdge(e.target.value)}
-                  >
-                    <option value="">Choose the blocked part…</option>
-                    {route.connections.map((c, i) => (
-                      <option key={c.a + c.b} value={`${c.a}|${c.b}`}>
-                        {i + 1}. {c.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+              (nearbyPaths.isPending && !routeParts.length ? (
+                <StateBox />
+              ) : routeParts.length || nearbyParts.length ? (
+                <PathPicker
+                  routeParts={routeParts}
+                  nearbyParts={nearbyParts}
+                  states={pathStates.data || []}
+                  map={map}
+                  place={mapPlace}
+                  value={reportEdge}
+                  onChange={setReportEdge}
+                />
               ) : (
-                <p className="muted">
-                  Find a route that passes through the blocked path first, then
-                  choose the blocked part from that route.
+                <p className="field-hint">
+                  {selectedPlace?.name} isn't connected to the mapped
+                  corridors, so a blocked path can't be pinned here. Open a
+                  nearby room or corridor on the map and report it from there.
                 </p>
               ))}
             <label>
-              {reportKind === "path"
-                ? "What is blocking the path?"
-                : "What needs correcting?"}
+              {reportKind === "path" ? "What did you see?" : "What's wrong?"}
               <textarea
                 required
                 maxLength={2000}
                 value={report}
                 onChange={(e) => setReport(e.target.value)}
-                placeholder="Describe what you noticed…"
+                placeholder={
+                  reportKind === "path"
+                    ? "e.g. The corridor is closed for repairs until Friday"
+                    : "e.g. It's open 9:00–17:00, not 8:00–18:00"
+                }
               />
             </label>
             {reporting.isError && <StateBox error={reporting.error} />}

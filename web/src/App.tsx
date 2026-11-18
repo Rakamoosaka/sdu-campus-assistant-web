@@ -16,8 +16,8 @@ import {
   Megaphone,
   UserRound,
   ShieldCheck,
-  LogOut,
-  ArrowUpRight,
+  Flag,
+  ChevronUp,
 } from "lucide-react";
 import { Auth } from "./Auth";
 import { MapWorkspace, StateBox } from "./MapWorkspace";
@@ -25,14 +25,16 @@ import {
   AdminPage,
   AssistantPage,
   SavedPage,
-  UpdatesPage,
+  AnnouncementsPage,
   SchedulePage,
-  ProfilePage,
+  MyReportsPage,
   initials,
   roleLabel,
 } from "./Pages";
 import { Button } from "./components/ui/button";
 import { OfflineMapControl } from "./components/MapActions";
+import { AccountMenu } from "./components/AccountMenu";
+import { features } from "./features";
 import {
   prepareOfflineShell,
   readSavedMap,
@@ -48,6 +50,7 @@ import {
   type Place,
   type CampusMap,
   type PathResult,
+  type Report,
 } from "./lib/api";
 import logo from "../../assets/images/sdu_30_logo.png";
 const visitor: Person = { role: "guest" };
@@ -91,7 +94,8 @@ export default function App() {
   }, [qc]);
   const [selected, setSelected] = useState<number | null>(null),
     [toast, setToast] = useState(""),
-    [authOverride, setAuthOverride] = useState(false);
+    [authOverride, setAuthOverride] = useState(false),
+    [accountOpen, setAccountOpen] = useState(false);
   const identity = useQuery({
     queryKey: ["identity"],
     queryFn: ({ signal }) =>
@@ -153,6 +157,14 @@ export default function App() {
     queryFn: () => get<Place[]>("/users/me/favorites"),
     enabled: !offline && !!person && person.role !== "guest",
   });
+  const myReports = useQuery({
+    queryKey: ["my-reports"],
+    queryFn: () => get<Report[]>("/reports/me"),
+    enabled: !offline && !!person,
+    refetchInterval: 60000,
+  });
+  const unreadReports =
+    myReports.data?.filter((r) => r.reporter_unread).length || 0;
   const logout = useMutation({
     mutationFn: () => api.post("/auth/logout"),
     onSuccess: () => {
@@ -225,10 +237,16 @@ export default function App() {
       to: "/schedule",
       label: person.role === "teacher" ? "Teaching" : "Timetable",
       icon: CalendarDays,
+      on: features.timetable,
     },
-    { to: "/updates", label: "Campus updates", icon: Megaphone },
-    { to: "/profile", label: "Profile", icon: UserRound },
-  ];
+    {
+      to: "/announcements",
+      label: "Announcements",
+      icon: Megaphone,
+      on: features.announcements,
+    },
+    { to: "/reports", label: "My reports", icon: Flag },
+  ].filter((link) => link.on !== false);
   return (
     <div className={offline ? "app-shell offline" : "app-shell"}>
       <aside className="sidebar">
@@ -263,6 +281,14 @@ export default function App() {
                 {to === "/saved" && person.role !== "guest" && (
                   <small>{favorites.data?.length || 0}</small>
                 )}
+                {to === "/reports" && unreadReports > 0 && (
+                  <small
+                    className="nav-badge-new"
+                    aria-label={`${unreadReports} new report updates`}
+                  >
+                    {unreadReports}
+                  </small>
+                )}
               </NavLink>
             ),
           )}
@@ -274,17 +300,14 @@ export default function App() {
           )}
         </nav>
         <div className="sidebar-bottom">
-          <div className="course-note">
-            <span className="gold-line" />
-            <p>
-              Built by students.
-              <br />
-              For the campus community.
-            </p>
-            <small>SEMESTER PROJECT</small>
-          </div>
           {!offline && (
-            <NavLink className="identity-link" to="/profile">
+            <button
+              className="identity-link"
+              aria-haspopup="dialog"
+              aria-expanded={accountOpen}
+              aria-label="Your account"
+              onClick={() => setAccountOpen(!accountOpen)}
+            >
               <div className="avatar">
                 {person.role === "guest" ? (
                   <UserRound size={20} />
@@ -298,8 +321,8 @@ export default function App() {
                 </strong>
                 <small>{roleLabel(person.role)}</small>
               </span>
-              <ArrowUpRight size={15} />
-            </NavLink>
+              <ChevronUp size={15} />
+            </button>
           )}
           {!offline && person.role === "guest" && (
             <button className="guest-sign-in" onClick={onLogin}>
@@ -310,7 +333,13 @@ export default function App() {
       </aside>
       <main className="app-main">
         {!offline && (
-          <NavLink to="/profile" className="compact-identity">
+          <button
+            className="compact-identity"
+            aria-haspopup="dialog"
+            aria-expanded={accountOpen}
+            aria-label="Your account"
+            onClick={() => setAccountOpen(!accountOpen)}
+          >
             <span>
               SDU <b>Campus Assistant</b>
             </span>
@@ -323,7 +352,24 @@ export default function App() {
               </span>
               <i className="avatar">{initials(person)}</i>
             </span>
-          </NavLink>
+          </button>
+        )}
+        {!offline && accountOpen && (
+          <AccountMenu
+            person={person}
+            name={person.full_name || person.name || "Campus Visitor"}
+            role={roleLabel(person.role)}
+            initials={initials(person)}
+            onClose={() => setAccountOpen(false)}
+            onLogin={() => {
+              setAccountOpen(false);
+              onLogin();
+            }}
+            onLogout={() => {
+              setAccountOpen(false);
+              logout.mutate();
+            }}
+          />
         )}
         {(!currentPlaces || !currentMap) &&
         (places.isPending || map.isPending) ? (
@@ -404,13 +450,34 @@ export default function App() {
                     )
                   }
                 />
-                <Route path="/updates" element={<UpdatesPage {...props} />} />
-                <Route path="/schedule" element={<SchedulePage {...props} />} />
+                <Route
+                  path="/announcements"
+                  element={
+                    features.announcements ? (
+                      <AnnouncementsPage {...props} />
+                    ) : (
+                      <Navigate to="/map" replace />
+                    )
+                  }
+                />
+                <Route
+                  path="/updates"
+                  element={<Navigate to="/announcements" replace />}
+                />
+                <Route
+                  path="/schedule"
+                  element={
+                    features.timetable ? (
+                      <SchedulePage {...props} />
+                    ) : (
+                      <Navigate to="/map" replace />
+                    )
+                  }
+                />
+                <Route path="/reports" element={<MyReportsPage {...props} />} />
                 <Route
                   path="/profile"
-                  element={
-                    <ProfilePage {...props} onLogout={() => logout.mutate()} />
-                  }
+                  element={<Navigate to="/reports" replace />}
                 />
                 <Route
                   path="/admin"

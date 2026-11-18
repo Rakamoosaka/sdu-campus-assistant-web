@@ -33,6 +33,34 @@ def connection_label(campus: dict, a: str, b: str) -> str:
     return f'Floor {floor} corridor between {first} and {second}'
 
 
+def nearby_connections(campus: dict, map_key: str, depth: int = 2, limit: int = 8) -> list[dict]:
+    """Connections within a few steps of a place's approach, nearest first, one per distinct label."""
+    graph = campus['routing']
+    start = graph['attachments'].get(map_key)
+    if not start:
+        return []
+    rows, seen_edges, seen_labels, frontier, reached = [], set(), set(), {start}, {start}
+    for _ in range(depth):
+        following = set()
+        for e in graph['edges']:
+            for a, b in ((e['a'], e['b']), (e['b'], e['a'])):
+                key = edge_key(a, b)
+                if a not in frontier or key in seen_edges:
+                    continue
+                seen_edges.add(key)
+                label = connection_label(campus, a, b)
+                names = frozenset(label.removeprefix(f'Floor {graph["node_floors"][a]} corridor between ').split(' and '))
+                if names not in seen_labels:
+                    seen_labels.add(names)
+                    rows.append({'a': a, 'b': b, 'kind': e['kind'], 'label': label,
+                                 'floor': graph['node_floors'][a], 'to_floor': graph['node_floors'][b]})
+                if b not in reached:
+                    reached.add(b)
+                    following.add(b)
+        frontier = following
+    return rows[:limit]
+
+
 def network(campus: dict, path_status: dict | None = None) -> list[dict]:
     """Every mapped connection with its step-free and closure state."""
     path_status = path_status or {}
@@ -128,6 +156,7 @@ def draft_route(campus: dict, start: int, destination: int, avoid_stairs: bool =
     for a, b in zip(path, path[1:]):
         e = edges[edge_key(a, b)]
         connections.append({'a': a, 'b': b, 'kind': e['kind'], 'label': connection_label(campus, a, b),
+                            'floor': floors[a], 'to_floor': floors[b],
                             'step_free': e['kind'] != 'stairs' and path_status.get(edge_key(a, b)) != 'not_step_free'})
         if floors[a] != floors[b]:
             transfers.append({'kind': e['kind'], 'label': e['label'], 'from_floor': floors[a], 'to_floor': floors[b]})
@@ -144,6 +173,11 @@ def draft_route(campus: dict, start: int, destination: int, avoid_stairs: bool =
         steps.append(f'Enter the {target["block"]} side corridor and follow the highlighted branch.')
     steps.append(f'Approach {target["name"]}. The final connection is an approximate doorway/landing position.')
     warnings = []
+    # Say why a route looks unusual when it goes around a reported closure.
+    unclosed = shortest(False, avoid_stairs) if 'closed' in path_status.values() else path
+    for a, b in zip(unclosed, unclosed[1:]):
+        if path_status.get(edge_key(a, b)) == 'closed':
+            warnings.append(f'Goes around a closed path: {connection_label(campus, a, b)}.')
     if avoid_stairs:
         for p in (origin, target):
             if p.get('step_free_access') == 'Step-free':

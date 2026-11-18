@@ -115,10 +115,6 @@ export function Auth({ onSuccess }: { onSuccess: () => void }) {
         <div className="decor decor-two" />
       </section>
       <section className="auth-form-wrap">
-        <div className="auth-topline">
-          <span>SEMESTER PROJECT</span>
-          <span className="gold-line" />
-        </div>
         <div className="auth-form">
           <span className="eyebrow">WELCOME TO YOUR CAMPUS</span>
           <h2>{register ? "Make yourself at home." : "Good to see you."}</h2>
@@ -239,9 +235,6 @@ export function Auth({ onSuccess }: { onSuccess: () => void }) {
             Demo access
           </button>
         </div>
-        <p className="auth-footer">
-          A student course project · No university SSO required
-        </p>
       </section>
       <Dialog
         open={demo}

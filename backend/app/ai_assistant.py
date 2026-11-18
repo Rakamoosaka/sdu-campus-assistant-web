@@ -108,7 +108,7 @@ TOOLS = [
     function("plan_route", "Compute a real schematic graph route. Backend enforces the signed-in user's avoid-stairs preference.",
              {"start_location_id": {"type": "integer"}, "destination_location_id": {"type": "integer"}},
              ["start_location_id", "destination_location_id"]),
-    function("get_campus_updates", "Read the latest dated campus announcements; seeded content is sample data.", {}, []),
+    function("get_campus_updates", "Read the campus announcements showing right now; seeded content is sample data.", {}, []),
     function("present_answer", "Finish the response after consulting campus tools. Return only observed IDs. Set clarification true for selectable competing choices.",
              {"answer": {"type": "string", "maxLength": 1800},
               "location_ids": {"type": "array", "items": {"type": "integer"}, "maxItems": 8},

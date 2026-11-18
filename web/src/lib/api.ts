@@ -79,6 +79,21 @@ export interface Connection {
   step_free: boolean;
   closed: boolean;
 }
+export interface PathPart {
+  a: string;
+  b: string;
+  kind: string;
+  label: string;
+  floor: number;
+  to_floor: number;
+  step_free?: boolean;
+}
+export interface PathState {
+  a: string;
+  b: string;
+  state: "closed" | "not_step_free" | null;
+  open_reports: number;
+}
 export interface CampusMap {
   routing: {
     attachments: Record<string, string>;
@@ -110,13 +125,7 @@ export interface PathResult {
   route_floors?: number[];
   avoid_stairs: boolean;
   warnings?: string[];
-  connections?: {
-    a: string;
-    b: string;
-    kind: string;
-    label: string;
-    step_free: boolean;
-  }[];
+  connections?: PathPart[];
   transfers?: {
     kind: string;
     label: string;
@@ -136,7 +145,17 @@ export interface News {
   body: string;
   published_at: string;
   location_id: number | null;
+  starts_at: string | null;
+  ends_at: string | null;
+  state?: "scheduled" | "showing" | "expired";
 }
+const asUtc = (date: string) =>
+  new Date(/Z$|[+-]\d\d:\d\d$/.test(date) ? date : date + "Z");
+// Value for a datetime-local input showing Asia/Almaty (UTC+5) time.
+export const almatyInputValue = (date: string | null) =>
+  date
+    ? new Date(asUtc(date).getTime() + 5 * 3600000).toISOString().slice(0, 16)
+    : "";
 export interface Lesson {
   id: number;
   course: string;
@@ -161,7 +180,9 @@ export interface Report {
   resolution_note: string;
   created_at: string;
   updated_at: string | null;
-  path_status: { id: number; state: string } | null;
+  reporter_unread: boolean;
+  similar_open: number[];
+  path_status: { id: number; state: string; reopens_at: string | null } | null;
 }
 export interface PathClosure {
   id: number;
@@ -172,6 +193,7 @@ export interface PathClosure {
   label: string;
   report_id: number | null;
   created_at: string;
+  reopens_at: string | null;
 }
 export const STEP_FREE_STATES = ["Not verified", "Step-free", "Not step-free"];
 export const reportStatusLabel = (status: string) =>
@@ -181,6 +203,7 @@ export const reportStatusLabel = (status: string) =>
       reviewing: "Under review",
       resolved: "Resolved",
       rejected: "Not changed",
+      withdrawn: "Withdrawn",
     }) as Record<string, string>
   )[status] || status;
 export interface Answer {

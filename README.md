@@ -29,22 +29,25 @@ docker compose up --build -d
 npm --prefix web run dev
 ```
 
-Compose preserves `sdu_postgres_data`; **do not use `down -v`** to stop a demonstration. `docker compose down` retains data. Stop the standalone local API first to free port 8000. The API container uses PostgreSQL directly. Schema setup is additive (`create_all` for missing tables); no existing tables or columns are dropped. See [database-schema.md](database-schema.md) for the update procedure.
+Compose preserves `sdu_postgres_data`; **do not use `down -v`** to stop a demonstration. `docker compose down` retains data. Stop the standalone local API first to free port 8000. The API container uses PostgreSQL directly. Schema setup is additive (`create_all` for missing tables, plus newer columns added to existing tables on startup); no existing tables or columns are dropped. See [database-schema.md](database-schema.md) for the update procedure.
 
 pgAdmin remains at [http://127.0.0.1:5050](http://127.0.0.1:5050), login `admin@sdu.edu.kz` / `admin`. Register host `database`, port `5432`, database/user `sdu_campus` / `sdu`, password `sdu_demo_password`. These are local presentation credentials. Docker's daemon was stopped in the verification environment, so the delivered run uses SQLite; PostgreSQL container execution is unverified in this batch.
 
 ## What works
 
+Timetable and Announcements are switched off in the interface for now (`web/src/features.ts`). Their pages, admin tools, server endpoints and data are kept; set a flag to `true` to bring a section back.
+
+
 - Empty ID/password login and registration forms, visibility controls, server-enforced roles and guest entry. New registrations are Students.
 - Real HttpOnly browser sessions, CSRF checks, restricted CORS, server-side logout and session restoration.
 - Supplied anniversary identity; desktop navigation, mobile sheet, zoom/pan, explicit zoom/fit and floor buttons.
 - Search with exact room ranking, normalized spacing, aliases and typo tolerance; searches are logged in the database.
-- Stable mapped locations, details, five persisted saved places per account, reports on incorrect location details or blocked route paths, tracked by the reporter under Profile → Your reports (guests included). Share links open the selected destination directly, including for visitors without an account.
+- Stable mapped locations, details, five persisted saved places per account, reports on incorrect location details or blocked corridors, stairs and lifts (picked from the planned route or around the selected place), tracked by the reporter on the My reports page with an unread badge (guests included; guest reports move to the account on sign-in). Admins fix a reported place and resolve the report in one step, see duplicates grouped, and can close paths until a set time. There is no separate profile page: the account menu (your name in the sidebar) holds the Avoid stairs switch and Log out / Sign in. Share links open the selected destination directly, including for visitors without an account.
 - The built app supports downloading public floor plans and the place catalogue for offline browsing and search. Offline mode requires HTTPS or localhost and a completed download in that browser. Routing and the assistant require the API.
 - Existing Dijkstra graph, floor-specific route segments, route framing, ordered transfers and avoid-stairs preference saved per account or guest session and applied by the server, a step-free map layer, admin-recorded step-free access per place, and explanations when no suitable route exists. Administrators can close a reported path or mark it not step-free, and routes avoid it immediately.
 - Grounded rule-based assistant: service recommendations, next-class lookup, selectable ambiguity resolution and map actions.
 - Editable sample student/teacher schedules, UTC storage and explicit Asia/Almaty display/selection of the next upcoming lesson. New accounts start with empty schedules and can add lessons.
-- Public dated updates; protected admin location/hour/contact edits, add-location forms, announcement creation/editing, report status review, role management and actual SQL search aggregates.
+- Public announcements with an optional show-from/until window (Asia/Almaty), listed on the Announcements page and in the linked place's details; admins create, edit, schedule and delete them. Protected admin edits of location details (name, block, floor label, hours, contact, search aliases, step-free access), report status review, role management and actual SQL search aggregates.
 
 The coverage checklist and verified test results are in [docs/web-coverage.md](docs/web-coverage.md).
 
@@ -52,7 +55,7 @@ The coverage checklist and verified test results are in [docs/web-coverage.md](d
 
 Floors 1 and 2 are schematic. Floor 2 follows the supplied red sketch and includes its connected corridors, Bochka platforms and library branch over a muted footprint. S1 stays removed. S3/S4/S5/S8 and known connections are retained. S6 connects 1 directly to 3 and skips 2; separate canteen stairs connect 2 to 3. Floor 3 has only a canteen terminal, with no invented general corridors or basement layout. D/F/H lifts route only through explicitly connected floor-1/2 landing nodes; their other served floors do not create routes automatically.
 
-Original D101–D104 records are retained. Other four-room D–H patterns on floors 1/2 and door connections are assumed/schematic. Library internal infrastructure and other unknown positions remain unpositioned. Admin-added catalogue entries do not automatically gain surveyed coordinates or graph connections. All routes remain unverified, and metres/walking times stay unavailable. Excluding stairs can honestly leave no route to the canteen.
+Original D101–D104 records are retained. Other four-room D–H patterns on floors 1/2 and door connections are assumed/schematic. Library internal infrastructure and other unknown positions remain unpositioned. Places, categories, map positions and route connections come only from the campus map file; administrators edit details, not the map. All routes remain unverified, and metres/walking times stay unavailable. Excluding stairs can honestly leave no route to the canteen.
 
 ## Demo access
 
@@ -92,7 +95,7 @@ This is the main campus app checkout. It combines the AI assistant, current mapp
 
 The assistant uses `deepseek/deepseek-v4-flash-0731` when the backend has `OPENROUTER_API_KEY` configured in the ignored root `.env`. Add your own key there; do not put it in `web/.env`, a `VITE_` variable or source control. The `.env.example` contains a blank key and the chosen model ID. `make web-start` loads the configuration; restart with `make web-stop && make web-start` after changing it. Docker Compose forwards the same settings to the API container.
 
-The model calls validated, read-only tools for catalogue search, location details, the current account's next sample lesson, public updates and graph routes. It interprets paraphrases/follow-ups, while the backend resolves identity, applies saved accessibility preferences and validates every returned action ID. Chat choices remain clickable. Route responses open their actual per-floor segments in the map instead of inventing navigation instructions. Campus records and approaches remain schematic/unconfirmed where documented.
+The model calls validated, read-only tools for catalogue search, location details, the current account's next sample lesson, announcements currently showing and graph routes. It interprets paraphrases/follow-ups, while the backend resolves identity, applies saved accessibility preferences and validates every returned action ID. Chat choices remain clickable. Route responses open their actual per-floor segments in the map instead of inventing navigation instructions. Campus records and approaches remain schematic/unconfirmed where documented.
 
 `OPENROUTER_TIMEOUT_SECONDS` defaults to 45. Each turn allows at most six provider requests, including the scope assessment, with three concurrent AI turns per API process; in-memory rate limits default to 10 turns/account/minute, 30/IP/minute and 90/process/minute. This is a local course-project limit, not a distributed deployment quota. API outages, missing credit, invalid keys, timeouts, limits or invalid model actions produce the existing rule-based answer with a visible fallback label. No key means the basic assistant is used directly. There are no automatic paid retries.
 
