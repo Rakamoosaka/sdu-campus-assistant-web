@@ -31,6 +31,9 @@ import {
   type Answer,
   type Report,
   type PathResult,
+  type PathClosure,
+  STEP_FREE_STATES,
+  reportStatusLabel,
 } from "./lib/api";
 interface Props {
   person: Person;
@@ -631,11 +634,15 @@ export function ProfilePage({
   onLogout,
 }: Props & { onLogout: () => void }) {
   const qc = useQueryClient();
+  const guest = person.role === "guest";
   const [draftPref, setDraftPref] = useState<boolean | null>(null);
   const pref = useQuery({
     queryKey: ["preferences"],
     queryFn: () => get<{ accessible_routes: boolean }>("/users/me/preferences"),
-    enabled: person.role !== "guest",
+  });
+  const myReports = useQuery({
+    queryKey: ["my-reports"],
+    queryFn: () => get<Report[]>("/reports/me"),
   });
   const save = useMutation({
     mutationFn: (value: boolean) =>
@@ -648,10 +655,10 @@ export function ProfilePage({
   return (
     <div className="content-page">
       <PageIntro label="A CAMPUS THAT FITS YOU" title="Your profile." />
-      {person.role === "guest" ? (
-        <LoginPrompt onLogin={onLogin} />
-      ) : (
-        <div className="profile-grid">
+      <div className="profile-grid">
+        {guest ? (
+          <LoginPrompt onLogin={onLogin} />
+        ) : (
           <section className="profile-card">
             <div className="large-avatar">{initials(person)}</div>
             <h2>{person.full_name || person.name}</h2>
@@ -667,49 +674,108 @@ export function ProfilePage({
               <LogOut size={16} /> Log out
             </Button>
           </section>
-          <section className="preferences-card">
-            <span className="eyebrow">NAVIGATION PREFERENCES</span>
-            <h2>Find a route that suits you.</h2>
-            <div className="preference-row">
-              <span className="location-icon">
-                <Accessibility size={22} />
-              </span>
-              <label htmlFor="stairs-pref">
-                <strong>Avoid stairs and use lifts</strong>
-                <p>Applies to every route you plan while signed in.</p>
-              </label>
-              <input
-                id="stairs-pref"
-                type="checkbox"
-                role="switch"
-                checked={draftPref ?? pref.data?.accessible_routes ?? false}
-                disabled={pref.isPending || pref.isError || save.isPending}
-                onChange={(e) => {
-                  setDraftPref(e.target.checked);
-                  save.mutate(e.target.checked);
-                }}
-              />
-            </div>
-            {pref.isError && (
-              <StateBox error={pref.error} retry={() => pref.refetch()} />
-            )}
-            {save.isError && <StateBox error={save.error} />}
-            {save.isSuccess && !save.isPending && (
-              <p className="success-text">
-                <Check size={15} /> Preference saved to your account
-              </p>
-            )}
-            <div className="info-note">
-              <ShieldCheck size={19} />
+        )}
+        <section className="preferences-card">
+          <span className="eyebrow">NAVIGATION PREFERENCES</span>
+          <h2>Find a route that suits you.</h2>
+          <div className="preference-row">
+            <span className="location-icon">
+              <Accessibility size={22} />
+            </span>
+            <label htmlFor="stairs-pref">
+              <strong>Avoid stairs and use lifts</strong>
               <p>
-                Routes use mapped lift connections where available. Approaches
-                and lift operation remain unverified. A connected step-free
-                route may not be available.
+                {guest
+                  ? "Applies to every route you plan in this guest session."
+                  : "Applies to every route you plan while signed in."}
               </p>
-            </div>
-          </section>
-        </div>
-      )}
+            </label>
+            <input
+              id="stairs-pref"
+              type="checkbox"
+              role="switch"
+              checked={draftPref ?? pref.data?.accessible_routes ?? false}
+              disabled={pref.isPending || pref.isError || save.isPending}
+              onChange={(e) => {
+                setDraftPref(e.target.checked);
+                save.mutate(e.target.checked);
+              }}
+            />
+          </div>
+          {pref.isError && (
+            <StateBox error={pref.error} retry={() => pref.refetch()} />
+          )}
+          {save.isError && <StateBox error={save.error} />}
+          {save.isSuccess && !save.isPending && (
+            <p className="success-text">
+              <Check size={15} /> Preference saved to your{" "}
+              {guest ? "guest session" : "account"}
+            </p>
+          )}
+          <div className="info-note">
+            <ShieldCheck size={19} />
+            <p>
+              Routes use only corridors and mapped lifts. Places marked as not
+              step-free and paths reported as closed are avoided. If no
+              suitable route exists, the route panel explains why. Doorways
+              and lift operation remain unverified.
+            </p>
+          </div>
+        </section>
+      </div>
+      <section className="report-list" aria-label="Your reports">
+        <span className="eyebrow">YOUR REPORTS</span>
+        <h2>Problems you reported.</h2>
+        {myReports.isError ? (
+          <StateBox
+            error={myReports.error}
+            retry={() => myReports.refetch()}
+          />
+        ) : myReports.isPending ? (
+          <StateBox />
+        ) : !myReports.data.length ? (
+          <StateBox empty="No reports yet. Use Report a problem on any place in the map." />
+        ) : (
+          myReports.data.map((r) => (
+            <article className="report-card" key={r.id}>
+              <header>
+                <strong>
+                  #{r.id} ·{" "}
+                  {r.kind === "path" ? "Blocked path" : "Location information"}
+                </strong>
+                <span className={"report-status " + r.status}>
+                  {reportStatusLabel(r.status)}
+                </span>
+              </header>
+              <small className="muted">
+                {(r.kind === "path" ? r.connection_label : r.location_name) ||
+                  "Campus"}{" "}
+                · Sent {localTime(r.created_at)}
+                {r.updated_at && ` · Updated ${localTime(r.updated_at)}`}
+              </small>
+              <p>{r.message}</p>
+              {r.path_status && (
+                <p className="muted">
+                  {r.path_status.state === "closed"
+                    ? "Routes currently avoid this path."
+                    : "Step-free routes currently avoid this path."}
+                </p>
+              )}
+              {r.resolution_note && (
+                <p className="report-note">
+                  <strong>Campus team:</strong> {r.resolution_note}
+                </p>
+              )}
+            </article>
+          ))
+        )}
+        {guest && (
+          <p className="muted text-xs">
+            Guest reports can be tracked for as long as this guest session
+            lasts.
+          </p>
+        )}
+      </section>
     </div>
   );
 }
@@ -740,7 +806,8 @@ export function AdminPage({ places }: Props) {
     [editing, setEditing] = useState<Place | null | undefined>(undefined),
     [newsEdit, setNewsEdit] = useState<News | null | undefined>(undefined),
     [message, setMessage] = useState(""),
-    [filter, setFilter] = useState("");
+    [filter, setFilter] = useState(""),
+    [notes, setNotes] = useState<Record<number, string>>({});
   const analytics = useQuery({
     queryKey: ["analytics"],
     queryFn: () =>
@@ -751,6 +818,10 @@ export function AdminPage({ places }: Props) {
   const reports = useQuery({
     queryKey: ["reports"],
     queryFn: () => get<Report[]>("/admin/reports"),
+  });
+  const closures = useQuery({
+    queryKey: ["path-status"],
+    queryFn: () => get<PathClosure[]>("/admin/path-status"),
   });
   const users = useQuery({
     queryKey: ["users"],
@@ -767,12 +838,13 @@ export function AdminPage({ places }: Props) {
       method = "put",
     }: {
       url: string;
-      data: unknown;
-      method?: "put" | "post";
-    }) => api[method](url, data),
+      data?: unknown;
+      method?: "put" | "post" | "delete";
+    }) => (method === "delete" ? api.delete(url) : api[method](url, data)),
     onSuccess: () => {
       setEditing(undefined);
       setNewsEdit(undefined);
+      setNotes({});
       setMessage("Changes saved to the database.");
       qc.invalidateQueries();
     },
@@ -883,6 +955,7 @@ export function AdminPage({ places }: Props) {
                   <th>Category</th>
                   <th>Position</th>
                   <th>Hours</th>
+                  <th>Step-free</th>
                   <th />
                 </tr>
               </thead>
@@ -902,6 +975,7 @@ export function AdminPage({ places }: Props) {
                       <td>{p.category}</td>
                       <td>{p.floor}</td>
                       <td>{p.opening_hours}</td>
+                      <td>{p.step_free_access || "Not verified"}</td>
                       <td>
                         <Button
                           size="sm"
@@ -961,42 +1035,174 @@ export function AdminPage({ places }: Props) {
       )}
       {tab === "Reports" && (
         <section className="admin-section">
+          <h2>Paths affecting routes</h2>
+          {closures.isError ? (
+            <StateBox error={closures.error} retry={() => closures.refetch()} />
+          ) : closures.isPending ? (
+            <StateBox />
+          ) : !closures.data.length ? (
+            <StateBox empty="All mapped paths are open." />
+          ) : (
+            closures.data.map((c) => (
+              <div className="admin-list-row" key={c.id}>
+                <div>
+                  <h3>{c.label}</h3>
+                  <small>
+                    {c.state === "closed"
+                      ? "Closed · all routes avoid it"
+                      : "Not step-free · step-free routes avoid it"}
+                    {c.report_id && ` · from report #${c.report_id}`}
+                  </small>
+                </div>
+                <Button
+                  variant="outline"
+                  disabled={update.isPending}
+                  onClick={() =>
+                    update.mutate({
+                      url: `/admin/path-status/${c.id}`,
+                      method: "delete",
+                    })
+                  }
+                >
+                  Reopen path
+                </Button>
+              </div>
+            ))
+          )}
+          <h2>Submitted reports</h2>
           {reports.isError ? (
             <StateBox error={reports.error} retry={() => reports.refetch()} />
           ) : reports.isPending ? (
             <StateBox />
           ) : !reports.data.length ? (
-            <StateBox empty="No inaccuracies have been submitted." />
+            <StateBox empty="No problems have been reported." />
           ) : (
-            reports.data.map((r) => (
-              <div className="admin-list-row" key={r.id}>
-                <div>
-                  <h3>
-                    {r.location_id
-                      ? places.find((p) => p.id === r.location_id)?.name ||
-                        `Location ${r.location_id}`
-                      : "Campus report"}
-                  </h3>
-                  <p>{r.message}</p>
-                  <small>Submitted by {r.author}</small>
+            reports.data.map((r) => {
+              const place = places.find((p) => p.id === r.location_id);
+              const note = notes[r.id] ?? r.resolution_note;
+              const closePath = (state: string) =>
+                update.mutate({
+                  url: "/admin/path-status",
+                  method: "post",
+                  data: {
+                    edge_a: r.edge_a,
+                    edge_b: r.edge_b,
+                    state,
+                    report_id: r.id,
+                  },
+                });
+              return (
+                <div className="admin-list-row" key={r.id}>
+                  <div>
+                    <span className="category-tag">
+                      {r.kind === "path"
+                        ? "Blocked path"
+                        : "Location information"}
+                    </span>
+                    <h3>
+                      {(r.kind === "path"
+                        ? r.connection_label
+                        : r.location_name) || "Campus report"}
+                    </h3>
+                    {r.route && <small>Reported on route {r.route}</small>}
+                    <p>{r.message}</p>
+                    <small>
+                      #{r.id} · Submitted by {r.author} ·{" "}
+                      {localTime(r.created_at)}
+                    </small>
+                  </div>
+                  <div className="admin-report-actions">
+                    <select
+                      aria-label={`Report ${r.id} status`}
+                      value={r.status}
+                      disabled={update.isPending}
+                      onChange={(e) =>
+                        update.mutate({
+                          url: `/admin/reports/${r.id}`,
+                          data: { status: e.target.value, resolution_note: note },
+                        })
+                      }
+                    >
+                      {["new", "reviewing", "resolved", "rejected"].map((s) => (
+                        <option key={s} value={s}>
+                          {reportStatusLabel(s)}
+                        </option>
+                      ))}
+                    </select>
+                    <textarea
+                      aria-label={`Report ${r.id} update for the reporter`}
+                      placeholder="Update visible to the reporter…"
+                      maxLength={1000}
+                      value={note}
+                      onChange={(e) =>
+                        setNotes({ ...notes, [r.id]: e.target.value })
+                      }
+                    />
+                    <div className="row">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={update.isPending || note === r.resolution_note}
+                        onClick={() =>
+                          update.mutate({
+                            url: `/admin/reports/${r.id}`,
+                            data: { status: r.status, resolution_note: note },
+                          })
+                        }
+                      >
+                        Save update
+                      </Button>
+                      {r.kind === "location" && place && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setEditing(place);
+                            update.reset();
+                          }}
+                        >
+                          Edit location
+                        </Button>
+                      )}
+                      {r.kind === "path" && r.edge_a && !r.path_status && (
+                        <>
+                          <Button
+                            size="sm"
+                            disabled={update.isPending}
+                            onClick={() => closePath("closed")}
+                          >
+                            Close path
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={update.isPending}
+                            onClick={() => closePath("not_step_free")}
+                          >
+                            Mark not step-free
+                          </Button>
+                        </>
+                      )}
+                      {r.path_status && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={update.isPending}
+                          onClick={() =>
+                            update.mutate({
+                              url: `/admin/path-status/${r.path_status!.id}`,
+                              method: "delete",
+                            })
+                          }
+                        >
+                          Reopen path
+                        </Button>
+                      )}
+                    </div>
+                  </div>
                 </div>
-                <select
-                  aria-label={`Report ${r.id} status`}
-                  value={r.status}
-                  disabled={update.isPending}
-                  onChange={(e) =>
-                    update.mutate({
-                      url: `/admin/reports/${r.id}`,
-                      data: { status: e.target.value },
-                    })
-                  }
-                >
-                  {["new", "reviewing", "resolved", "rejected"].map((s) => (
-                    <option key={s}>{s}</option>
-                  ))}
-                </select>
-              </div>
-            ))
+              );
+            })
           )}
         </section>
       )}
@@ -1116,6 +1322,17 @@ export function AdminPage({ places }: Props) {
             <label>
               Aliases
               <input name="aliases" defaultValue={editing?.aliases || ""} />
+            </label>
+            <label>
+              Step-free access
+              <select
+                name="step_free_access"
+                defaultValue={editing?.step_free_access || "Not verified"}
+              >
+                {STEP_FREE_STATES.map((state) => (
+                  <option key={state}>{state}</option>
+                ))}
+              </select>
             </label>
           </div>
           <label>

@@ -87,7 +87,8 @@ def test_second_floor_routes_use_stairs_or_lifts_by_preference():
     canteen = client.get('/routes', params={'start': ids['d201'], 'destination': ids['canteen_floor_3']}).json()
     assert any(t['label'] == 'Canteen stairs' for t in canteen['transfers'])
     blocked = client.get('/routes', params={'destination': ids['canteen_floor_3'], 'accessible': True}).json()
-    assert blocked['status'] == 'no_route'
+    assert blocked['status'] == 'no_step_free_route'
+    assert 'Turn off Avoid stairs' in blocked['message']
 
 
 def test_search_confirmed_room_and_no_fake_parking():

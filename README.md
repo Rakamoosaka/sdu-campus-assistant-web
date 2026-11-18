@@ -39,9 +39,9 @@ pgAdmin remains at [http://127.0.0.1:5050](http://127.0.0.1:5050), login `admin@
 - Real HttpOnly browser sessions, CSRF checks, restricted CORS, server-side logout and session restoration.
 - Supplied anniversary identity; desktop navigation, mobile sheet, zoom/pan, explicit zoom/fit and floor buttons.
 - Search with exact room ranking, normalized spacing, aliases and typo tolerance; searches are logged in the database.
-- Stable mapped locations, details, five persisted saved places per account, reports tied to selected locations. Share links open the selected destination directly, including for visitors without an account.
+- Stable mapped locations, details, five persisted saved places per account, reports on incorrect location details or blocked route paths, tracked by the reporter under Profile → Your reports (guests included). Share links open the selected destination directly, including for visitors without an account.
 - The built app supports downloading public floor plans and the place catalogue for offline browsing and search. Offline mode requires HTTPS or localhost and a completed download in that browser. Routing and the assistant require the API.
-- Existing Dijkstra graph, floor-specific route segments, route framing, ordered transfers and saved avoid-stairs preference (Profile only).
+- Existing Dijkstra graph, floor-specific route segments, route framing, ordered transfers and avoid-stairs preference saved per account or guest session and applied by the server, a step-free map layer, admin-recorded step-free access per place, and explanations when no suitable route exists. Administrators can close a reported path or mark it not step-free, and routes avoid it immediately.
 - Grounded rule-based assistant: service recommendations, next-class lookup, selectable ambiguity resolution and map actions.
 - Editable sample student/teacher schedules, UTC storage and explicit Asia/Almaty display/selection of the next upcoming lesson. New accounts start with empty schedules and can add lessons.
 - Public dated updates; protected admin location/hour/contact edits, add-location forms, announcement creation/editing, report status review, role management and actual SQL search aggregates.

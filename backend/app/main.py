@@ -8,7 +8,7 @@ import re
 import secrets
 import json
 import zlib
-from .routing import draft_route
+from .routing import draft_route, network, edge_key, connection_label, STEP_FREE_STATES
 from . import ai_assistant, assistant_scope, assistant_answers
 from pathlib import Path
 from datetime import datetime, timedelta, timezone
@@ -23,7 +23,7 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel
-from sqlalchemy import or_, func, Column, DateTime
+from sqlalchemy import or_, func, Column, DateTime, inspect, text
 from sqlalchemy.types import TypeDecorator
 from sqlmodel import Field, Session, SQLModel, create_engine, select
 
@@ -129,6 +129,11 @@ class Preference(SQLModel, table=True):
     accessible_routes: bool = False
 
 
+class GuestPreference(SQLModel, table=True):
+    session_key: str = Field(primary_key=True)
+    accessible_routes: bool = False
+
+
 class Location(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     name: str = Field(index=True)
@@ -141,6 +146,7 @@ class Location(SQLModel, table=True):
     contact: str = "Not confirmed"
     accessible: bool = True
     aliases: str = ""
+    step_free_access: str = "Not verified"
 
 
 class Route(SQLModel, table=True):
@@ -190,6 +196,24 @@ class InaccuracyReport(SQLModel, table=True):
     message: str
     status: str = Field(default="new", index=True)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    kind: str = "location"
+    edge_a: str | None = None
+    edge_b: str | None = None
+    route_start_id: int | None = None
+    route_destination_id: int | None = None
+    resolution_note: str = ""
+    updated_at: datetime | None = None
+
+
+class PathStatus(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    edge_a: str = Field(index=True)
+    edge_b: str = Field(index=True)
+    state: str
+    note: str = ""
+    report_id: int | None = None
+    active: bool = Field(default=True, index=True)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class SearchLog(SQLModel, table=True):
@@ -214,6 +238,24 @@ class RegisterRequest(BaseModel):
 class ReportRequest(BaseModel):
     message: str
     location_id: int | None = None
+    kind: str = "location"
+    edge_a: str | None = None
+    edge_b: str | None = None
+    route_start_id: int | None = None
+    route_destination_id: int | None = None
+
+
+class ReportUpdateRequest(BaseModel):
+    status: str
+    resolution_note: str | None = None
+
+
+class PathStatusRequest(BaseModel):
+    edge_a: str
+    edge_b: str
+    state: str
+    note: str = ""
+    report_id: int | None = None
 
 
 class AssistantRequest(BaseModel):
@@ -225,10 +267,6 @@ class AssistantRequest(BaseModel):
 
 class RoleRequest(BaseModel):
     role: str
-
-
-class StatusRequest(BaseModel):
-    status: str
 
 
 class PreferenceRequest(BaseModel):
@@ -246,6 +284,7 @@ class LocationRequest(BaseModel):
     contact: str = "Not confirmed"
     accessible: bool = True
     aliases: str = ""
+    step_free_access: str = "Not verified"
 
 
 def get_session():
@@ -395,8 +434,23 @@ LOCATION_SEEDS = [
 ]
 
 
+NEW_COLUMNS = {
+    "location": [("step_free_access", "VARCHAR NOT NULL DEFAULT 'Not verified'")],
+    "inaccuracyreport": [("kind", "VARCHAR NOT NULL DEFAULT 'location'"), ("edge_a", "VARCHAR"), ("edge_b", "VARCHAR"),
+                         ("route_start_id", "INTEGER"), ("route_destination_id", "INTEGER"),
+                         ("resolution_note", "VARCHAR NOT NULL DEFAULT ''"), ("updated_at", "TIMESTAMP")],
+}
+
+
 def seed_database() -> None:
     SQLModel.metadata.create_all(engine)
+    # create_all does not add columns to existing tables, so add the newer ones in place.
+    with engine.begin() as connection:
+        for table, columns in NEW_COLUMNS.items():
+            existing = {column["name"] for column in inspect(connection).get_columns(table)}
+            for name, definition in columns:
+                if name not in existing:
+                    connection.execute(text(f"ALTER TABLE {table} ADD COLUMN {name} {definition}"))
     with Session(engine) as session:
         if session.exec(select(RoleOverride)).first() is None:
             session.add_all([
@@ -551,32 +605,41 @@ def me(identity: Identity, session: DbSession) -> dict:
     return {"name": "Campus Visitor", "role": "guest", "session": identity["sub"]}
 
 
+def saved_avoid_stairs(identity: dict, session: Session) -> bool | None:
+    """The saved step-free preference for an account or guest session; None when nothing can be saved."""
+    user = user_for_identity(identity, session)
+    if user:
+        preference = session.exec(select(Preference).where(Preference.user_id == user.id)).first()
+        return preference.accessible_routes if preference else False
+    if identity.get("role") == "guest":
+        preference = session.get(GuestPreference, identity["sub"])
+        return preference.accessible_routes if preference else False
+    return None
+
+
 @app.get("/users/me/preferences", tags=["Users"])
 def get_preferences(identity: Identity, session: DbSession) -> dict:
-    user = user_for_identity(identity, session)
-    if not user:
-        raise HTTPException(status_code=403, detail="Registered account required")
-    preference = session.exec(select(Preference).where(Preference.user_id == user.id)).first()
-    if preference is None:
-        preference = Preference(user_id=user.id)
-        session.add(preference)
-        session.commit()
-        session.refresh(preference)
-    return {"accessible_routes": preference.accessible_routes}
+    value = saved_avoid_stairs(identity, session)
+    if value is None:
+        raise HTTPException(status_code=403, detail="Sign in or continue as a guest to save preferences")
+    return {"accessible_routes": value, "saved_for": "guest_session" if identity.get("role") == "guest" else "account"}
 
 
 @app.put("/users/me/preferences", tags=["Users"])
 def update_preferences(body: PreferenceRequest, identity: Identity, session: DbSession) -> dict:
     user = user_for_identity(identity, session)
-    if not user:
-        raise HTTPException(status_code=403, detail="Registered account required")
-    preference = session.exec(select(Preference).where(Preference.user_id == user.id)).first()
-    if preference is None:
-        preference = Preference(user_id=user.id)
-        session.add(preference)
+    if user:
+        preference = session.exec(select(Preference).where(Preference.user_id == user.id)).first()
+        if preference is None:
+            preference = Preference(user_id=user.id)
+    elif identity.get("role") == "guest":
+        preference = session.get(GuestPreference, identity["sub"]) or GuestPreference(session_key=identity["sub"])
+    else:
+        raise HTTPException(status_code=403, detail="Sign in or continue as a guest to save preferences")
     preference.accessible_routes = body.accessible_routes
+    session.add(preference)
     session.commit()
-    return {"accessible_routes": preference.accessible_routes}
+    return {"accessible_routes": preference.accessible_routes, "saved_for": "account" if user else "guest_session"}
 
 
 @app.get("/locations", response_model=list[Location], tags=["Campus"])
@@ -587,9 +650,28 @@ def locations(session: DbSession, category: str | None = None) -> list[Location]
     return list(session.exec(statement).all())
 
 
+def active_path_status(session: Session) -> dict:
+    """Admin path decisions by connection; a closure outranks a not-step-free mark."""
+    states = {}
+    for row in session.exec(select(PathStatus).where(PathStatus.active == True)).all():  # noqa: E712
+        key = edge_key(row.edge_a, row.edge_b)
+        if states.get(key) != "closed":
+            states[key] = row.state
+    return states
+
+
+def live_campus(session: Session) -> dict:
+    # Use current database metadata; preserve explicit graph attachments and geometry.
+    live = {item.id: item for item in session.exec(select(Location)).all()}
+    return {**CAMPUS_MAP, "places": [{**p, **(live[p['id']].model_dump() if p['id'] in live else {})} for p in CAMPUS_MAP['places']]}
+
+
 @app.get('/campus-map', tags=['Campus'])
-def campus_map() -> dict:
-    return CAMPUS_MAP
+def campus_map(session: DbSession) -> dict:
+    campus = live_campus(session)
+    places = [{**p, "step_free_access": campus["places"][i].get("step_free_access", "Not verified")}
+              for i, p in enumerate(CAMPUS_MAP["places"])]
+    return {**CAMPUS_MAP, "places": places, "network": network(CAMPUS_MAP, active_path_status(session))}
 
 
 @app.get("/locations/{location_id}", response_model=Location, tags=["Campus"])
@@ -644,17 +726,13 @@ def list_announcements(session: DbSession) -> list[Announcement]:
 @app.get("/routes", tags=["Navigation"])
 def get_route(request: Request, session: DbSession, destination: int, start: int = 1, accessible: bool = False) -> dict:
     identity = resolve_identity(request, session, required=False)
-    user = user_for_identity(identity, session) if identity else None
-    if user:
-        pref = session.exec(select(Preference).where(Preference.user_id == user.id)).first()
-        accessible = pref.accessible_routes if pref else False
-    return route_for_user(session, start, destination, accessible)
+    saved = saved_avoid_stairs(identity, session) if identity else None
+    return route_for_user(session, start, destination, accessible if saved is None else saved)
 
 
 def route_for_user(session: Session, start: int, destination: int, accessible: bool = False) -> dict:
-    # Use current database metadata; preserve explicit graph attachments and geometry.
-    campus = {**CAMPUS_MAP, "places": [{**p, **(session.get(Location, p['id']).model_dump() if session.get(Location, p['id']) else {})} for p in CAMPUS_MAP['places']]}
-    return {**draft_route(campus, start, destination, accessible), "start_location_id": start, "destination_location_id": destination}
+    route = draft_route(live_campus(session), start, destination, accessible, active_path_status(session))
+    return {**route, "start_location_id": start, "destination_location_id": destination}
 
 
 def lessons_for(identity: dict, session: Session) -> list[SampleLesson]:
@@ -784,8 +862,7 @@ def openrouter_answer(question: str, identity: dict | None, session: Session,
                 return {"full_name": user.full_name, "email": user.email, "sdu_id": account.sdu_id if account else None,
                         "faculty": user.faculty, "role": user.role, "source": "Stored app profile; no university-system integration"}
             if name == 'get_my_preferences':
-                pref = session.exec(select(Preference).where(Preference.user_id == user.id)).first()
-                return {"avoid_stairs": pref.accessible_routes if pref else False, "accessibility": "Routes remain unverified"}
+                return {"avoid_stairs": saved_avoid_stairs(identity, session), "accessibility": "Routes remain unverified"}
             if name == 'get_my_saved_places':
                 saved = session.exec(select(Favorite).where(Favorite.user_id == user.id)).all()
                 return {"locations": [record(item) for favorite in saved if (item := read_location(favorite.location_id))]}
@@ -799,6 +876,7 @@ def openrouter_answer(question: str, identity: dict | None, session: Session,
             reports = session.exec(select(InaccuracyReport).where(InaccuracyReport.author == identity['sub'])
                                    .order_by(InaccuracyReport.created_at.desc()).limit(10)).all()
             return {"reports": [{"message": r.message, "status": r.status, "created_at": r.created_at.isoformat(),
+                      "kind": r.kind, "resolution_note": r.resolution_note,
                       "location": record(item) if r.location_id and (item := read_location(r.location_id)) else None} for r in reports]}
         if name == 'get_next_class':
             if not identity or identity['role'] == 'guest':
@@ -820,9 +898,7 @@ def openrouter_answer(question: str, identity: dict | None, session: Session,
             if not start or not target:
                 return {"status": "unmapped", "message": "Start or destination unavailable or restricted"}
             record(start); record(target)
-            user = user_for_identity(identity, session) if identity else None
-            pref = session.exec(select(Preference).where(Preference.user_id == user.id)).first() if user else None
-            path = route_for_user(session, start.id, target.id, pref.accessible_routes if pref else False)
+            path = route_for_user(session, start.id, target.id, bool(identity and saved_avoid_stairs(identity, session)))
             routes.append(path)
             return {k: v for k, v in path.items() if k not in {'points', 'node_path', 'segments'}}
         raise ValueError('Unsupported tool')
@@ -1007,26 +1083,50 @@ def remove_favorite(location_id: int, identity: Identity, session: DbSession) ->
     return {"saved": False, "location_id": location_id}
 
 
-@app.post("/reports", response_model=InaccuracyReport, status_code=201, tags=["Reports"])
-def create_report(body: ReportRequest, identity: Identity, session: DbSession) -> InaccuracyReport:
-    if not user_for_identity(identity, session):
-        raise HTTPException(403, "Registered account required")
+REPORT_STATUSES = {"new", "reviewing", "resolved", "rejected"}
+GRAPH_EDGES = {edge_key(e['a'], e['b']) for e in CAMPUS_MAP['routing']['edges']}
+
+
+def report_view(report: InaccuracyReport, session: Session) -> dict:
+    location = session.get(Location, report.location_id) if report.location_id else None
+    closure = None
+    if report.edge_a and report.edge_b:
+        key = edge_key(report.edge_a, report.edge_b)
+        rows = session.exec(select(PathStatus).where(PathStatus.active == True)).all()  # noqa: E712
+        current = [row for row in rows if edge_key(row.edge_a, row.edge_b) == key]
+        closure = {"id": current[-1].id, "state": current[-1].state} if current else None
+    route = [session.get(Location, i) for i in (report.route_start_id, report.route_destination_id) if i]
+    return {**report.model_dump(), "location_name": location.name if location else None,
+            "connection_label": connection_label(CAMPUS_MAP, report.edge_a, report.edge_b) if report.edge_a and report.edge_b else None,
+            "route": " → ".join(item.name for item in route if item) or None, "path_status": closure}
+
+
+@app.post("/reports", status_code=201, tags=["Reports"])
+def create_report(body: ReportRequest, identity: Identity, session: DbSession) -> dict:
     if not body.message.strip() or len(body.message) > 2000:
-        raise HTTPException(422, "Describe the correction in 1–2000 characters")
+        raise HTTPException(422, "Describe the problem in 1–2000 characters")
+    if body.kind not in {"location", "path"}:
+        raise HTTPException(422, "Choose location information or a blocked path")
     if body.location_id is not None and not session.get(Location, body.location_id):
         raise HTTPException(404, "Location not found")
-    report = InaccuracyReport(author=identity["sub"], location_id=body.location_id, message=body.message)
+    if body.kind == "path" and (not body.edge_a or not body.edge_b or edge_key(body.edge_a, body.edge_b) not in GRAPH_EDGES):
+        raise HTTPException(422, "Choose the part of the route that is blocked")
+    if body.kind == "location" and body.location_id is None:
+        raise HTTPException(422, "Choose the location to correct")
+    report = InaccuracyReport(author=identity["sub"], location_id=body.location_id, message=body.message.strip(), kind=body.kind,
+                              edge_a=body.edge_a if body.kind == "path" else None, edge_b=body.edge_b if body.kind == "path" else None,
+                              route_start_id=body.route_start_id, route_destination_id=body.route_destination_id)
     session.add(report)
     session.commit()
     session.refresh(report)
-    return report
+    return report_view(report, session)
 
 
-@app.get("/reports/me", response_model=list[InaccuracyReport], tags=["Reports"])
-def my_reports(identity: Identity, session: DbSession) -> list[InaccuracyReport]:
-    if not user_for_identity(identity, session):
-        raise HTTPException(403, "Registered account required")
-    return list(session.exec(select(InaccuracyReport).where(InaccuracyReport.author == identity["sub"])).all())
+@app.get("/reports/me", tags=["Reports"])
+def my_reports(identity: Identity, session: DbSession) -> list[dict]:
+    rows = session.exec(select(InaccuracyReport).where(InaccuracyReport.author == identity["sub"])
+                        .order_by(InaccuracyReport.created_at.desc())).all()
+    return [report_view(report, session) for report in rows]
 
 
 @app.get("/admin/users", response_model=list[User], tags=["Administration"])
@@ -1053,8 +1153,14 @@ def set_role(user_id: int, body: RoleRequest, _: AdminIdentity, session: DbSessi
     return user
 
 
+def check_step_free_access(body: LocationRequest) -> None:
+    if body.step_free_access not in STEP_FREE_STATES:
+        raise HTTPException(422, "Choose a valid step-free access status")
+
+
 @app.post("/admin/locations", response_model=Location, status_code=201, tags=["Administration"])
 def add_location(body: LocationRequest, _: AdminIdentity, session: DbSession) -> Location:
+    check_step_free_access(body)
     item = Location(**body.model_dump())
     session.add(item)
     session.commit()
@@ -1064,6 +1170,7 @@ def add_location(body: LocationRequest, _: AdminIdentity, session: DbSession) ->
 
 @app.put("/admin/locations/{location_id}", response_model=Location, tags=["Administration"])
 def edit_location(location_id: int, body: LocationRequest, _: AdminIdentity, session: DbSession) -> Location:
+    check_step_free_access(body)
     item = session.get(Location, location_id)
     if not item:
         raise HTTPException(status_code=404, detail="Location not found")
@@ -1074,22 +1181,70 @@ def edit_location(location_id: int, body: LocationRequest, _: AdminIdentity, ses
     return item
 
 
-@app.get("/admin/reports", response_model=list[InaccuracyReport], tags=["Administration"])
-def admin_reports(_: AdminIdentity, session: DbSession) -> list[InaccuracyReport]:
-    return list(session.exec(select(InaccuracyReport).order_by(InaccuracyReport.created_at.desc())).all())
+@app.get("/admin/reports", tags=["Administration"])
+def admin_reports(_: AdminIdentity, session: DbSession) -> list[dict]:
+    rows = session.exec(select(InaccuracyReport).order_by(InaccuracyReport.created_at.desc())).all()
+    return [report_view(report, session) for report in rows]
 
 
-@app.put("/admin/reports/{report_id}", response_model=InaccuracyReport, tags=["Administration"])
-def update_report(report_id: int, body: StatusRequest, _: AdminIdentity, session: DbSession) -> InaccuracyReport:
+@app.put("/admin/reports/{report_id}", tags=["Administration"])
+def update_report(report_id: int, body: ReportUpdateRequest, _: AdminIdentity, session: DbSession) -> dict:
     report = session.get(InaccuracyReport, report_id)
     if not report:
         raise HTTPException(status_code=404, detail="Report not found")
-    if body.status not in {"new", "reviewing", "resolved", "rejected"}:
+    if body.status not in REPORT_STATUSES:
         raise HTTPException(422, "Choose a valid report status")
+    if body.resolution_note is not None and len(body.resolution_note) > 1000:
+        raise HTTPException(422, "Keep the update to 1000 characters")
     report.status = body.status
+    if body.resolution_note is not None:
+        report.resolution_note = body.resolution_note.strip()
+    report.updated_at = datetime.now(timezone.utc)
     session.commit()
     session.refresh(report)
-    return report
+    return report_view(report, session)
+
+
+@app.get("/admin/path-status", tags=["Administration"])
+def list_path_status(_: AdminIdentity, session: DbSession) -> list[dict]:
+    rows = session.exec(select(PathStatus).where(PathStatus.active == True).order_by(PathStatus.created_at.desc())).all()  # noqa: E712
+    return [{**row.model_dump(), "label": connection_label(CAMPUS_MAP, row.edge_a, row.edge_b)} for row in rows]
+
+
+@app.post("/admin/path-status", status_code=201, tags=["Administration"])
+def set_path_status(body: PathStatusRequest, _: AdminIdentity, session: DbSession) -> dict:
+    key = edge_key(body.edge_a, body.edge_b)
+    if key not in GRAPH_EDGES:
+        raise HTTPException(404, "Connection not found")
+    if body.state not in {"closed", "not_step_free"}:
+        raise HTTPException(422, "Choose closed or not step-free")
+    report = session.get(InaccuracyReport, body.report_id) if body.report_id else None
+    if body.report_id and not report:
+        raise HTTPException(404, "Report not found")
+    for row in session.exec(select(PathStatus).where(PathStatus.active == True)).all():  # noqa: E712
+        if edge_key(row.edge_a, row.edge_b) == key:
+            row.active = False
+    row = PathStatus(edge_a=key[0], edge_b=key[1], state=body.state, note=body.note.strip()[:1000], report_id=body.report_id)
+    session.add(row)
+    if report:
+        report.status = "resolved"
+        report.resolution_note = report.resolution_note or (
+            "This path is now closed and routes avoid it." if body.state == "closed"
+            else "This path is now marked as not step-free; step-free routes avoid it.")
+        report.updated_at = datetime.now(timezone.utc)
+    session.commit()
+    session.refresh(row)
+    return {**row.model_dump(), "label": connection_label(CAMPUS_MAP, row.edge_a, row.edge_b)}
+
+
+@app.delete("/admin/path-status/{status_id}", tags=["Administration"])
+def reopen_path(status_id: int, _: AdminIdentity, session: DbSession) -> dict:
+    row = session.get(PathStatus, status_id)
+    if not row or not row.active:
+        raise HTTPException(404, "Path status not found")
+    row.active = False
+    session.commit()
+    return {"reopened": True, "id": status_id}
 
 
 @app.get("/admin/analytics/popular-searches", tags=["Administration"])

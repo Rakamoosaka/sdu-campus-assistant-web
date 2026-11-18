@@ -56,6 +56,7 @@ export interface Place {
   contact: string;
   accessible: boolean;
   aliases: string;
+  step_free_access?: string;
 }
 export interface MapPlace extends Place {
   map_key: string;
@@ -68,8 +69,22 @@ export interface MapPlace extends Place {
   position_status: string;
   accessibility_status: string;
 }
+export interface Connection {
+  a: string;
+  b: string;
+  kind: string;
+  label: string | null;
+  from_floor: number;
+  to_floor: number;
+  step_free: boolean;
+  closed: boolean;
+}
 export interface CampusMap {
-  routing: { attachments: Record<string, string> };
+  routing: {
+    attachments: Record<string, string>;
+    nodes: Record<string, [number, number]>;
+  };
+  network?: Connection[];
   width: number;
   height: number;
   places: MapPlace[];
@@ -94,6 +109,14 @@ export interface PathResult {
   destination?: string;
   route_floors?: number[];
   avoid_stairs: boolean;
+  warnings?: string[];
+  connections?: {
+    a: string;
+    b: string;
+    kind: string;
+    label: string;
+    step_free: boolean;
+  }[];
   transfers?: {
     kind: string;
     label: string;
@@ -126,10 +149,40 @@ export interface Lesson {
 export interface Report {
   id: number;
   author: string;
+  kind: "location" | "path";
   location_id: number | null;
+  location_name: string | null;
+  connection_label: string | null;
+  edge_a: string | null;
+  edge_b: string | null;
+  route: string | null;
   message: string;
   status: string;
+  resolution_note: string;
+  created_at: string;
+  updated_at: string | null;
+  path_status: { id: number; state: string } | null;
 }
+export interface PathClosure {
+  id: number;
+  edge_a: string;
+  edge_b: string;
+  state: string;
+  note: string;
+  label: string;
+  report_id: number | null;
+  created_at: string;
+}
+export const STEP_FREE_STATES = ["Not verified", "Step-free", "Not step-free"];
+export const reportStatusLabel = (status: string) =>
+  (
+    ({
+      new: "Received",
+      reviewing: "Under review",
+      resolved: "Resolved",
+      rejected: "Not changed",
+    }) as Record<string, string>
+  )[status] || status;
 export interface Answer {
   conversation_id?: string;
   engine?: "openrouter" | "rules";

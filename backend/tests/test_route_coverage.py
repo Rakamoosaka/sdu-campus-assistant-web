@@ -29,7 +29,7 @@ def test_all_public_start_destination_pairs_and_stairs_exclusion():
                 elif start['id'] == target['id']:
                     assert status == 'same_location'
                 elif avoid_stairs and (start['map_floor'] == 3 or target['map_floor'] == 3):
-                    assert status == 'no_route'
+                    assert status == 'no_step_free_route' and 'stairs' in route['message']
                 else:
                     assert status == 'schematic_draft', (start['name'], target['name'], route)
                     assert route['segments'] and route['steps']

@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   TransformWrapper,
   TransformComponent,
@@ -23,6 +23,8 @@ import {
   Flag,
   ArrowLeft,
   SlidersHorizontal,
+  Accessibility,
+  Check,
 } from "lucide-react";
 import { Button } from "./components/ui/button";
 import { Dialog } from "./components/ui/dialog";
@@ -37,6 +39,8 @@ import {
   type CampusMap,
   type MapPlace,
   type PathResult,
+  type Report,
+  reportStatusLabel,
 } from "./lib/api";
 import floor1 from "../../assets/maps/floor-1-background.svg?url";
 import floor2 from "../../assets/maps/floor-2-background.svg?url";
@@ -94,7 +98,8 @@ export function MapWorkspace({
   offlineControl,
 }: MapProps) {
   const location = useLocation(),
-    navigate = useNavigate();
+    navigate = useNavigate(),
+    qc = useQueryClient();
   const incomingRoute = location.state?.assistantRoute as
     PathResult | undefined;
   const [floor, setFloor] = useState(incomingRoute?.route_floors?.[0] || 1),
@@ -106,7 +111,12 @@ export function MapWorkspace({
     [routeError, setRouteError] = useState(""),
     [panelOpen, setPanelOpen] = useState(false),
     [reportOpen, setReportOpen] = useState(false),
-    [report, setReport] = useState("");
+    [report, setReport] = useState(""),
+    [reportKind, setReportKind] = useState<"location" | "path">("location"),
+    [reportEdge, setReportEdge] = useState(""),
+    [reportDone, setReportDone] = useState<Report | null>(null),
+    [showAccess, setShowAccess] = useState(false),
+    [draftAvoid, setDraftAvoid] = useState<boolean | null>(null);
   const zoom = useRef<ReactZoomPanPinchRef>(null),
     viewport = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.5);
@@ -164,14 +174,54 @@ export function MapWorkspace({
         setRouteError(errorMessage(e));
     },
   });
-  const reporting = useMutation({
-    mutationFn: () =>
-      api.post("/reports", { message: report, location_id: selected }),
+  const pref = useQuery({
+    queryKey: ["preferences"],
+    queryFn: () => get<{ accessible_routes: boolean }>("/users/me/preferences"),
+    enabled: !offline,
+  });
+  const savePref = useMutation({
+    mutationFn: (value: boolean) =>
+      api.put("/users/me/preferences", { accessible_routes: value }),
+    onSettled: async () => {
+      await qc.invalidateQueries({ queryKey: ["preferences"] });
+      setDraftAvoid(null);
+    },
     onSuccess: () => {
-      setReportOpen(false);
-      setReport("");
+      if (route && selected !== null)
+        planning.mutate({ start, destination: selected });
     },
   });
+  const reporting = useMutation({
+    mutationFn: () => {
+      const [edge_a, edge_b] = reportEdge.split("|");
+      return api.post<Report>(
+        "/reports",
+        reportKind === "path"
+          ? {
+              kind: "path",
+              message: report,
+              location_id: selected,
+              edge_a,
+              edge_b,
+              route_start_id: route?.start_location_id,
+              route_destination_id: route?.destination_location_id,
+            }
+          : { kind: "location", message: report, location_id: selected },
+      );
+    },
+    onSuccess: (result) => {
+      setReportDone(result.data);
+      setReport("");
+      qc.invalidateQueries({ queryKey: ["my-reports"] });
+    },
+  });
+  function openReport(kind: "location" | "path") {
+    setReportKind(kind);
+    setReportEdge("");
+    setReportDone(null);
+    reporting.reset();
+    setReportOpen(true);
+  }
   useEffect(() => {
     const timer = setTimeout(() => setDebounced(query.trim()), 300);
     return () => clearTimeout(timer);
@@ -519,6 +569,10 @@ export function MapWorkspace({
                 <strong>{selectedPlace.contact}</strong>
               </div>
               <div>
+                <span>Step-free access</span>
+                <strong>{selectedPlace.step_free_access || "Not verified"}</strong>
+              </div>
+              <div>
                 <span>Map position</span>
                 <strong>
                   {mapPlace?.has_position
@@ -581,6 +635,31 @@ export function MapWorkspace({
               <div className="route-destination">
                 <MapPin size={16} /> {selectedPlace.name}
               </div>
+              {!offline && (
+                <label className="route-toggle">
+                  <Accessibility size={18} />
+                  <span>
+                    <strong>Avoid stairs</strong>
+                    <small>
+                      Saved to your{" "}
+                      {person.role === "guest" ? "guest session" : "account"}
+                    </small>
+                  </span>
+                  <input
+                    type="checkbox"
+                    role="switch"
+                    checked={draftAvoid ?? pref.data?.accessible_routes ?? false}
+                    disabled={
+                      pref.isPending || pref.isError || savePref.isPending
+                    }
+                    onChange={(e) => {
+                      setDraftAvoid(e.target.checked);
+                      savePref.mutate(e.target.checked);
+                    }}
+                  />
+                </label>
+              )}
+              {savePref.isError && <StateBox error={savePref.error} />}
               <Button
                 className="w-full"
                 disabled={offline || planning.isPending || !canRoute || selected === null}
@@ -621,10 +700,17 @@ export function MapWorkspace({
                 </div>
                 {route.avoid_stairs && (
                   <span className="category-tag">
-                    Stairs excluded · lift connections only
+                    Step-free preference · stairs excluded
                   </span>
                 )}
                 <p>{route.message}</p>
+                {!!route.warnings?.length && (
+                  <ul className="route-warnings">
+                    {route.warnings.map((w) => (
+                      <li key={w}>{w}</li>
+                    ))}
+                  </ul>
+                )}
                 {route.route_floors && (
                   <div className="route-floor-tabs">
                     {route.route_floors.map((f) => (
@@ -645,21 +731,30 @@ export function MapWorkspace({
                   ))}
                 </ol>
                 {route.status === "schematic_draft" && (
-                  <p className="muted text-xs">
-                    Distance & walking time unavailable: the schematic has no
-                    measured scale.
-                  </p>
+                  <>
+                    <p className="muted text-xs">
+                      Distance & walking time unavailable: the schematic has
+                      no measured scale.
+                    </p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => openReport("path")}
+                    >
+                      <Flag size={14} /> Report a blocked path on this route
+                    </Button>
+                  </>
                 )}
               </section>
             )}
-            {person.role !== "guest" && (
+            {!offline && (
               <Button
                 variant="ghost"
                 size="sm"
                 className="mt-4"
-                onClick={() => setReportOpen(true)}
+                onClick={() => openReport("location")}
               >
-                <Flag size={14} /> Report an inaccuracy
+                <Flag size={14} /> Report a problem
               </Button>
             )}
           </div>
@@ -808,6 +903,36 @@ export function MapWorkspace({
                       {b}
                     </text>
                   ))}
+                {showAccess &&
+                  map.network
+                    ?.filter((c) => c.from_floor === floor && c.to_floor === floor)
+                    .map((c) => {
+                      const a = map.routing.nodes[c.a],
+                        b = map.routing.nodes[c.b];
+                      return (
+                        <line
+                          key={c.a + c.b}
+                          x1={a[0]}
+                          y1={a[1]}
+                          x2={b[0]}
+                          y2={b[1]}
+                          stroke={
+                            c.closed
+                              ? "#dc2626"
+                              : c.step_free
+                                ? "#15803d"
+                                : "#b45309"
+                          }
+                          strokeWidth={c.closed ? 5 : 3.5}
+                          strokeDasharray={
+                            c.closed || !c.step_free ? "5 5" : undefined
+                          }
+                          strokeLinecap="round"
+                          opacity={0.85}
+                          pointerEvents="none"
+                        />
+                      );
+                    })}
                 {routeBounds && (
                   <rect
                     id="route-bounds"
@@ -904,6 +1029,18 @@ export function MapWorkspace({
           >
             <Maximize size={18} />
           </Button>
+          {!!map.network && (
+            <Button
+              variant={showAccess ? "default" : "outline"}
+              size="icon"
+              aria-label="Show step-free connections"
+              aria-pressed={showAccess}
+              title="Show step-free connections"
+              onClick={() => setShowAccess(!showAccess)}
+            >
+              <Accessibility size={18} />
+            </Button>
+          )}
         </div>
         <div className="map-legend">
           <span>
@@ -914,6 +1051,22 @@ export function MapWorkspace({
             <i className="legend-service" />
             Campus service
           </span>
+          {showAccess && (
+            <>
+              <span>
+                <i className="legend-stepfree" />
+                Step-free
+              </span>
+              <span>
+                <i className="legend-steps" />
+                Stairs / not step-free
+              </span>
+              <span>
+                <i className="legend-closed" />
+                Closed
+              </span>
+            </>
+          )}
           {!offline && route && (
             <>
               <span>
@@ -934,33 +1087,98 @@ export function MapWorkspace({
       <Dialog
         open={reportOpen}
         onOpenChange={setReportOpen}
-        title="Help improve campus information"
-        description={`Report an inaccuracy for ${selectedPlace?.name}.`}
+        title="Help keep campus navigation reliable"
+        description={`Report a problem at or near ${selectedPlace?.name}.`}
       >
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            reporting.mutate();
-          }}
-        >
-          <label>
-            What needs correcting?
-            <textarea
-              required
-              maxLength={2000}
-              value={report}
-              onChange={(e) => setReport(e.target.value)}
-              placeholder="Describe what you noticed…"
-            />
-          </label>
-          {reporting.isError && <StateBox error={reporting.error} />}
-          <Button
-            type="submit"
-            disabled={reporting.isPending || !report.trim()}
+        {reportDone ? (
+          <div className="report-done" role="status">
+            <p className="success-text">
+              <Check size={16} /> Report #{reportDone.id} received ·{" "}
+              {reportStatusLabel(reportDone.status)}
+            </p>
+            <p>
+              Follow its progress under <Link to="/profile">Profile → Your reports</Link>.
+              {person.role === "guest" &&
+                " As a guest, you can track it for as long as this guest session lasts."}
+            </p>
+            <Button onClick={() => setReportOpen(false)}>Done</Button>
+          </div>
+        ) : (
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              reporting.mutate();
+            }}
           >
-            Submit report
-          </Button>
-        </form>
+            <fieldset className="report-kind">
+              <legend>What is wrong?</legend>
+              <label>
+                <input
+                  type="radio"
+                  name="report-kind"
+                  checked={reportKind === "location"}
+                  onChange={() => setReportKind("location")}
+                />
+                Location information is incorrect
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="report-kind"
+                  checked={reportKind === "path"}
+                  onChange={() => setReportKind("path")}
+                />
+                A path is blocked or not usable
+              </label>
+            </fieldset>
+            {reportKind === "path" &&
+              (route?.connections?.length ? (
+                <label>
+                  Which part of your route?
+                  <select
+                    required
+                    value={reportEdge}
+                    onChange={(e) => setReportEdge(e.target.value)}
+                  >
+                    <option value="">Choose the blocked part…</option>
+                    {route.connections.map((c, i) => (
+                      <option key={c.a + c.b} value={`${c.a}|${c.b}`}>
+                        {i + 1}. {c.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              ) : (
+                <p className="muted">
+                  Find a route that passes through the blocked path first, then
+                  choose the blocked part from that route.
+                </p>
+              ))}
+            <label>
+              {reportKind === "path"
+                ? "What is blocking the path?"
+                : "What needs correcting?"}
+              <textarea
+                required
+                maxLength={2000}
+                value={report}
+                onChange={(e) => setReport(e.target.value)}
+                placeholder="Describe what you noticed…"
+              />
+            </label>
+            {reporting.isError && <StateBox error={reporting.error} />}
+            <Button
+              type="submit"
+              disabled={
+                reporting.isPending ||
+                !report.trim() ||
+                (reportKind === "path" && !reportEdge)
+              }
+            >
+              Submit report
+            </Button>
+          </form>
+        )}
       </Dialog>
     </div>
   );

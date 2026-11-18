@@ -40,11 +40,12 @@ def test_invalid_duplicate_and_no_registration_admin(api_client):
 def test_guest_restrictions_and_public_endpoints(api_client):
     c=api_client
     r=c.post('/auth/guest'); headers={'Authorization':'Bearer '+r.json()['access_token']}
-    for path in ['/users/me/favorites','/users/me/preferences','/students/me/timetable','/teachers/me/schedule','/reports/me','/admin/users']:
+    for path in ['/users/me/favorites','/students/me/timetable','/teachers/me/schedule','/admin/users','/admin/reports']:
         assert c.get(path,headers=headers).status_code==403,path
     assert c.post('/users/me/favorites/2',headers=headers).status_code==403
     assert c.delete('/users/me/favorites/2',headers=headers).status_code==403
-    assert c.post('/reports',headers=headers,json={'message':'Report'}).status_code==403
+    assert c.get('/reports/me',headers=headers).json()==[]
+    assert c.get('/users/me/preferences',headers=headers).json()['saved_for']=='guest_session'
     for path in ['/locations','/campus-map','/routes?destination=2','/search?q=D201','/announcements']:
         assert c.get(path).status_code==200
 
@@ -135,7 +136,7 @@ def test_saved_preference_drives_routes_and_unavailable_canteen(api_client):
     path=c.get('/routes',headers=h,params={'destination':ids['d201'],'accessible':False}).json()
     assert path['avoid_stairs'] is True
     assert all(t['kind']=='lift' for t in path['transfers'])
-    assert c.get('/routes',headers=h,params={'destination':ids['canteen_floor_3']}).json()['status']=='no_route'
+    assert c.get('/routes',headers=h,params={'destination':ids['canteen_floor_3']}).json()['status']=='no_step_free_route'
     assert c.get('/routes?destination=999999999',headers=h).json()['status']=='unmapped'
 
 

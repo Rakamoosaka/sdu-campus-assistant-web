@@ -88,7 +88,7 @@ test("saved accessibility preference changes cross-floor routing to a lift", asy
   ).toContainText("lift from floor 1 to floor 2");
   await expect(
     page.getByRole("region", { name: "Route directions" }),
-  ).toContainText("Stairs excluded");
+  ).toContainText("stairs excluded");
 });
 test("five saved places persist and removal permits replacement", async ({
   page,
@@ -532,4 +532,71 @@ test("offline map survives a failed update and reopens a shared room without a n
       name: "No offline map is saved on this device",
     }),
   ).toBeVisible();
+});
+
+async function logout(page: Page) {
+  await page.getByRole("link", { name: "Profile", exact: true }).click();
+  await page.getByRole("button", { name: "Log out", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Good to see you." }),
+  ).toBeVisible();
+}
+test("guest saves a step-free preference and sees why no step-free route exists", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Continue as guest" }).click();
+  await search(page, "D201");
+  await page.getByRole("switch", { name: /Avoid stairs/ }).check();
+  await page.getByRole("button", { name: "Find route", exact: true }).click();
+  const directions = page.getByRole("region", { name: "Route directions" });
+  await expect(directions).toContainText("lift from floor 1 to floor 2");
+  await expect(directions).toContainText("Step-free access at D201 is not verified");
+  await page.getByRole("button", { name: "Show step-free connections" }).click();
+  await expect(page.locator(".map-legend")).toContainText("Step-free");
+  await search(page, "Canteen — Floor 3");
+  await page.getByRole("button", { name: "Find route", exact: true }).click();
+  await expect(directions).toContainText("No step-free route");
+  await page.getByRole("link", { name: "Profile", exact: true }).click();
+  await expect(page.getByRole("switch")).toBeChecked();
+});
+test("blocked path report is tracked and resolved by an administrator", async ({
+  page,
+}) => {
+  await login(page);
+  await search(page, "D201");
+  await page.getByRole("button", { name: "Find route", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Report a blocked path on this route" })
+    .click();
+  await page.getByLabel("Which part of your route?").selectOption({ index: 3 });
+  await page
+    .getByLabel("What is blocking the path?")
+    .fill("Browser test: corridor closed for repairs");
+  await page.getByRole("button", { name: "Submit report" }).click();
+  await expect(page.getByRole("status").filter({ hasText: "received" })).toBeVisible();
+  await page.getByRole("link", { name: "Profile → Your reports" }).click();
+  const mine = page
+    .locator(".report-card")
+    .filter({ hasText: "corridor closed for repairs" });
+  await expect(mine).toContainText("Received");
+  await logout(page);
+
+  await login(page, "240000002");
+  await page.getByRole("link", { name: "Administration", exact: true }).click();
+  await page.getByRole("button", { name: "Reports", exact: true }).click();
+  const row = page
+    .locator(".admin-list-row")
+    .filter({ hasText: "corridor closed for repairs" });
+  await row.getByRole("button", { name: "Close path" }).click();
+  await expect(page.getByText("Changes saved to the database.")).toBeVisible();
+  await expect(row.getByRole("combobox")).toHaveValue("resolved");
+  await row.getByRole("button", { name: "Reopen path" }).click();
+  await expect(page.getByText("All mapped paths are open.")).toBeVisible();
+  await logout(page);
+
+  await login(page);
+  await page.getByRole("link", { name: "Profile", exact: true }).click();
+  await expect(mine).toContainText("Resolved");
+  await expect(mine).toContainText("This path is now closed and routes avoid it.");
 });
