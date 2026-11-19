@@ -15,6 +15,7 @@ from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 from difflib import SequenceMatcher
 from typing import Annotated
+from urllib.parse import urlsplit
 from uuid import uuid4
 
 import jwt
@@ -28,11 +29,18 @@ from sqlalchemy.types import TypeDecorator
 from sqlmodel import Field, Session, SQLModel, create_engine, select
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./sdu_campus.db")
+# Hosts such as Neon hand out postgres:// or postgresql:// addresses; use the installed psycopg 3 driver.
+DATABASE_URL = re.sub(r"^postgres(ql)?://", "postgresql+psycopg://", DATABASE_URL)
 JWT_SECRET = os.getenv("JWT_SECRET", "sdu-campus-course-demo-secret")
 engine = create_engine(DATABASE_URL, echo=False, pool_pre_ping=True)
 security = HTTPBearer(auto_error=False)
 ALLOWED_ORIGINS = os.getenv("CORS_ORIGINS", "http://127.0.0.1:5173,http://localhost:5173").split(",")
 COOKIE_SECURE = os.getenv("COOKIE_SECURE", "false").lower() == "true"
+if COOKIE_SECURE and JWT_SECRET == "sdu-campus-course-demo-secret":
+    # The demo secret is public in this repository; never sign real sessions with it.
+    # A random secret is safe, but everyone is signed out whenever the server restarts.
+    print("JWT_SECRET is not set; using a random secret for this run.")
+    JWT_SECRET = secrets.token_urlsafe(48)
 COOKIE_NAME = "sdu_session"
 TZ = ZoneInfo("Asia/Almaty")
 CAMPUS_MAP = json.loads((Path(__file__).parent / 'data/campus.json').read_text())
@@ -525,11 +533,14 @@ app.add_middleware(CORSMiddleware, allow_origins=ALLOWED_ORIGINS, allow_credenti
 async def browser_origin_check(request: Request, call_next):
     if request.method not in {"GET", "HEAD", "OPTIONS"}:
         origin = request.headers.get("origin")
-        if origin and origin not in ALLOWED_ORIGINS and origin != str(request.base_url).rstrip("/"):
+        same_site = origin and urlsplit(origin).netloc == request.headers.get("host")
+        if origin and origin not in ALLOWED_ORIGINS and not same_site:
             return JSONResponse({"detail": "Origin is not allowed"}, status_code=403)
     response = await call_next(request)
     response.headers["X-Content-Type-Options"] = "nosniff"
-    if request.url.path.startswith(("/auth", "/users", "/admin", "/students", "/teachers")):
+    # When served under /api (app.server), the mount prefix is in root_path.
+    path = request.url.path.removeprefix(request.scope.get("root_path", ""))
+    if path.startswith(("/auth", "/users", "/admin", "/students", "/teachers")):
         response.headers["Cache-Control"] = "no-store"
     return response
 

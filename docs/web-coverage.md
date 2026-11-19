@@ -27,7 +27,7 @@ Status is based on real API/database behavior and browser execution. There is no
 
 | Check | Result |
 |---|---|
-| `PYTHONPATH=backend .venv/bin/pytest backend/tests -q` | 85 tests passed, including AI grounding, step-free routing, path closures, report tracking and the column migration for existing databases |
+| `PYTHONPATH=backend .venv/bin/pytest backend/tests -q` | 86 tests passed on SQLite and on PostgreSQL 17, including AI grounding, step-free routing, path closures, report tracking and the column migration for existing databases |
 | `npm --prefix web test` | 4 component tests passed |
 | `npm --prefix web run test:e2e` | 20 Chromium browser tests passed, 2 skipped (timetable and announcement tests skip while those sections are switched off in `web/src/features.ts`) against disposable servers/database; external AI disabled |
 | `npm --prefix web run build` | TypeScript check and production build passed |

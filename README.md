@@ -20,7 +20,24 @@ If `.venv` and the dependencies already exist, use `make web-start` directly. Ke
 - API/Swagger: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 - Health: [http://127.0.0.1:8000/health](http://127.0.0.1:8000/health)
 
-Stop with `make web-stop`. On macOS, the launcher submits current-login launchd jobs so servers survive the end of a Codex command/chat turn; it does not install boot/login startup items. The stop command removes those jobs. Logs, errors and recorded service PIDs live in ignored `.local-run/`. If you instead start `make backend-local` and `make web-dev` in separate terminals, stop each with Ctrl-C. `make web-build` checks TypeScript and produces `web/dist/`. The launcher builds the app and serves it with Vite preview. Both Vite modes proxy `/api` requests to FastAPI with same-origin browser cookies. Use `make web-dev` for hot reload. A production host needs an equivalent `/api` reverse proxy and SPA history fallback. No public hosting is configured.
+Stop with `make web-stop`. On macOS, the launcher submits current-login launchd jobs so servers survive the end of a Codex command/chat turn; it does not install boot/login startup items. The stop command removes those jobs. Logs, errors and recorded service PIDs live in ignored `.local-run/`. If you instead start `make backend-local` and `make web-dev` in separate terminals, stop each with Ctrl-C. `make web-build` checks TypeScript and produces `web/dist/`. The launcher builds the app and serves it with Vite preview. Both Vite modes proxy `/api` requests to FastAPI with same-origin browser cookies. Use `make web-dev` for hot reload. For hosting, the root Dockerfile serves the site and API from one address; see Deploy (Render + Neon) below.
+
+## Deploy (Render + Neon, free)
+
+The root `Dockerfile` builds the website and serves it together with the API (under `/api`) from one FastAPI process (`backend/app/server.py`). On Render's free plan the container keeps no files, so the data lives in a free [Neon](https://neon.com) Postgres database. `render.yaml` describes the service.
+
+1. **Database (Neon):** sign up at neon.com and create a project (region: Frankfurt / `eu-central-1`). On the project dashboard, click **Connect** and copy the connection string (`postgresql://…?sslmode=require`).
+2. **App (Render):** sign in at render.com with GitHub. Choose **New → Blueprint**, pick this repository, and paste the Neon connection string into `DATABASE_URL` when asked. Render generates `JWT_SECRET` itself.
+3. Wait for the first deploy, then open the `https://sdu-campus-assistant.onrender.com` address shown on the service (Render may add a suffix if the name is taken). The demo logins work after the first start, which creates the tables and demo data.
+4. Optional: in the service's **Environment** tab, add `OPENROUTER_API_KEY` (and `OPENROUTER_MODEL`) for the AI assistant; without them the built-in assistant answers.
+
+Notes:
+- The free service falls asleep after about 15 idle minutes and takes up to a minute to wake. Open the link a minute before presenting.
+- Data stays in Neon across sleeps, restarts and redeploys. Each push to `main` redeploys.
+- `COOKIE_SECURE=true` is set in the image. No `CORS_ORIGINS` is needed because the site and API share one address. Without `JWT_SECRET`, the server uses a random secret, so everyone is signed out after each restart.
+- `postgres://` and `postgresql://` addresses are accepted as-is.
+
+To try the same image locally: `docker build -t sdu-campus .` then `docker run -p 8000:8000 -v sdu-data:/data sdu-campus` and open http://127.0.0.1:8000. Add `-e DATABASE_URL=postgresql://…` to use Postgres instead of the SQLite file on the volume.
 
 ## PostgreSQL and Docker
 
@@ -31,7 +48,7 @@ npm --prefix web run dev
 
 Compose preserves `sdu_postgres_data`; **do not use `down -v`** to stop a demonstration. `docker compose down` retains data. Stop the standalone local API first to free port 8000. The API container uses PostgreSQL directly. Schema setup is additive (`create_all` for missing tables, plus newer columns added to existing tables on startup); no existing tables or columns are dropped. See [database-schema.md](database-schema.md) for the update procedure.
 
-pgAdmin remains at [http://127.0.0.1:5050](http://127.0.0.1:5050), login `admin@sdu.edu.kz` / `admin`. Register host `database`, port `5432`, database/user `sdu_campus` / `sdu`, password `sdu_demo_password`. These are local presentation credentials. Docker's daemon was stopped in the verification environment, so the delivered run uses SQLite; PostgreSQL container execution is unverified in this batch.
+pgAdmin remains at [http://127.0.0.1:5050](http://127.0.0.1:5050), login `admin@sdu.edu.kz` / `admin`. Register host `database`, port `5432`, database/user `sdu_campus` / `sdu`, password `sdu_demo_password`. These are local presentation credentials. The full backend test suite also passes on PostgreSQL 17 (see Tests).
 
 ## What works
 
@@ -71,7 +88,7 @@ cd ..
 make test-e2e             # real API + browser; disposable temporary SQLite database
 ```
 
-The E2E runner starts isolated servers on ports 8001/5174 and never uses the user's database. Backend fixtures create a fresh database per test. Flutter sources and Flutter-only commands are intentionally excluded.
+The E2E runner starts isolated servers on ports 8001/5174 and never uses the user's database. Backend fixtures create a fresh database per test. To run the backend tests on PostgreSQL, point `TEST_DATABASE_URL` at a throwaway database (its `public` schema is wiped before every test), for example `TEST_DATABASE_URL=postgresql+psycopg://sdu:pw@127.0.0.1:55432/sdu_campus make test-api`. Flutter sources and Flutter-only commands are intentionally excluded.
 
 ## Optional map regeneration
 
