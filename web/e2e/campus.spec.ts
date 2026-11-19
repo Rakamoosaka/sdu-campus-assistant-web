@@ -595,15 +595,17 @@ test("blocked path report is tracked and resolved by an administrator", async ({
   await page.getByRole("link", { name: "Administration", exact: true }).click();
   await page.getByRole("button", { name: "Reports", exact: true }).click();
   const row = page
-    .locator(".admin-list-row")
+    .locator(".report-group")
     .filter({ hasText: "corridor closed for repairs" });
-  await row.getByRole("button", { name: "Close path" }).click();
-  await expect(page.getByText("Changes saved to the database.")).toBeVisible();
+  await expect(row).toContainText("Reported by 1 person");
+  await row.getByRole("button", { name: /Close this path/ }).click();
+  await expect(page.getByText(/Path closed\. Routes now go around it/)).toBeVisible();
   await expect(row).toHaveCount(0);
-  await page.getByRole("button", { name: "Resolved", exact: true }).click();
+  await expect(page.locator(".closed-path")).toHaveCount(1);
+  await page.getByRole("button", { name: /^Resolved/ }).click();
   await expect(row).toBeVisible();
   await page.getByRole("button", { name: "Reopen now" }).click();
-  await expect(page.getByText("All mapped paths are open.")).toBeVisible();
+  await expect(page.locator(".closed-path")).toHaveCount(0);
   await logout(page);
 
   await login(page);
@@ -724,16 +726,18 @@ test("administrator fixes a reported location in one step; reporter can withdraw
   await page.getByRole("link", { name: "Administration", exact: true }).click();
   await page.getByRole("button", { name: "Reports", exact: true }).click();
   const row = page
-    .locator(".admin-list-row")
+    .locator(".report-group")
     .filter({ hasText: "open until 22:00 now" });
-  await row.getByRole("button", { name: "Fix details and resolve" }).click();
+  await row.getByRole("button", { name: /Fix the details/ }).click();
+  await expect(page.getByRole("dialog")).toContainText("open until 22:00 now");
   await page.getByLabel("Opening hours").fill("Sample: 08:00–22:00");
   await page.getByRole("button", { name: "Save and resolve report" }).click();
+  await expect(page.getByText(/Details saved\. The report is resolved/)).toBeVisible();
   await expect(row).toHaveCount(0);
-  await page.getByRole("button", { name: "Withdrawn", exact: true }).click();
+  await page.getByRole("button", { name: /^Withdrawn/ }).click();
   await expect(
-    page.locator(".admin-list-row").filter({ hasText: "sent by mistake" }),
-  ).toContainText("Withdrawn by the reporter");
+    page.locator(".report-group").filter({ hasText: "sent by mistake" }),
+  ).toContainText("The reporter withdrew this report.");
   await logout(page);
 
   await login(page, "240103050");
@@ -763,4 +767,40 @@ test("switched-off sections are hidden everywhere", async ({ page }) => {
   await expect(
     page.getByRole("button", { name: "Announcements", exact: true }),
   ).toHaveCount(0);
+});
+test("same-place reports are grouped and declined with one message", async ({
+  page,
+}) => {
+  for (const who of ["240103051", "240103052"]) {
+    await login(page, who);
+    await search(page, "Medical Point");
+    await page.getByRole("button", { name: "Report a problem" }).click();
+    await page.getByLabel("What's wrong?").fill(`Browser test: moved upstairs (${who})`);
+    await page.getByRole("button", { name: "Submit report" }).click();
+    await expect(page.getByRole("status").filter({ hasText: "received" })).toBeVisible();
+    await page.getByRole("button", { name: "Done" }).click();
+    await logout(page);
+  }
+  await login(page, "240000002");
+  await page.getByRole("link", { name: "Administration", exact: true }).click();
+  await page.getByRole("button", { name: "Reports", exact: true }).click();
+  const card = page
+    .locator(".report-group")
+    .filter({ hasText: "moved upstairs" });
+  await expect(card).toHaveCount(1);
+  await expect(card).toContainText("Reported by 2 people");
+  await card.getByRole("button", { name: "Reply or decline…" }).click();
+  await card
+    .getByLabel("Message to the reporters")
+    .fill("We checked: it is still on the first floor.");
+  await card.getByRole("button", { name: "Decline with this message" }).click();
+  await expect(page.getByText(/the reporters were told why/)).toBeVisible();
+  await expect(card).toHaveCount(0);
+  await logout(page);
+
+  await login(page, "240103052");
+  await page.getByRole("link", { name: /My reports/ }).click();
+  const mine = page.locator(".report-card").filter({ hasText: "moved upstairs" });
+  await expect(mine).toContainText("Not changed");
+  await expect(mine).toContainText("still on the first floor");
 });

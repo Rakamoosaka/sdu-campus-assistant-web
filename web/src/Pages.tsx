@@ -17,6 +17,7 @@ import { Button } from "./components/ui/button";
 import { Dialog } from "./components/ui/dialog";
 import { StateBox } from "./MapWorkspace";
 import { features } from "./features";
+import { AdminReports } from "./components/AdminReports";
 import {
   api,
   get,
@@ -788,11 +789,8 @@ export function AdminPage({ places }: Props) {
     [newsEdit, setNewsEdit] = useState<News | null | undefined>(undefined),
     [message, setMessage] = useState(""),
     [filter, setFilter] = useState(""),
-    [notes, setNotes] = useState<Record<number, string>>({}),
     [confirmDelete, setConfirmDelete] = useState<number | null>(null),
-    [fixing, setFixing] = useState<Report | null>(null),
-    [reportFilter, setReportFilter] = useState("open"),
-    [reopenAt, setReopenAt] = useState<Record<number, string>>({});
+    [fixing, setFixing] = useState<Report | null>(null);
   const analytics = useQuery({
     queryKey: ["analytics"],
     queryFn: () =>
@@ -830,11 +828,13 @@ export function AdminPage({ places }: Props) {
     onSuccess: () => {
       setEditing(null);
       setFixing(null);
-      setReopenAt({});
       setNewsEdit(undefined);
-      setNotes({});
       setConfirmDelete(null);
-      setMessage("Changes saved to the database.");
+      setMessage(
+        fixing
+          ? "Details saved. The report is resolved and the reporter was told."
+          : "Changes saved to the database.",
+      );
       qc.invalidateQueries();
     },
     onError: () => setMessage(""),
@@ -1070,257 +1070,31 @@ export function AdminPage({ places }: Props) {
           )}
         </section>
       )}
-      {tab === "Reports" && (
-        <section className="admin-section">
-          <h2>Paths affecting routes</h2>
-          {closures.isError ? (
-            <StateBox error={closures.error} retry={() => closures.refetch()} />
-          ) : closures.isPending ? (
-            <StateBox />
-          ) : !closures.data.length ? (
-            <StateBox empty="All mapped paths are open." />
-          ) : (
-            closures.data.map((c) => (
-              <div className="admin-list-row" key={c.id}>
-                <div>
-                  <h3>{c.label}</h3>
-                  <small>
-                    {c.state === "closed"
-                      ? "Closed · all routes avoid it"
-                      : "Not step-free · step-free routes avoid it"}
-                    {c.reopens_at
-                      ? ` · reopens ${localTime(c.reopens_at)}`
-                      : " · until reopened"}
-                    {c.report_id && ` · from report #${c.report_id}`}
-                  </small>
-                </div>
-                <Button
-                  variant="outline"
-                  disabled={update.isPending}
-                  onClick={() =>
-                    update.mutate({
-                      url: `/admin/path-status/${c.id}`,
-                      method: "delete",
-                    })
-                  }
-                >
-                  Reopen now
-                </Button>
-              </div>
-            ))
-          )}
-          <h2>Submitted reports</h2>
-          <div className="filter-chips" role="group" aria-label="Filter reports">
-            {[
-              ["open", "Open"],
-              ["resolved", "Resolved"],
-              ["rejected", "Not changed"],
-              ["withdrawn", "Withdrawn"],
-              ["all", "All"],
-            ].map(([value, label]) => (
-              <button
-                key={value}
-                aria-pressed={reportFilter === value}
-                onClick={() => setReportFilter(value)}
-              >
-                {label}
-                {value === "open" &&
-                  ` (${reports.data?.filter((r) => ["new", "reviewing"].includes(r.status)).length ?? 0})`}
-              </button>
-            ))}
-          </div>
-          {reports.isError ? (
-            <StateBox error={reports.error} retry={() => reports.refetch()} />
-          ) : reports.isPending ? (
-            <StateBox />
-          ) : (
-            (() => {
-              const shown = reports.data.filter((r) =>
-                reportFilter === "all"
-                  ? true
-                  : reportFilter === "open"
-                    ? ["new", "reviewing"].includes(r.status)
-                    : r.status === reportFilter,
-              );
-              if (!shown.length)
-                return <StateBox empty="No reports here." />;
-              return shown.map((r) => {
-                const place = places.find((p) => p.id === r.location_id);
-                const note = notes[r.id] ?? r.resolution_note;
-                const open = ["new", "reviewing"].includes(r.status);
-                const closePath = (state: string) =>
-                  update.mutate({
-                    url: "/admin/path-status",
-                    method: "post",
-                    data: {
-                      edge_a: r.edge_a,
-                      edge_b: r.edge_b,
-                      state,
-                      report_id: r.id,
-                      reopens_at: reopenAt[r.id]
-                        ? reopenAt[r.id] + ":00+05:00"
-                        : null,
-                    },
-                  });
-                return (
-                  <div className="admin-list-row" key={r.id}>
-                    <div>
-                      <span className="category-tag">
-                        {r.kind === "path"
-                          ? "Blocked path"
-                          : "Location information"}
-                      </span>
-                      {open && r.similar_open.length > 0 && (
-                        <span className="window-state scheduled">
-                          Same problem in {r.similar_open.length} other open
-                          report{r.similar_open.length > 1 ? "s" : ""} (#
-                          {r.similar_open.join(", #")})
-                        </span>
-                      )}
-                      <h3>
-                        {(r.kind === "path"
-                          ? r.connection_label
-                          : r.location_name) || "Campus report"}
-                      </h3>
-                      {r.route && <small>Reported on route {r.route}</small>}
-                      <p>{r.message}</p>
-                      <small>
-                        #{r.id} · Submitted by {r.author} ·{" "}
-                        {localTime(r.created_at)}
-                      </small>
-                    </div>
-                    <div className="admin-report-actions">
-                      {r.status === "withdrawn" ? (
-                        <span className="report-status">
-                          Withdrawn by the reporter
-                        </span>
-                      ) : (
-                        <>
-                          {r.kind === "location" && place && open && (
-                            <Button
-                              onClick={() => {
-                                setFixing(r);
-                                setEditing(place);
-                                update.reset();
-                              }}
-                            >
-                              Fix details and resolve
-                            </Button>
-                          )}
-                          {r.kind === "path" && r.edge_a && !r.path_status && (
-                            <>
-                              <label className="reopen-field">
-                                Reopen automatically (optional)
-                                <input
-                                  type="datetime-local"
-                                  value={reopenAt[r.id] || ""}
-                                  onChange={(e) =>
-                                    setReopenAt({
-                                      ...reopenAt,
-                                      [r.id]: e.target.value,
-                                    })
-                                  }
-                                />
-                              </label>
-                              <div className="row">
-                                <Button
-                                  size="sm"
-                                  disabled={update.isPending}
-                                  onClick={() => closePath("closed")}
-                                >
-                                  Close path
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  disabled={update.isPending}
-                                  onClick={() => closePath("not_step_free")}
-                                >
-                                  Mark not step-free
-                                </Button>
-                              </div>
-                              {r.similar_open.length > 0 && (
-                                <small className="muted">
-                                  Closing it resolves the other reports about
-                                  this path too.
-                                </small>
-                              )}
-                            </>
-                          )}
-                          {r.path_status && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              disabled={update.isPending}
-                              onClick={() =>
-                                update.mutate({
-                                  url: `/admin/path-status/${r.path_status!.id}`,
-                                  method: "delete",
-                                })
-                              }
-                            >
-                              Reopen path
-                            </Button>
-                          )}
-                          <details className="report-more">
-                            <summary>Other answer</summary>
-                            <select
-                              aria-label={`Report ${r.id} status`}
-                              value={r.status}
-                              disabled={update.isPending}
-                              onChange={(e) =>
-                                update.mutate({
-                                  url: `/admin/reports/${r.id}`,
-                                  data: {
-                                    status: e.target.value,
-                                    resolution_note: note,
-                                  },
-                                })
-                              }
-                            >
-                              {["new", "reviewing", "resolved", "rejected"].map(
-                                (st) => (
-                                  <option key={st} value={st}>
-                                    {reportStatusLabel(st)}
-                                  </option>
-                                ),
-                              )}
-                            </select>
-                            <textarea
-                              aria-label={`Report ${r.id} update for the reporter`}
-                              placeholder="Message to the reporter…"
-                              maxLength={1000}
-                              value={note}
-                              onChange={(e) =>
-                                setNotes({ ...notes, [r.id]: e.target.value })
-                              }
-                            />
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              disabled={
-                                update.isPending || note === r.resolution_note
-                              }
-                              onClick={() =>
-                                update.mutate({
-                                  url: `/admin/reports/${r.id}`,
-                                  data: { status: r.status, resolution_note: note },
-                                })
-                              }
-                            >
-                              Send message
-                            </Button>
-                          </details>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                );
-              });
-            })()
-          )}
-        </section>
-      )}
+      {tab === "Reports" &&
+        (reports.isError || closures.isError ? (
+          <StateBox
+            error={reports.error || closures.error}
+            retry={() => {
+              reports.refetch();
+              closures.refetch();
+            }}
+          />
+        ) : reports.isPending || closures.isPending ? (
+          <StateBox />
+        ) : (
+          <AdminReports
+            reports={reports.data}
+            closures={closures.data}
+            places={places}
+            onFix={(report, place) => {
+              setFixing(report);
+              setEditing(place);
+              setMessage("");
+              update.reset();
+            }}
+            onSaved={setMessage}
+          />
+        ))}
       {tab === "Search analytics" && (
         <section className="admin-section">
           <h2>What people are looking for</h2>
@@ -1404,7 +1178,7 @@ export function AdminPage({ places }: Props) {
             setFixing(null);
           }
         }}
-        title={fixing ? `Fix report #${fixing.id}` : "Edit location details"}
+        title={fixing ? `Fix the details of ${editing?.name}` : "Edit location details"}
         description={
           editing
             ? `${editing.category} · ${editing.floor}. Category, map position and route connections come from the campus map file.`
@@ -1417,6 +1191,11 @@ export function AdminPage({ places }: Props) {
             onSubmit={saveLocation}
             className="admin-form"
           >
+            {fixing && (
+              <p className="report-note">
+                <strong>Reported (#{fixing.id}):</strong> {fixing.message}
+              </p>
+            )}
             <label>
               Name
               <input name="name" required defaultValue={editing.name} />
@@ -1467,9 +1246,6 @@ export function AdminPage({ places }: Props) {
             </label>
             {fixing && (
               <>
-                <p className="report-note">
-                  <strong>Reported:</strong> {fixing.message}
-                </p>
                 <label>
                   Message to the reporter
                   <textarea

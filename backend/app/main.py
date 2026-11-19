@@ -1309,8 +1309,12 @@ def edit_location(location_id: int, body: LocationDetailsRequest, _: AdminIdenti
         setattr(item, key, value.strip() if isinstance(value, str) else value)
     item.aliases = ",".join(aliases)
     if report:
-        tell_reporter(report, "resolved", (body.resolution_note or "").strip()
-                      or f"We updated the details for {item.name}. Thanks for reporting it!")
+        note = (body.resolution_note or "").strip() or f"We updated the details for {item.name}. Thanks for reporting it!"
+        # Everyone who reported this place gets the answer, as with closed paths.
+        for other in session.exec(select(InaccuracyReport).where(InaccuracyReport.kind == "location",
+                                                                 InaccuracyReport.location_id == location_id,
+                                                                 InaccuracyReport.status.in_(OPEN_REPORT_STATUSES))).all():
+            tell_reporter(other, "resolved", note)
     session.commit()
     session.refresh(item)
     return item

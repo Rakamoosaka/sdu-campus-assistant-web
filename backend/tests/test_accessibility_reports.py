@@ -184,6 +184,7 @@ def test_fix_location_resolves_report_and_reporter_sees_unread(api_client):
     c = api_client; student = login(c); admin = login(c, '240000002')
     report = c.post('/reports', headers=student, json={'kind': 'location', 'location_id': 2, 'message': 'Open until 22:00'}).json()
     other = c.post('/reports', headers=student, json={'kind': 'location', 'location_id': 1, 'message': 'Other place'}).json()
+    same_place = c.post('/reports', headers=login(c, '240103050'), json={'kind': 'location', 'location_id': 2, 'message': 'Hours wrong'}).json()
     library = c.get('/locations/2').json()
     assert c.put('/admin/locations/2', headers=admin, json={**library, 'report_id': other['id']}).status_code == 404
     c.put('/admin/locations/2', headers=admin, json={**library, 'opening_hours': '08:00–22:00', 'report_id': report['id']})
@@ -191,6 +192,8 @@ def test_fix_location_resolves_report_and_reporter_sees_unread(api_client):
     assert mine[report['id']]['status'] == 'resolved' and mine[report['id']]['reporter_unread'] is True
     assert 'We updated the details for' in mine[report['id']]['resolution_note']
     assert mine[other['id']]['reporter_unread'] is False
+    assert c.get('/reports/me', headers=login(c, '240103050')).json()[0]['id'] == same_place['id']
+    assert c.get('/reports/me', headers=login(c, '240103050')).json()[0]['status'] == 'resolved'
     assert c.post('/reports/me/seen', headers=student).json()['seen'] == 1
     assert not any(r['reporter_unread'] for r in c.get('/reports/me', headers=student).json())
     c.put(f"/admin/reports/{other['id']}", headers=admin, json={'status': 'new', 'resolution_note': ''})
