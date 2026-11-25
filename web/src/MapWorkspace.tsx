@@ -20,7 +20,6 @@ import {
   ChevronLeft,
   ArrowUp,
   ArrowDown,
-  Route,
   Layers,
   Info,
   Flag,
@@ -55,6 +54,14 @@ import floor1 from "../../assets/maps/floor-1-background.svg?url";
 import floor2 from "../../assets/maps/floor-2-background.svg?url";
 import floor3 from "../../assets/maps/floor-3-background.svg?url";
 const FLOOR_BACKGROUNDS: Record<number, string> = { 1: floor1, 2: floor2, 3: floor3 };
+// "Library · Floor 2" -> "Library" where a list is already grouped by floor.
+function withoutFloor(name: string) {
+  return name.replace(/\s*[·—-]\s*Floor \d+$/, "");
+}
+// Catalogue fields hold placeholders such as "Not confirmed" until an admin fills them in.
+function isKnown(value?: string | null) {
+  return !!value && !/^(not (confirmed|verified)|unknown|unavailable)/i.test(value.trim());
+}
 export function StateBox({
   error,
   empty,
@@ -159,6 +166,33 @@ export function MapWorkspace({
     ),
   );
   const canRoute = routePlaces.some((p) => p.id === selected);
+  // Start choices: entrances first, then one group per floor with rooms and
+  // services before staircases and lifts, each in natural order (D101 < D110).
+  const startGroups = (() => {
+    const byName = (a: Place, b: Place) =>
+      a.name.localeCompare(b.name, undefined, { numeric: true });
+    const isTransit = (p: Place) => p.category === "Stairs" || p.category === "Lift";
+    const entrances = routePlaces.filter((p) => p.category === "Entrance");
+    const floors = [...new Set(routePlaces.map((p) => p.floor))].sort((a, b) =>
+      a.localeCompare(b, undefined, { numeric: true }),
+    );
+    return [
+      { label: "Entrances", places: [...entrances].sort(byName) },
+      ...floors.map((f) => {
+        const here = routePlaces.filter(
+          (p) => p.floor === f && p.category !== "Entrance",
+        );
+        return {
+          label: f,
+          places: [
+            ...here.filter((p) => !isTransit(p)).sort(byName),
+            ...here.filter(isTransit).sort(byName),
+          ],
+        };
+      }),
+    ].filter((g) => g.places.length);
+  })();
+  const startFloor = routePlaces.find((p) => p.id === start)?.floor;
   const previousSelected = useRef(selected);
   const routeEndpoints = useRef({ start, selected });
   routeEndpoints.current = { start, selected };
@@ -487,11 +521,15 @@ export function MapWorkspace({
   return (
     <div className="map-workspace">
       <aside className={"explore-panel " + (panelOpen ? "mobile-open" : "")}>
-        <div className="panel-heading">
-          <div>
-            <span className="eyebrow">YOUR CAMPUS, CONNECTED</span>
-            <h2>Where to?</h2>
-          </div>
+        <div
+          className={"panel-heading" + (selectedPlace ? " compact" : "")}
+        >
+          {!selectedPlace && (
+            <div>
+              <span className="eyebrow">YOUR CAMPUS, CONNECTED</span>
+              <h2>Where to?</h2>
+            </div>
+          )}
           <button
             className="mobile-panel-close icon-button"
             aria-label="Close explore panel"
@@ -606,33 +644,58 @@ export function MapWorkspace({
             >
               <ArrowLeft size={15} /> Back to places
             </button>
-            <span className="category-tag">{selectedPlace.category}</span>
-            <h3>{selectedPlace.name}</h3>
-            <p className="muted">
-              {selectedPlace.block} · {selectedPlace.floor}
-            </p>
-            <div className="detail-facts">
-              <div>
-                <span>Opening hours</span>
-                <strong>{selectedPlace.opening_hours}</strong>
-              </div>
-              <div>
-                <span>Contact</span>
-                <strong>{selectedPlace.contact}</strong>
-              </div>
-              <div>
-                <span>Step-free access</span>
-                <strong>{selectedPlace.step_free_access || "Not verified"}</strong>
-              </div>
-              <div>
-                <span>Map position</span>
-                <strong>
-                  {mapPlace?.has_position
-                    ? "Schematic"
-                    : "Map position unavailable"}
-                </strong>
-              </div>
+            <header className="place-head">
+              <h3>{selectedPlace.name}</h3>
+              <p className="place-meta">
+                <span className="category-tag">{selectedPlace.category}</span>
+                {selectedPlace.block} · {selectedPlace.floor}
+              </p>
+            </header>
+            <div className="place-actions">
+              <ShareDestination
+                key={selectedPlace.id}
+                place={selectedPlace}
+                compact
+              />
+              {!offline &&
+                (person.role === "guest" ? (
+                  <Button
+                    variant="outline"
+                    aria-label="Log in to save"
+                    onClick={onLogin}
+                  >
+                    <Bookmark size={16} /> Save
+                  </Button>
+                ) : (
+                  <Button
+                    variant={saved ? "secondary" : "outline"}
+                    aria-label={`${saved ? "Remove saved" : "Save place"} (${favorites.length}/5 saved)`}
+                    disabled={savePending || (!saved && favorites.length >= 5)}
+                    onClick={() => onSave(selectedPlace)}
+                  >
+                    <Bookmark
+                      size={16}
+                      fill={saved ? "currentColor" : "none"}
+                    />
+                    {saved ? "Saved" : "Save"}
+                  </Button>
+                ))}
+              {!offline && (
+                <Button
+                  variant="outline"
+                  aria-label="Report a problem"
+                  onClick={() => openReport("location")}
+                >
+                  <Flag size={16} /> Report
+                </Button>
+              )}
             </div>
+            {!offline && person.role !== "guest" && !saved && favorites.length >= 5 && (
+              <p className="place-note">
+                All five saved slots are filled. Remove a place in Saved to
+                make room.
+              </p>
+            )}
             {features.announcements && !offline && !!placeNews.data?.length && (
               <section
                 className="place-announcements"
@@ -649,73 +712,53 @@ export function MapWorkspace({
                 ))}
               </section>
             )}
-            <div className="detail-actions">
-              <ShareDestination key={selectedPlace.id} place={selectedPlace} />
-              {!offline && (
-                <Button variant="outline" onClick={() => openReport("location")}>
-                  <Flag size={16} /> Report a problem
-                </Button>
-              )}
-              {!offline &&
-                (person.role === "guest" ? (
-                  <Button variant="outline" onClick={onLogin}>
-                    <Bookmark size={16} /> Log in to save
-                  </Button>
-                ) : (
-                  <Button
-                    variant={saved ? "secondary" : "outline"}
-                    disabled={savePending || (!saved && favorites.length >= 5)}
-                    onClick={() => onSave(selectedPlace)}
-                  >
-                    <Bookmark
-                      size={16}
-                      fill={saved ? "currentColor" : "none"}
-                    />
-                    {saved ? "Remove saved" : "Save place"}{" "}
-                    <span className="count">{favorites.length}/5</span>
-                  </Button>
-                ))}
-              {!saved && favorites.length >= 5 && (
-                <p className="muted text-xs">
-                  All five slots are filled. Remove a place in Saved to make
-                  room.
-                </p>
-              )}
-            </div>
-            <div className="route-form">
-              <div className="section-label">
-                <Route size={17} /> Plan your route
-              </div>
-              <label>
-                Start from
-                <select
-                  disabled={offline}
-                  value={start}
-                  onChange={(e) => {
-                    setStart(Number(e.target.value));
-                    setRoute(null);
-                    setRouteError("");
-                  }}
-                  aria-label="Route start"
-                >
-                  {routePlaces.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name} · {p.floor}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <div className="route-destination">
-                <MapPin size={16} /> {selectedPlace.name}
+            <section className="route-card" aria-label="Plan your route">
+              <div className="route-stops">
+                <label className="route-stop">
+                  <span className="route-stop-dot" aria-hidden />
+                  <span className="route-stop-body">
+                    <small>From{startFloor && ` · ${startFloor}`}</small>
+                    <select
+                      disabled={offline}
+                      value={start}
+                      onChange={(e) => {
+                        setStart(Number(e.target.value));
+                        setRoute(null);
+                        setRouteError("");
+                      }}
+                      aria-label="Route start"
+                    >
+                      {startGroups.map((group) => (
+                        <optgroup key={group.label} label={group.label}>
+                          {group.places.map((p) => (
+                            <option key={p.id} value={p.id}>
+                              {withoutFloor(p.name)}
+                            </option>
+                          ))}
+                        </optgroup>
+                      ))}
+                    </select>
+                  </span>
+                </label>
+                <div className="route-stop">
+                  <span className="route-stop-dot to" aria-hidden>
+                    <MapPin size={12} />
+                  </span>
+                  <span className="route-stop-body">
+                    <small>To</small>
+                    <strong>{selectedPlace.name}</strong>
+                  </span>
+                </div>
               </div>
               {!offline && (
                 <label className="route-toggle">
-                  <Accessibility size={18} />
+                  <Accessibility size={17} />
                   <span>
                     <strong>Avoid stairs</strong>
-                    <small>
-                      Saved to your{" "}
-                      {person.role === "guest" ? "guest session" : "account"}
+                    <small
+                      title={`Saved to your ${person.role === "guest" ? "guest session" : "account"}`}
+                    >
+                      Route by lift instead
                     </small>
                   </span>
                   <input
@@ -744,25 +787,36 @@ export function MapWorkspace({
                 <Navigation size={16} />
                 {planning.isPending ? "Finding a route…" : "Find route"}
               </Button>
-              <p className="route-hint">
-                {offline ? "Reconnect to find a route." : canRoute
-                  ? "Choose your start manually. No live indoor positioning."
-                  : "This place has no public mapped approach yet. Choose another destination."}
-              </p>
+              {(offline || !canRoute || !route) && (
+                <p className="route-hint">
+                  {offline
+                    ? "Reconnect to find a route."
+                    : canRoute
+                      ? "Pick where you are. There's no live indoor positioning."
+                      : "This place has no public mapped approach yet. Choose another destination."}
+                </p>
+              )}
               {!offline && routeError && (
                 <div role="alert" className="error-box">
                   {routeError}
                 </div>
               )}
-            </div>
+            </section>
             {!offline && route && (
               <section className="route-result" aria-label="Route directions">
-                <div className="flex justify-between items-center">
+                <div className="route-result-head">
                   <strong>
                     {route.status === "schematic_draft"
                       ? "Your route"
                       : "Route information"}
                   </strong>
+                  {!!route.route_floors?.length && (
+                    <span className="route-result-floors">
+                      {route.route_floors.length > 1
+                        ? `Floors ${route.route_floors.join(" → ")}`
+                        : `Floor ${route.route_floors[0]} only`}
+                    </span>
+                  )}
                   <Button
                     size="sm"
                     variant="ghost"
@@ -776,7 +830,6 @@ export function MapWorkspace({
                     Step-free preference · stairs excluded
                   </span>
                 )}
-                <p>{route.message}</p>
                 {!!route.warnings?.length && (
                   <ul className="route-warnings">
                     {route.warnings.map((w) => (
@@ -784,42 +837,65 @@ export function MapWorkspace({
                     ))}
                   </ul>
                 )}
-                {route.route_floors && (
-                  <div className="route-floor-tabs">
-                    {route.route_floors.map((f) => (
-                      <Button
-                        size="sm"
-                        variant={floor === f ? "default" : "outline"}
-                        key={f}
-                        onClick={() => setFloor(f)}
-                      >
-                        Floor {f}
-                      </Button>
-                    ))}
-                  </div>
-                )}
-                <ol>
+                <ol className="route-steps">
                   {route.steps.map((step, i) => (
                     <li key={i}>{step}</li>
                   ))}
                 </ol>
+                <p className="route-note">
+                  {route.message}
+                  {route.status === "schematic_draft" &&
+                    " Distance and walking time aren't shown: the schematic has no measured scale."}
+                </p>
                 {route.status === "schematic_draft" && (
-                  <>
-                    <p className="muted text-xs">
-                      Distance & walking time unavailable: the schematic has
-                      no measured scale.
-                    </p>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => openReport("path")}
-                    >
-                      <Flag size={14} /> Report a blocked path
-                    </Button>
-                  </>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => openReport("path")}
+                  >
+                    <Flag size={14} /> Report a blocked path
+                  </Button>
                 )}
               </section>
             )}
+            <section className="place-about" aria-label="About this place">
+              <h4>About this place</h4>
+              {(() => {
+                const facts = [
+                  ["Opening hours", selectedPlace.opening_hours],
+                  ["Contact", selectedPlace.contact],
+                  ["Step-free access", selectedPlace.step_free_access],
+                ] as const;
+                const known = facts.filter(([, v]) => isKnown(v));
+                const missing = facts
+                  .filter(([, v]) => !isKnown(v))
+                  .map(([k]) => k.toLowerCase());
+                return (
+                  <>
+                    {!!known.length && (
+                      <div className="detail-facts">
+                        {known.map(([k, v]) => (
+                          <div key={k}>
+                            <span>{k}</span>
+                            <strong>{v}</strong>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {!!missing.length && (
+                      <p className="place-note">
+                        Not confirmed yet: {missing.join(", ")}.
+                      </p>
+                    )}
+                    {!mapPlace?.has_position && (
+                      <p className="place-note">
+                        This place isn't drawn on the map yet.
+                      </p>
+                    )}
+                  </>
+                );
+              })()}
+            </section>
           </div>
         )}
         <div className="panel-foot">

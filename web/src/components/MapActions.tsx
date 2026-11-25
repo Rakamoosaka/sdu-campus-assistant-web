@@ -10,7 +10,13 @@ import {
   type SavedMap,
 } from "../lib/offlineMap";
 
-export function ShareDestination({ place }: { place: Place }) {
+export function ShareDestination({
+  place,
+  compact = false,
+}: {
+  place: Place;
+  compact?: boolean;
+}) {
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState("");
   const trigger = useRef<HTMLButtonElement>(null);
@@ -46,8 +52,13 @@ export function ShareDestination({ place }: { place: Place }) {
 
   return (
     <>
-      <Button ref={trigger} variant="outline" onClick={share}>
-        <Share2 size={16} /> Share destination
+      <Button
+        ref={trigger}
+        variant="outline"
+        onClick={share}
+        aria-label={compact ? "Share destination" : undefined}
+      >
+        <Share2 size={16} /> {compact ? "Share" : "Share destination"}
       </Button>
       <Dialog
         open={open}

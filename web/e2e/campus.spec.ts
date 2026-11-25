@@ -61,11 +61,9 @@ test("D201 switches floor and route from entrance draws both floors", async ({
   await expect(
     page.getByRole("region", { name: "Route directions" }),
   ).toContainText("Your route");
-  await expect(page.locator(".route-floor-tabs button")).toHaveCount(2);
-  await page
-    .locator(".route-floor-tabs")
-    .getByRole("button", { name: "Floor 2" })
-    .click();
+  const bar = page.getByRole("navigation", { name: "Route floors" });
+  await expect(bar.getByRole("listitem")).toHaveCount(2);
+  await bar.getByRole("button", { name: /^2 Floor 2/ }).click();
   await expect(
     page.locator('svg[aria-label="Schematic floor 2"] line'),
   ).not.toHaveCount(0);
