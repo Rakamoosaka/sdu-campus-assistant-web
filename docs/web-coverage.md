@@ -10,11 +10,11 @@ Status is based on real API/database behavior and browser execution. There is no
 - [x] Persisted PBKDF2 hashes; existing demo roles no longer reset; new registration cannot self-assign Admin.
 - [x] HttpOnly/SameSite browser sessions, optional Secure cookies, CSRF headers, configured cross-origin CORS plus same-origin Swagger access, database revocation/logout. Current roles/active status are checked server-side.
 - [x] Public guest map/search/routes/announcements/assistant. Guests can save the avoid-stairs preference and submit/track reports for their guest session. API rejects guest saved places, schedules and admin operations.
-- [x] Reuse of both SVGs, 103 mapped catalogue entries and graph, with unchanged stable IDs. Current database detail fields overlay map metadata.
+- [x] Three floor backgrounds traced from the posted evacuation plans, 145 catalogue entries and the walking graph, with unchanged stable IDs for existing places. Current database detail fields overlay map metadata; positions are refreshed from the map file on start.
 - [x] Dynamic rooms/markers rendered once; correct room/floor focus from search/saved/schedule/assistant actions; unpositioned records remain unpinned.
 - [x] Buttons for zoom in/out/fit/floors alongside pan/pinch, route framing, floor-specific segments, approximate terminal styling, clear route, numbered directions and floor-transfer controls.
 - [x] Existing Dijkstra, normal stairs/lift choices, avoid-stairs preference saved per account or guest session (account menu or route form) and applied by the server. `/campus-map` lists every connection with its kind (corridor/stairs/lift), step-free flag and closure; the map has a step-free layer. Admins record each place's step-free access (Not verified / Step-free / Not step-free); entrances and other endpoints marked not step-free are refused for step-free routes. Step-free routes list unverified endpoints and unmonitored lifts as warnings. When no suitable route exists, the panel explains why (stairs only, place not step-free, or closed path).
-- [x] Map facts retained: S1 absent; S3/S4/S5/S6/S8; S6 skips 2; separate 2→3 canteen stairs; D/F/H mapped lift approaches; floor-2 sketch branches/platforms and muted context; no fabricated basement/full third floor.
+- [x] Map facts retained: S1 absent; S3/S4/S5/S6/S8 matched to their described locations; S6 skips 2; separate 2→3 canteen stairs; D/F/H lifts and every block end staircase serve floors 1–3; floor 3 mapped from its evacuation plan; no fabricated basement.
 - [x] Exact-code ranking, case/space normalization, editable aliases/service synonyms, typo tolerance (`libary`), no-results state and actual search logging.
 - [x] Assistant recommendations from current catalogue data (medical/printing/study/food), room questions, hours/contact grounding, actual competing choices with expiring owned context and working map actions.
 - [x] Dated, editable, persisted sample student/teacher schedules; UTC normalization; next upcoming instant using Asia/Almaty; empty and unmapped handling. New users start empty and can add sample lessons.
@@ -49,7 +49,7 @@ Browser cases cover login identity/avatar/reload/logout; guest no-save; D201 flo
 ## Unavailable pending campus facts / outside scope
 
 - Surveyed distances/walking times, live indoor GPS, certified step-free approaches and live lift availability.
-- Basement/full floor-3 plans, missing door/landing positions, unconfirmed parking, missing service hours/contacts and unknown library internal positions.
+- Basement plan, surveyed door/landing positions, unconfirmed parking, missing service hours/contacts and unknown library internal positions.
 - University SSO, real university timetable synchronization and public deployment. Sample data is labelled and editable locally.
 
 ## Optional AI follow-up

@@ -92,7 +92,7 @@ The E2E runner starts isolated servers on ports 8001/5174 and never uses the use
 
 ## Optional map regeneration
 
-Install the importer dependency with `.venv/bin/pip install -r scripts/requirements-map.txt`, then run `.venv/bin/python scripts/import_campus_map.py docs/map-source`. Supplied geometry and uncertainty remain the source of truth.
+The map is traced from the posted evacuation plans for floors 1–3 (`docs/map-source/evacuation-plans/`). Install the dependencies with `.venv/bin/pip install -r scripts/requirements-map.txt`, then run `cd scripts && ../.venv/bin/python import_campus_map.py ../docs/map-source`. See [Map integration](docs/map-integration.md) for the sources and the decisions behind them.
 
 ## Repository and data separation
 
@@ -106,7 +106,6 @@ This is the main campus app checkout. It combines the AI assistant, current mapp
 - [Web design system](design-system.md)
 - [Database, sessions and migration](database-schema.md)
 - [Map integration](docs/map-integration.md)
-- [Floor-2 source and graph details](docs/floor-2-integration.md)
 
 ## Optional DeepSeek AI through OpenRouter
 

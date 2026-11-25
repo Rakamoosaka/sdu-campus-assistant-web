@@ -159,16 +159,23 @@ def draft_route(campus: dict, start: int, destination: int, avoid_stairs: bool =
                             'floor': floors[a], 'to_floor': floors[b],
                             'step_free': e['kind'] != 'stairs' and path_status.get(edge_key(a, b)) != 'not_step_free'})
         if floors[a] != floors[b]:
-            transfers.append({'kind': e['kind'], 'label': e['label'], 'from_floor': floors[a], 'to_floor': floors[b]})
+            # Several flights of the same staircase or lift read as one transfer.
+            last = transfers[-1] if transfers else None
+            if last and last['node'] == a and last['label'] == e['label']:
+                last.update(to_floor=floors[b], node=b)
+            else:
+                transfers.append({'kind': e['kind'], 'label': e['label'], 'from_floor': floors[a], 'to_floor': floors[b], 'node': b})
         else:
             segments.append({'from': nodes[a], 'to': nodes[b], 'floor': floors[a], 'approximate_door': False})
+    for transfer in transfers:
+        del transfer['node']
     segments.append({'from': nodes[end], 'to': points[-1], 'floor': floors[end], 'approximate_door': True})
     points = [segments[0]['from'], *[s['to'] for s in segments]] if segments else points
     steps = [f'Start at {origin["name"]} on floor {floors[source]}. Your start is manually selected, not GPS.']
     steps.append(f'Follow the highlighted corridor on floor {floors[source]}.')
     for transfer in transfers:
         steps.append(f'Take {transfer["label"]} from floor {transfer["from_floor"]} to floor {transfer["to_floor"]}. Switch the map floor to continue.')
-        steps.append(f'Continue along the highlighted corridor on floor {transfer["to_floor"]}.' if transfer['to_floor'] in [1, 2] else 'The staircase leads into the floor-3 canteen; no general third-floor corridor is mapped.')
+        steps.append(f'Continue along the highlighted corridor on floor {transfer["to_floor"]}.')
     if target['block'].startswith('Block ') and target['category'] in ['Classroom', 'Lift']:
         steps.append(f'Enter the {target["block"]} side corridor and follow the highlighted branch.')
     steps.append(f'Approach {target["name"]}. The final connection is an approximate doorway/landing position.')
@@ -191,5 +198,5 @@ def draft_route(campus: dict, start: int, destination: int, avoid_stairs: bool =
                'Draft traced from the map, not a verified navigation or accessible route. Dashed ends are approximate door connections.')
     return {**base, 'status': 'schematic_draft', 'points': points, 'segments': segments,
             'node_path': path, 'steps': steps, 'transfers': transfers, 'connections': connections, 'warnings': warnings,
-            'route_floors': list(dict.fromkeys(floors[n] for n in path)),
+            'route_floors': list(dict.fromkeys(s['floor'] for s in segments)),
             'start': origin['name'], 'destination': target['name'], 'message': message}

@@ -1,2 +1,5 @@
-# Optional: only needed to regenerate supplied map assets
+# Optional: only needed to regenerate the map assets
 PyYAML>=6.0,<7
+# Only for scripts/stitch_evacuation_plans.py
+opencv-python-headless>=4.9
+numpy>=1.26

@@ -70,6 +70,40 @@ test("D201 switches floor and route from entrance draws both floors", async ({
     page.locator('svg[aria-label="Schematic floor 2"] line'),
   ).not.toHaveCount(0);
 });
+test("route bar shows every floor and steps between them", async ({ page }) => {
+  await login(page, "240103050");
+  await search(page, "D201");
+  await page.getByRole("button", { name: "Find route", exact: true }).click();
+  const bar = page.getByRole("navigation", { name: "Route floors" });
+  await expect(bar.getByRole("listitem")).toHaveCount(2);
+  await expect(bar.locator('[aria-current="step"]')).toContainText(
+    "Floor 1",
+  );
+  const floors = page.locator(".floor-switch button");
+  await expect(floors.filter({ hasText: "Floor 2" })).toHaveAttribute(
+    "data-route",
+    "on",
+  );
+  await expect(floors.filter({ hasText: "Floor 3" })).toHaveAttribute(
+    "data-route",
+    "off",
+  );
+  await bar.getByRole("button", { name: "Next: floor 2" }).click();
+  await expect(floors.filter({ hasText: "Floor 2" })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+  await page
+    .getByRole("button", { name: "Arrive from floor 1. Show floor 1" })
+    .click();
+  await expect(floors.filter({ hasText: "Floor 1" })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+  await expect(
+    page.getByRole("button", { name: /to floor 2\. Show floor 2/ }),
+  ).toBeVisible();
+});
 test("saved accessibility preference changes cross-floor routing to a lift", async ({
   page,
 }) => {
@@ -173,13 +207,20 @@ test("mobile map keeps floor/zoom controls usable and identity visible", async (
   await page.getByRole("button", { name: "Explore", exact: true }).click();
   await search(page, "D201");
   await page.getByRole("button", { name: "Find route", exact: true }).click();
+  // The panel closes on a phone so the route and its floors are in view.
   await expect(
-    page.getByRole("region", { name: "Route directions" }),
-  ).toContainText("Your route");
-  await page.getByRole("button", { name: "Close explore panel" }).click();
+    page.getByRole("navigation", { name: "Route floors" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Next: floor 2" }),
+  ).toBeVisible();
   await expect(
     page.getByRole("button", { name: "Fit map", exact: true }),
   ).toBeVisible();
+  await page.getByRole("button", { name: "Place details" }).click();
+  await expect(
+    page.getByRole("region", { name: "Route directions" }),
+  ).toContainText("Your route");
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= window.innerWidth,
@@ -380,7 +421,7 @@ test("unmapped places cannot start a route and changing destination clears it", 
   await expect(
     page.getByRole("region", { name: "Route directions" }),
   ).toBeVisible();
-  await search(page, "D105");
+  await search(page, "Technopark");
   await expect(
     page.getByRole("region", { name: "Route directions" }),
   ).toHaveCount(0);
@@ -391,7 +432,7 @@ test("unmapped places cannot start a route and changing destination clears it", 
     page
       .getByRole("combobox", { name: "Route start" })
       .locator("option")
-      .filter({ hasText: "D105" }),
+      .filter({ hasText: "Technopark" }),
   ).toHaveCount(0);
 });
 
@@ -560,7 +601,10 @@ test("guest saves a step-free preference and sees why no step-free route exists"
   await expect(page.locator(".map-legend")).toContainText("Step-free");
   await search(page, "Canteen — Floor 3");
   await page.getByRole("button", { name: "Find route", exact: true }).click();
-  await expect(directions).toContainText("No step-free route");
+  await expect(directions).toContainText("lift from floor 1 to floor 3");
+  await search(page, "Main corridor staircase 8");
+  await page.getByRole("button", { name: "Find route", exact: true }).click();
+  await expect(directions).toContainText("A staircase cannot be a step-free endpoint");
   await page.getByRole("button", { name: "Your account", exact: true }).click();
   await expect(
     page.getByRole("dialog", { name: "Your account" }).getByRole("switch"),

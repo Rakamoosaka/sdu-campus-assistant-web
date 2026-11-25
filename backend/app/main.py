@@ -46,7 +46,9 @@ TZ = ZoneInfo("Asia/Almaty")
 CAMPUS_MAP = json.loads((Path(__file__).parent / 'data/campus.json').read_text())
 MAP_LOCATIONS = {p['id']: p for p in CAMPUS_MAP['places']}
 MAP_IMPORT_MARKER = "[campus-map-v1]"
+# Seed records replaced by the map, plus map records that a later map no longer contains.
 RETIRED_LOCATION_IDS = [4, 5, 8, 9, 10, 11, 12, 1000 + zlib.crc32(b'stair_main_01') % 100000000]
+RETIRED_LOCATION_IDS += [1000 + zlib.crc32(key.encode()) % 100000000 for key in ('h103', 'h104', 'h203', 'h204')]
 
 
 class BrowserSession(SQLModel, table=True):
@@ -503,6 +505,9 @@ def seed_database() -> None:
             marker = MAP_IMPORT_MARKER
             item = session.get(Location, record['id'])
             if item is not None and marker in item.aliases:
+                # Positions and categories come from the map file, so keep them current.
+                item.x, item.y, item.category = record['x'], record['y'], record['category']
+                session.add(item)
                 continue
             if item is None:
                 item = Location(id=record['id'], name=record['name'], category=record['category'],
@@ -512,7 +517,7 @@ def seed_database() -> None:
             item.aliases = record['aliases'] + ',' + marker
             session.add(item)
         if not session.get(DataMigration, "web-sample-schedule-v1"):
-            room_ids = [p for p in MAP_LOCATIONS.values() if p['map_key'] in {'d201', 'f102', 'h203'}]
+            room_ids = [p for p in MAP_LOCATIONS.values() if p['map_key'] in {'d201', 'f102', 'h202'}]
             for user in session.exec(select(User)).all():
                 if user.email.split('@')[0] not in DEMO_USERS:
                     continue

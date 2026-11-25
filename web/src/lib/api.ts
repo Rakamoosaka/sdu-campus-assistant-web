@@ -111,6 +111,7 @@ export interface CampusMap {
     size: number;
     align: string;
     bold: boolean;
+    floors?: number[];
   }[];
   mapped_floors: number[];
 }

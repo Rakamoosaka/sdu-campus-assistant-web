@@ -7,7 +7,7 @@ from app.routing import draft_route
 def test_every_positioned_public_place_has_an_explicit_approach():
     campus = m.CAMPUS_MAP
     public = [p for p in campus['places'] if p['has_position'] and p.get('access', 'public') == 'public']
-    assert len(public) == 88
+    assert len(public) == 137
     assert all(p['map_key'] in campus['routing']['attachments'] for p in public)
     assert all(campus['routing']['node_floors'][campus['routing']['attachments'][p['map_key']]] == p['map_floor'] for p in public)
 
@@ -28,8 +28,6 @@ def test_all_public_start_destination_pairs_and_stairs_exclusion():
                     assert status == 'no_step_free_route'
                 elif start['id'] == target['id']:
                     assert status == 'same_location'
-                elif avoid_stairs and (start['map_floor'] == 3 or target['map_floor'] == 3):
-                    assert status == 'no_step_free_route' and 'stairs' in route['message']
                 else:
                     assert status == 'schematic_draft', (start['name'], target['name'], route)
                     assert route['segments'] and route['steps']
@@ -44,7 +42,7 @@ def test_all_public_start_destination_pairs_and_stairs_exclusion():
                     for segment in route['segments']:
                         assert len(segment['from']) == len(segment['to']) == 2
                     assert route['distance_m'] is None and route['duration_min'] is None
-    assert sum(results.values()) == 2 * 89 * 89
+    assert sum(results.values()) == 2 * len(public) ** 2
 
 
 def test_new_destinations_route_through_api_and_reverse(api_client):

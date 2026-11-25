@@ -17,6 +17,9 @@ import {
   Maximize,
   Bookmark,
   ChevronRight,
+  ChevronLeft,
+  ArrowUp,
+  ArrowDown,
   Route,
   Layers,
   Info,
@@ -50,6 +53,8 @@ import {
 } from "./lib/api";
 import floor1 from "../../assets/maps/floor-1-background.svg?url";
 import floor2 from "../../assets/maps/floor-2-background.svg?url";
+import floor3 from "../../assets/maps/floor-3-background.svg?url";
+const FLOOR_BACKGROUNDS: Record<number, string> = { 1: floor1, 2: floor2, 3: floor3 };
 export function StateBox({
   error,
   empty,
@@ -171,6 +176,7 @@ export function MapWorkspace({
       setRoute(data);
       setRouteError("");
       if (data.route_floors?.length) setFloor(data.route_floors[0]);
+      setPanelOpen(false);
     },
     onError: (e, endpoints) => {
       if (
@@ -325,6 +331,22 @@ export function MapWorkspace({
       fit();
     }
   }, [route, floor, scale, offline]);
+  // The route split into one leg per floor, in walking order, with the
+  // staircase or lift that links each leg to the next.
+  const routeLegs = useMemo(() => {
+    if (!route || offline) return [];
+    const legs: { floor: number; from: number[]; to: number[] }[] = [];
+    for (const s of route.segments) {
+      const last = legs[legs.length - 1];
+      if (last && last.floor === s.floor) last.to = s.to;
+      else legs.push({ floor: s.floor, from: s.from, to: s.to });
+    }
+    return legs.map((leg, i) => ({
+      ...leg,
+      via: i < legs.length - 1 ? route.transfers?.[i] : undefined,
+    }));
+  }, [route, offline]);
+  const legIndex = routeLegs.findIndex((leg) => leg.floor === floor);
   const routeBounds = useMemo(() => {
     const points = floorSegments.flatMap((s) => [s.from, s.to]);
     if (!points.length) return null;
@@ -804,7 +826,10 @@ export function MapWorkspace({
           <span className="status-dot" /> Campus catalogue · Schematic map
         </div>
       </aside>
-      <section className="map-canvas" aria-label="Interactive campus map">
+      <section
+        className={"map-canvas" + (routeLegs.length ? " has-route" : "")}
+        aria-label="Interactive campus map"
+      >
         <div className="map-topbar">
           <div>
             <span className="eyebrow">SDU UNIVERSITY</span>
@@ -821,15 +846,29 @@ export function MapWorkspace({
           </Button>
           <div className="floor-switch" aria-label="Select map floor">
             <Layers size={17} />
-            {[1, 2, 3].map((f) => (
-              <button
-                key={f}
-                aria-pressed={floor === f}
-                onClick={() => setFloor(f)}
-              >
-                {f === 3 ? "3 · terminal" : `Floor ${f}`}
-              </button>
-            ))}
+            {[1, 2, 3].map((f) => {
+              const onRoute = routeLegs.some((leg) => leg.floor === f);
+              return (
+                <button
+                  key={f}
+                  aria-pressed={floor === f}
+                  data-route={
+                    routeLegs.length ? (onRoute ? "on" : "off") : undefined
+                  }
+                  title={
+                    routeLegs.length
+                      ? onRoute
+                        ? "Your route uses this floor"
+                        : "Your route doesn't use this floor"
+                      : undefined
+                  }
+                  onClick={() => setFloor(f)}
+                >
+                  {`Floor ${f}`}
+                  {onRoute && <span className="route-dot" aria-hidden />}
+                </button>
+              );
+            })}
           </div>
           <div className="offline-map-control">{offlineControl}</div>
           {(offline || (sharedDestination && !selectedPlace)) && (
@@ -869,6 +908,72 @@ export function MapWorkspace({
             </div>
           )}
         </div>
+        {routeLegs.length > 0 && (
+          <nav className="route-journey" aria-label="Route floors">
+            <ol>
+              {routeLegs.map((leg, i) => (
+                <li key={i}>
+                  <button
+                    aria-current={i === legIndex ? "step" : undefined}
+                    onClick={() => setFloor(leg.floor)}
+                  >
+                    <span className="route-journey-num">{i + 1}</span>
+                    <span>
+                      <strong>Floor {leg.floor}</strong>
+                      <small>
+                        {i === 0
+                          ? `From ${route?.start ?? "start"}`
+                          : i === routeLegs.length - 1
+                            ? `To ${route?.destination ?? "destination"}`
+                            : "Pass through"}
+                      </small>
+                    </span>
+                  </button>
+                  {leg.via && (
+                    <span className="route-journey-via">
+                      {leg.via.to_floor > leg.via.from_floor ? (
+                        <ArrowUp size={13} />
+                      ) : (
+                        <ArrowDown size={13} />
+                      )}
+                      {leg.via.kind === "lift" ? "Lift" : "Stairs"}
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ol>
+            {routeLegs.length > 1 && (
+              <div className="route-journey-nav">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  aria-label="Previous route floor"
+                  disabled={legIndex <= 0}
+                  onClick={() => setFloor(routeLegs[legIndex - 1].floor)}
+                >
+                  <ChevronLeft size={15} />
+                </Button>
+                {legIndex === routeLegs.length - 1 ? (
+                  <span className="route-journey-end">
+                    <MapPin size={14} /> Destination floor
+                  </span>
+                ) : (
+                  <Button
+                    size="sm"
+                    onClick={() =>
+                      setFloor(routeLegs[legIndex < 0 ? 0 : legIndex + 1].floor)
+                    }
+                  >
+                    {legIndex < 0
+                      ? `Go to floor ${routeLegs[0].floor}`
+                      : `Next: floor ${routeLegs[legIndex + 1].floor}`}
+                    <ChevronRight size={15} />
+                  </Button>
+                )}
+              </div>
+            )}
+          </nav>
+        )}
         {sharedDestination && selectedPlace && !panelOpen && (
           <button
             className="shared-place-card"
@@ -895,8 +1000,14 @@ export function MapWorkspace({
             maxScale={5}
             limitToBounds={false}
             centerOnInit
-            panning={{ excluded: ["map-place"] }}
+            panning={{ excluded: ["map-place", "route-transfer"] }}
             doubleClick={{ disabled: true }}
+            onTransform={(_, state) =>
+              viewport.current?.style.setProperty(
+                "--map-zoom",
+                String(state.scale),
+              )
+            }
           >
             <TransformComponent
               wrapperStyle={{ width: "100%", height: "100%" }}
@@ -910,38 +1021,28 @@ export function MapWorkspace({
                 className="campus-svg"
                 aria-label={`Schematic floor ${floor}`}
               >
-                {floor !== 3 && (
-                  <image
-                    href={floor === 1 ? floor1 : floor2}
-                    width={map.width}
-                    height={map.height}
-                  />
-                )}
-                {floor === 1 &&
-                  map.labels?.map((label, i) => (
+                <image
+                  href={FLOOR_BACKGROUNDS[floor] ?? floor1}
+                  width={map.width}
+                  height={map.height}
+                />
+                {map.labels
+                  ?.filter((label) => !label.floors || label.floors.includes(floor))
+                  .map((label, i) => (
                     <text
                       key={i}
                       x={label.x}
                       y={label.y}
                       fill={label.color || "#3b506e"}
                       fontSize={label.size}
-                      textAnchor={label.align === "middle" ? "middle" : "start"}
+                      textAnchor={
+                        label.align === "middle" || label.align === "end"
+                          ? label.align
+                          : "start"
+                      }
                       fontWeight={label.bold ? 700 : 400}
                     >
                       {label.text}
-                    </text>
-                  ))}
-                {floor === 2 &&
-                  ["D", "E", "F", "G", "H"].map((b, i) => (
-                    <text
-                      key={b}
-                      x={200}
-                      y={[868, 685, 501, 318, 139][i]}
-                      fontSize={17}
-                      fontWeight={700}
-                      fill="#60728e"
-                    >
-                      {b}
                     </text>
                   ))}
                 {showAccess &&
@@ -1019,17 +1120,79 @@ export function MapWorkspace({
                         route),
                   )
                   .map(renderPlace)}
-                {floor === 3 && (
-                  <text
-                    x={map.width / 2}
-                    y={map.height / 2 + 95}
-                    textAnchor="middle"
-                    fontSize={18}
-                    fill="#61728e"
-                  >
-                    Canteen terminal only · no full floor plan
-                  </text>
-                )}
+                {routeLegs.map((leg, i) => {
+                  if (leg.floor !== floor) return null;
+                  const markers = [];
+                  if (leg.via) {
+                    const next = routeLegs[i + 1].floor;
+                    markers.push({
+                      at: leg.to,
+                      target: next,
+                      up: next > floor,
+                      text: `${leg.via.kind === "lift" ? "Lift" : "Stairs"} to floor ${next}`,
+                    });
+                  }
+                  if (i > 0) {
+                    const prev = routeLegs[i - 1].floor;
+                    markers.push({
+                      at: leg.from,
+                      target: prev,
+                      up: prev > floor,
+                      text: `Arrive from floor ${prev}`,
+                    });
+                  }
+                  return markers.map((m, j) => {
+                    const w = m.text.length * 7.2 + 34;
+                    // Point the label into the route, where the view has room for it.
+                    const centre = routeBounds
+                      ? routeBounds.x + routeBounds.width / 2
+                      : map.width / 2;
+                    const left =
+                      Math.abs(m.at[0] - centre) < 20
+                        ? m.at[0] > map.width / 2
+                        : m.at[0] > centre;
+                    return (
+                      <g
+                        key={`${i}-${j}`}
+                        className="route-transfer"
+                        role="button"
+                        tabIndex={0}
+                        aria-label={`${m.text}. Show floor ${m.target}`}
+                        transform={`translate(${m.at[0]} ${m.at[1]})`}
+                        onClick={() => setFloor(m.target)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            setFloor(m.target);
+                          }
+                        }}
+                      >
+                        <g className="route-transfer-body">
+                          <circle r={9} fill="#2563eb" stroke="white" strokeWidth={3} />
+                          <rect
+                            x={left ? -14 - w : 14}
+                            y={-15}
+                            width={w}
+                            height={30}
+                            rx={15}
+                            fill={j === 0 && leg.via ? "#203965" : "white"}
+                            stroke="#203965"
+                            strokeWidth={1.5}
+                          />
+                          <text
+                            x={left ? -w : 28}
+                            y={5}
+                            fontSize={13}
+                            fontWeight={600}
+                            fill={j === 0 && leg.via ? "white" : "#203965"}
+                          >
+                            {(m.up ? "↑ " : "↓ ") + m.text}
+                          </text>
+                        </g>
+                      </g>
+                    );
+                  });
+                })}
               </svg>
             </TransformComponent>
           </TransformWrapper>
@@ -1037,11 +1200,9 @@ export function MapWorkspace({
         <div className="map-caption">
           <Info size={16} />
           <span>
-            {floor === 2
-              ? "Floor 2 follows the supplied annotated sketch. Pale areas give building context."
-              : floor === 3
-                ? "Only the canteen connection is mapped on floor 3."
-                : "A campus schematic, with approximate room and doorway positions."}
+            {floor === 1
+              ? "Traced from the posted evacuation plans. Room doors and lifts are approximate."
+              : "Traced from the evacuation plans. Hatched areas are open to the floor below."}
           </span>
         </div>
         <div className="map-controls">

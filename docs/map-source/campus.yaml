@@ -1,29 +1,8 @@
+# Catalogue facts for the SDU main building. Positions come from scripts/campus_layout.py.
 schema_version: '0.1'
 campus:
   id: sdu
   name: SDU University
-drawing:
-  file: floor-1.svg
-  floor: 1
-  view_box:
-  - 0
-  - 0
-  - 765
-  - 1280
-  coordinate_system: image_pixels
-  origin: top_left
-  x_direction: right
-  y_direction: down
-  geometry_status: schematic_trace_draft
-  anchors_status: approximate_visual_locations_not_door_positions
-  layout_adjustments:
-    central_corridor_width_multiplier: 1.672
-    reference_section: 'Block D: west edge x=384, east edge x=500 before widening'
-    original_width: 116
-    current_width: 194
-    right_side_translation_x: 78
-    note: Schematic spacing change; facilities keep their original dimensions. Width
-      varies elsewhere along the spine.
 blocks:
 - id: A
   label: Block A
@@ -62,8 +41,8 @@ block_layout_notes:
   restrooms:
     general: 1
     staff: 1
-  staircase: At the end of the block, on the right when facing the block; exact map
-    position and connected floors unresolved.
+  staircase: At the end of the block, on the right when facing the block; exact map position and connected
+    floors unresolved.
   room_numbering_example:
     block: D
     floor_1_left:
@@ -76,36 +55,26 @@ block_layout_notes:
     floor_1_right_provisional:
     - D105
     - D106
-    floor_1_left_order: D101 nearest the main corridor, then D102, D103, D104 toward
-      the far end.
-  note: This is a reported layout pattern, not generated room inventory or surveyed
-    geometry.
+    floor_1_left_order: D101 nearest the main corridor, then D102, D103, D104 toward the far end.
+  note: This is a reported layout pattern, not generated room inventory or surveyed geometry.
+  evacuation_plans: The floor 1-3 evacuation plans show four classrooms plus an end room in the long wing
+    of D, E, F and G, and two large rooms plus an end room in Block H. The angled wing has two rooms and
+    the end staircase on floor 1, and small offices above.
 places:
 - id: red_hall
   type: event_hall
   name: Red Hall
   floor: 1
-  anchor:
-    x: 161
-    y: 1087
-  svg_id: red-hall
   entrances_from_floors:
   - 1
 - id: restroom_lower_central
   type: restroom
   name: Restroom — lower central area
   floor: 1
-  anchor:
-    x: 285
-    y: 1066
 - id: wifi_zone
   type: lounge
   name: WiFi Zone
   floor: 1
-  anchor:
-    x: 517
-    y: 1059
-  svg_id: wifi-zone
   aliases:
   - Wi-Fi Zone
   amenities:
@@ -115,19 +84,11 @@ places:
   type: cloakroom
   name: Cloakroom
   floor: 1
-  anchor:
-    x: 598
-    y: 1020
-  svg_id: cloakroom
 - id: entrance_c_main
   type: entrance
   name: Main Entrance
   floor: 1
-  anchor:
-    x: 602
-    y: 1080
   block: C
-  svg_id: entrance-c-main
 - id: library
   type: library
   name: Library
@@ -138,151 +99,92 @@ places:
   entrances_from_floors:
   - 1
   - 2
-  anchor:
-    floor: 1
-    x: 340
-    y: 1152
-  svg_id: library
 - id: d_staff_restroom
   type: restroom
   name: Block D — staff restroom
   floor: 1
-  anchor:
-    x: 366
-    y: 830
   block: D
   access: staff
 - id: d_restroom
   type: restroom
   name: Block D — general restroom
   floor: 1
-  anchor:
-    x: 366
-    y: 917
   block: D
   access: public
 - id: e_staff_restroom
   type: restroom
   name: Block E — staff restroom
   floor: 1
-  anchor:
-    x: 366
-    y: 645
   block: E
   access: staff
 - id: e_restroom
   type: restroom
   name: Block E — general restroom
   floor: 1
-  anchor:
-    x: 366
-    y: 734
   block: E
   access: public
 - id: f_staff_restroom
   type: restroom
   name: Block F — staff restroom
   floor: 1
-  anchor:
-    x: 366
-    y: 464
   block: F
   access: staff
 - id: f_restroom
   type: restroom
   name: Block F — general restroom
   floor: 1
-  anchor:
-    x: 366
-    y: 553
   block: F
   access: public
 - id: g_staff_restroom
   type: restroom
   name: Block G — staff restroom
   floor: 1
-  anchor:
-    x: 366
-    y: 280
   block: G
   access: staff
 - id: g_restroom
   type: restroom
   name: Block G — general restroom
   floor: 1
-  anchor:
-    x: 366
-    y: 370
   block: G
   access: public
 - id: h_staff_restroom
   type: restroom
   name: Block H — staff restroom
   floor: 1
-  anchor:
-    x: 366
-    y: 99
   block: H
   access: staff
 - id: h_restroom
   type: restroom
   name: Block H — general restroom
   floor: 1
-  anchor:
-    x: 366
-    y: 187
   block: H
   access: public
 - id: main_canteen
   type: canteen
   name: Canteen
   floor: 1
-  anchor:
-    x: 556
-    y: 487
-  svg_id: main-canteen
 - id: canteen_shop
   type: food_shop
   name: Food / drinks point
   floor: 1
-  anchor:
-    x: 537
-    y: 579
-  svg_id: canteen-shop
   notes: D5 confirmed for inclusion; exact name and service type remain to be confirmed.
 - id: red_canteen
   type: dining_area
   name: Red Canteen
   floor: 1
-  anchor:
-    x: 537
-    y: 613
-  svg_id: red-canteen
   notes: Seating area mainly used for food bought from the nearby food / drinks point.
 - id: medical_point
   type: medical
   name: Medical Point
   floor: 1
-  anchor:
-    x: 370
-    y: 242
-  svg_id: medical-point-shape
 - id: mini_red_hall
   type: event_hall
   name: Mini Red Hall
   floor: 1
-  anchor:
-    x: 568
-    y: 305
-  svg_id: mini-red-hall
 - id: table_tennis_zone
   type: recreation
   name: Table Tennis Zone
   floor: 1
-  anchor:
-    x: 572
-    y: 373
-  svg_id: table-tennis-zone
   amenities:
   - table_tennis
   notes: Approximately 2–3 tables; exact count not confirmed.
@@ -290,10 +192,6 @@ places:
   type: shop
   name: Print & Stationery
   floor: 1
-  anchor:
-    x: 562
-    y: 402
-  svg_id: print-shop-shape
   services:
   - stationery
   - photocopy
@@ -302,10 +200,6 @@ places:
   type: entrance
   name: Entrance near Block G
   floor: 1
-  anchor:
-    x: 632
-    y: 331
-  svg_id: entrance-g
   near_block: G
 - id: d105
   type: classroom
@@ -313,30 +207,29 @@ places:
   block: D
   floor: 1
   side: right_when_facing_block
-  numbering_status: provisional
-  notes: Temporary room number accepted for now; door position and room geometry unresolved.
+  notes: Provisional room number accepted by the user. Placed in the angled (north) wing, nearer the main
+    corridor; the order of D105/D106 is assumed.
 - id: d106
   type: classroom
   name: D106
   block: D
   floor: 1
   side: right_when_facing_block
-  numbering_status: provisional
-  notes: Temporary room number accepted for now; door position and room geometry unresolved.
+  notes: Provisional room number accepted by the user. Placed in the angled (north) wing, beside the end
+    staircase; the order of D105/D106 is assumed.
 - id: canteen_floor_3
   type: canteen
   name: Canteen — Floor 3
   floor: 3
   access_via:
   - stair_main_06
-  notes: Reached directly from floor 1 using staircase 6. Third-floor geometry and
-    connections to other spaces remain unresolved.
+  notes: Third-floor canteen. Reached by staircase 6 from floor 1, by the canteen stairs from floor 2,
+    and by a short bridge from the floor-3 main corridor.
 - id: technopark
   type: innovation_center
   name: Technopark
   block: F
   floor: null
-  position_status: unknown
   notes: Known to be in Block F; exact floor and location not recalled.
 - id: d101
   type: classroom
@@ -345,17 +238,7 @@ places:
   floor: 1
   side: left_when_entering_from_main_corridor
   order_from_main_corridor: 1
-  svg_id: room-d101
-  anchor:
-    x: 364.875
-    y: 897.5
-  geometry:
-    x: 345.75
-    y: 878
-    width: 38.25
-    height: 39
-    status: schematic_equal_division
-  notes: Room order confirmed; equal widths are schematic. Door positions unresolved.
+  notes: Room order confirmed; door positions unresolved.
 - id: d102
   type: classroom
   name: D102
@@ -363,17 +246,7 @@ places:
   floor: 1
   side: left_when_entering_from_main_corridor
   order_from_main_corridor: 2
-  svg_id: room-d102
-  anchor:
-    x: 326.625
-    y: 897.5
-  geometry:
-    x: 307.5
-    y: 878
-    width: 38.25
-    height: 39
-    status: schematic_equal_division
-  notes: Room order confirmed; equal widths are schematic. Door positions unresolved.
+  notes: Room order confirmed; door positions unresolved.
 - id: d103
   type: classroom
   name: D103
@@ -381,17 +254,7 @@ places:
   floor: 1
   side: left_when_entering_from_main_corridor
   order_from_main_corridor: 3
-  svg_id: room-d103
-  anchor:
-    x: 288.375
-    y: 897.5
-  geometry:
-    x: 269.25
-    y: 878
-    width: 38.25
-    height: 39
-    status: schematic_equal_division
-  notes: Room order confirmed; equal widths are schematic. Door positions unresolved.
+  notes: Room order confirmed; door positions unresolved.
 - id: d104
   type: classroom
   name: D104
@@ -399,22 +262,11 @@ places:
   floor: 1
   side: left_when_entering_from_main_corridor
   order_from_main_corridor: 4
-  svg_id: room-d104
-  anchor:
-    x: 250.125
-    y: 897.5
-  geometry:
-    x: 231.0
-    y: 878
-    width: 38.25
-    height: 39
-    status: schematic_equal_division
-  notes: Room order confirmed; equal widths are schematic. Door positions unresolved.
+  notes: Room order confirmed; door positions unresolved.
 structures:
 - id: bochka_1
   name: Bochka 1
   type: lecture_hall_structure
-  svg_id: bochka-1
   floor: 1
   lecture_hall_count: 2
   upper_study_space:
@@ -424,7 +276,6 @@ structures:
 - id: bochka_2
   name: Bochka 2
   type: lecture_hall_structure
-  svg_id: bochka-2
   floor: 1
   lecture_hall_count: 2
   upper_study_space:
@@ -434,7 +285,6 @@ structures:
 - id: bochka_3
   name: Bochka 3
   type: lecture_hall_structure
-  svg_id: bochka-3
   floor: 1
   lecture_hall_count: 2
   upper_study_space:
@@ -444,84 +294,73 @@ structures:
 - id: bochka_4
   name: Bochka 4
   type: lecture_hall_structure
-  svg_id: bochka-4
   floor: 1
   lecture_hall_count: 2
   upper_study_space:
     type: study_open_space
     floor: null
   numbering: Temporary map order from top to bottom; not official hall numbers.
-routing:
-  status: not_surveyed
-  nodes: []
-  edges: []
-  vertical_connections: []
 unresolved:
-- Exact doors and routeable corridor centerlines
-- Stair positions and connected floors for every block
-- Lift locations, operating floors and step-free access
-- Verify provisional D105/D106 and right-side room numbers in E–H
-- Actual Bochka hall names, internal doors and upper-level access
+- Exact doorways; corridor centrelines are traced from the evacuation plans
+- Lift locations, landings and step-free access
+- Room numbers beyond the D101 pattern, and the angled-wing rooms in E-H
+- Actual Bochka hall names, internal doors and the use of their upper levels
 - Exact name and type of the food / drinks point
-- Missing or changed first-floor features in the old map
-- Whether upper floors repeat the first-floor layout
+- Use of the Block G hall and Block H east wing above floor 1
 - Confirm basement access restrictions for the spiral staircase
 - Locate Technopark within Block F and confirm its floor
 - Identify and locate other special facilities on level -1
-- Position the five end-of-block staircases and their landings
+- The area between the canteen and the first Bochka (not visible in the photographed plans)
 vertical_infrastructure:
 - id: lift_block_d
   type: elevator
   name: Block D corridor lift
   block: D
   documented_floor: 1
-  connects_floors: [-1, 1, 2, 3]
-  anchor: {floor: 1, x: 295, y: 865}
-  position_status: schematic_position_from_confirmed_relative_location
-  notes: Lift in the middle of the Block D corridor. Relative location confirmed;
-    marker is approximate. Serves floors -1, 1, 2 and 3. Landing positions and
-    step-free approaches are not yet confirmed.
+  connects_floors:
+  - -1
+  - 1
+  - 2
+  - 3
+  notes: Lift in the middle of the Block D corridor. Relative location confirmed; marker is approximate.
+    Serves floors -1, 1, 2 and 3. Landing positions and step-free approaches are not yet confirmed.
 - id: lift_block_f
   type: elevator
   name: Block F corridor lift
   block: F
-  documented_floor: 1
-  connects_floors: [-1, 1, 2, 3]
-  anchor: {floor: 1, x: 295, y: 500}
-  position_status: schematic_position_from_confirmed_relative_location
-  notes: Lift in the middle of the Block F corridor. Relative location confirmed;
-    marker is approximate. Serves floors -1, 1, 2 and 3. Landing positions and
-    step-free approaches are not yet confirmed.
-- id: lift_block_h
-  type: elevator
-  name: Block H corridor lift
-  block: H
-  documented_floor: 1
-  connects_floors: [-1, 1, 2, 3]
-  anchor: {floor: 1, x: 295, y: 136}
-  position_status: schematic_position_from_confirmed_relative_location
-  notes: Lift in the middle of the Block H corridor. Relative location confirmed;
-    marker is approximate. Serves floors -1, 1, 2 and 3. Landing positions and
-    step-free approaches are not yet confirmed.
-- id: stair_block_d
-  type: stairs
-  block: D
-  location_description: At the far end when entering D from the main corridor, on
-    the right (upper side of this drawing).
   documented_floor: 1
   connects_floors:
   - -1
   - 1
   - 2
   - 3
-  position_status: schematic_position_from_confirmed_relative_location
-  notes: Serves −1, 1, 2 and 3. Relative location confirmed; marker and landing dimensions
-    are schematic.
-  svg_id: stair-block-d
-  anchor:
-    floor: 1
-    x: 216
-    y: 849
+  notes: Lift in the middle of the Block F corridor. Relative location confirmed; marker is approximate.
+    Serves floors -1, 1, 2 and 3. Landing positions and step-free approaches are not yet confirmed.
+- id: lift_block_h
+  type: elevator
+  name: Block H corridor lift
+  block: H
+  documented_floor: 1
+  connects_floors:
+  - -1
+  - 1
+  - 2
+  - 3
+  notes: Lift in the middle of the Block H corridor. Relative location confirmed; marker is approximate.
+    Serves floors -1, 1, 2 and 3. Landing positions and step-free approaches are not yet confirmed.
+- id: stair_block_d
+  type: stairs
+  block: D
+  location_description: At the far end when entering D from the main corridor, on the right (upper side
+    of this drawing).
+  documented_floor: 1
+  connects_floors:
+  - -1
+  - 1
+  - 2
+  - 3
+  notes: Serves −1, 1, 2 and 3. Relative location confirmed; drawn at the end of the angled wing as on
+    the evacuation plans.
 - id: stair_block_e
   type: stairs
   block: E
@@ -532,8 +371,8 @@ vertical_infrastructure:
   - 1
   - 2
   - 3
-  position_status: not_positioned
-  notes: Served floors confirmed. Precise staircase position and landings remain unresolved.
+  notes: Serves −1, 1, 2 and 3. Drawn at the end of the angled wing as on the evacuation plans; landings
+    approximate.
 - id: stair_block_f
   type: stairs
   block: F
@@ -544,8 +383,8 @@ vertical_infrastructure:
   - 1
   - 2
   - 3
-  position_status: not_positioned
-  notes: Served floors confirmed. Precise staircase position and landings remain unresolved.
+  notes: Serves −1, 1, 2 and 3. Drawn at the end of the angled wing as on the evacuation plans; landings
+    approximate.
 - id: stair_block_g
   type: stairs
   block: G
@@ -556,8 +395,8 @@ vertical_infrastructure:
   - 1
   - 2
   - 3
-  position_status: not_positioned
-  notes: Served floors confirmed. Precise staircase position and landings remain unresolved.
+  notes: Serves −1, 1, 2 and 3. Drawn at the end of the angled wing as on the evacuation plans; landings
+    approximate.
 - id: stair_block_h
   type: stairs
   block: H
@@ -568,8 +407,8 @@ vertical_infrastructure:
   - 1
   - 2
   - 3
-  position_status: not_positioned
-  notes: Served floors confirmed. Precise staircase position and landings remain unresolved.
+  notes: Serves −1, 1, 2 and 3. Drawn at the end of the angled wing as on the evacuation plans; landings
+    approximate.
 - id: stair_spiral_bochkas
   type: spiral_stairs
   name: Spiral staircase by the Bochkas
@@ -577,14 +416,8 @@ vertical_infrastructure:
   - -1
   - 1
   - 2
-  svg_id: stair-spiral-bochkas
-  anchor:
-    floor: 1
-    x: 541
-    y: 720
-  location_description: Between the topmost two Bochkas in the supplied image (temporary
-    map IDs bochka_1 and bochka_2).
-  position_status: approximate_from_visible_spiral_shape
+  location_description: Between the topmost two Bochkas in the supplied image (temporary map IDs bochka_1
+    and bochka_2).
   floor_notes:
     '-1': Basement; access restrictions not confirmed.
 - id: library_stairs
@@ -594,12 +427,6 @@ vertical_infrastructure:
   - -1
   - 1
   - 2
-  svg_id: library-stairs
-  anchor:
-    floor: 1
-    x: 325
-    y: 1150
-  position_status: illustrative_inside_library_not_verified
   notes: Internal location unresolved.
 - id: library_lift
   type: elevator
@@ -608,12 +435,6 @@ vertical_infrastructure:
   - -1
   - 1
   - 2
-  svg_id: library-lift
-  anchor:
-    floor: 1
-    x: 357
-    y: 1164
-  position_status: illustrative_inside_library_not_verified
 - id: stair_main_01
   type: stairs
   name: Main corridor staircase 1
@@ -622,14 +443,9 @@ vertical_infrastructure:
   - 1
   - 2
   - 3
-  svg_id: stair-main-01
-  anchor:
-    floor: 1
-    x: 491.67
-    y: 973
   location_description: Above WiFi Zone, toward the cloakroom
-  position_status: approximate_map_position_confirmed_for_inclusion
   notes: Exact stair landing and access positions unresolved.
+  retired: true
 - id: stair_main_03
   type: stairs
   name: Main corridor staircase 3
@@ -637,13 +453,7 @@ vertical_infrastructure:
   connects_floors:
   - 1
   - 2
-  svg_id: stair-main-03
-  anchor:
-    floor: 1
-    x: 456.83
-    y: 920
   location_description: Below D general restroom, left of the bottommost Bochka
-  position_status: approximate_map_position_confirmed_for_inclusion
   notes: Exact stair landing and access positions unresolved.
 - id: stair_main_04
   type: stairs
@@ -652,13 +462,7 @@ vertical_infrastructure:
   connects_floors:
   - 1
   - 2
-  svg_id: stair-main-04
-  anchor:
-    floor: 1
-    x: 498
-    y: 763
   location_description: Opposite the second Bochka from the top
-  position_status: approximate_map_position_confirmed_for_inclusion
   notes: Exact stair landing and access positions unresolved.
 - id: stair_main_05
   type: stairs
@@ -667,13 +471,7 @@ vertical_infrastructure:
   connects_floors:
   - 1
   - 2
-  svg_id: stair-main-05
-  anchor:
-    floor: 1
-    x: 456.83
-    y: 611
   location_description: Between E and F, beside Red Canteen
-  position_status: approximate_map_position_confirmed_for_inclusion
   notes: Exact stair landing and access positions unresolved.
 - id: stair_main_06
   type: stairs
@@ -682,16 +480,9 @@ vertical_infrastructure:
   connects_floors:
   - 1
   - 3
-  svg_id: stair-main-06
-  anchor:
-    floor: 1
-    x: 541
-    y: 385
   location_description: Below table tennis, above the canteen
-  position_status: approximate_map_position_confirmed_for_inclusion
-  notes: Direct stairs from floor 1 to the canteen on floor 3, approached from the
-    secondary entrance. No floor 2 landing. Exact landing coordinates and the floor
-    1 approach path remain unresolved.
+  notes: Direct stairs from floor 1 to the canteen on floor 3, approached from the secondary entrance.
+    No floor 2 landing.
   skips_floors:
   - 2
   upper_destination: canteen_floor_3
@@ -702,11 +493,5 @@ vertical_infrastructure:
   connects_floors:
   - 1
   - 2
-  svg_id: stair-main-08
-  anchor:
-    floor: 1
-    x: 466.33
-    y: 250
   location_description: Above G, beside Mini Red Hall
-  position_status: approximate_map_position_confirmed_for_inclusion
   notes: Exact stair landing and access positions unresolved.

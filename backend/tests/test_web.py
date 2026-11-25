@@ -136,7 +136,9 @@ def test_saved_preference_drives_routes_and_unavailable_canteen(api_client):
     path=c.get('/routes',headers=h,params={'destination':ids['d201'],'accessible':False}).json()
     assert path['avoid_stairs'] is True
     assert all(t['kind']=='lift' for t in path['transfers'])
-    assert c.get('/routes',headers=h,params={'destination':ids['canteen_floor_3']}).json()['status']=='no_step_free_route'
+    canteen=c.get('/routes',headers=h,params={'destination':ids['canteen_floor_3']}).json()
+    assert canteen['status']=='schematic_draft' and all(t['kind']=='lift' for t in canteen['transfers'])
+    assert c.get('/routes',headers=h,params={'destination':ids['stair_main_06']}).json()['status']=='no_step_free_route'
     assert c.get('/routes?destination=999999999',headers=h).json()['status']=='unmapped'
 
 

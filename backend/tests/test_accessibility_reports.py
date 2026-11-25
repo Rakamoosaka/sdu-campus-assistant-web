@@ -171,7 +171,7 @@ def test_announcement_window_place_filter_and_delete(api_client):
 def test_nearby_paths_let_a_place_report_a_blocked_path(api_client):
     c = api_client; visitor = guest(c)
     nearby = c.get(f"/locations/{IDS['red_hall']}/nearby-paths").json()
-    assert nearby[0]['label'] == 'Floor 1 corridor between Red Hall and WiFi Zone'
+    assert nearby[0]['label'] == 'Floor 1 corridor between Red Hall and Block B staircase'
     assert len({frozenset((n['a'], n['b'])) for n in nearby}) == len(nearby) <= 8
     assert 'Block D lift' in [n['label'] for n in c.get(f"/locations/{IDS['lift_block_d']}/nearby-paths").json()]
     assert c.get('/locations/999999999/nearby-paths').json() == []
