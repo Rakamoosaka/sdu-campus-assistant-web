@@ -2907,6 +2907,12 @@ td button {
 .report-list {
   margin-top: 28px;
 }
+.content-page.narrow {
+  max-width: 880px;
+}
+.report-list .filter-chips {
+  margin-bottom: 20px;
+}
 .report-section {
   display: grid;
   gap: 12px;

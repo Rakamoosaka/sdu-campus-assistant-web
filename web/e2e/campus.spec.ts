@@ -761,6 +761,13 @@ test("administrator fixes a reported location in one step; reporter can withdraw
     .filter({ hasText: "sent by mistake" });
   await mistake.getByRole("button", { name: "Withdraw", exact: true }).click();
   await mistake.getByRole("button", { name: "Withdraw report" }).click();
+  await expect(page.getByRole("status").filter({ hasText: "Report withdrawn" })).toBeVisible();
+  // Withdrawn reports leave the default view and sit under their own filter.
+  await expect(mistake).toHaveCount(0);
+  await page
+    .getByRole("group", { name: "Filter your reports" })
+    .getByRole("button", { name: /^Withdrawn/ })
+    .click();
   await expect(mistake).toContainText("Withdrawn");
   await logout(page);
 

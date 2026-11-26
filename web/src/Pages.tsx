@@ -642,7 +642,9 @@ export function SchedulePage({ person, onLogin, openPlace, places }: Props) {
 export function MyReportsPage({ person }: Props) {
   const qc = useQueryClient();
   const [fresh, setFresh] = useState<number[] | null>(null),
-    [confirmWithdraw, setConfirmWithdraw] = useState<number | null>(null);
+    [confirmWithdraw, setConfirmWithdraw] = useState<number | null>(null),
+    [view, setView] = useState<"all" | "open" | "closed" | "withdrawn">("all"),
+    [withdrawnNote, setWithdrawnNote] = useState(false);
   const myReports = useQuery({
     queryKey: ["my-reports"],
     queryFn: () => get<Report[]>("/reports/me"),
@@ -663,18 +665,24 @@ export function MyReportsPage({ person }: Props) {
     mutationFn: (id: number) => api.post(`/reports/${id}/withdraw`),
     onSuccess: () => {
       setConfirmWithdraw(null);
+      setWithdrawnNote(true);
       qc.invalidateQueries({ queryKey: ["my-reports"] });
       qc.invalidateQueries({ queryKey: ["path-states"] });
     },
   });
   return (
-    <div className="content-page">
+    <div className="content-page narrow">
       <PageIntro label="YOUR REPORTS" title="Problems you reported.">
         Follow what the campus team did about each report. To report something
         new, open a place on the map and choose Report.
       </PageIntro>
       <section className="report-list" aria-label="Your reports">
         {withdraw.isError && <StateBox error={withdraw.error} />}
+        {withdrawnNote && (
+          <p role="status" className="success-text">
+            <Check size={16} /> Report withdrawn. You'll find it under Withdrawn.
+          </p>
+        )}
         {myReports.isError ? (
           <StateBox
             error={myReports.error}
@@ -699,12 +707,49 @@ export function MyReportsPage({ person }: Props) {
             </Button>
           </div>
         ) : (
-          (
-            [
-              ["Open", myReports.data.filter((r) => OPEN_REPORT.includes(r.status))],
-              ["Closed", myReports.data.filter((r) => !OPEN_REPORT.includes(r.status))],
-            ] as const
-          )
+          (() => {
+            const rows = myReports.data;
+            const open = rows.filter((r) => OPEN_REPORT.includes(r.status));
+            const closed = rows.filter(
+              (r) => !OPEN_REPORT.includes(r.status) && r.status !== "withdrawn",
+            );
+            const withdrawn = rows.filter((r) => r.status === "withdrawn");
+            const views = [
+              ["all", "All", open.length + closed.length],
+              ["open", "Open", open.length],
+              ["closed", "Closed", closed.length],
+              ["withdrawn", "Withdrawn", withdrawn.length],
+            ] as const;
+            const sections = (
+              view === "all"
+                ? [["Open", open], ["Closed", closed]]
+                : view === "open"
+                  ? [["Open", open]]
+                  : view === "closed"
+                    ? [["Closed", closed]]
+                    : [["Withdrawn", withdrawn]]
+            ) as [string, Report[]][];
+            return (
+              <>
+                <div
+                  className="filter-chips"
+                  role="group"
+                  aria-label="Filter your reports"
+                >
+                  {views.map(([value, label, count]) => (
+                    <button
+                      key={value}
+                      aria-pressed={view === value}
+                      onClick={() => setView(value)}
+                    >
+                      {label} <span>{count}</span>
+                    </button>
+                  ))}
+                </div>
+                {sections.every(([, list]) => !list.length) && (
+                  <p className="report-guest-note">Nothing here.</p>
+                )}
+                {sections
             .filter(([, rows]) => rows.length)
             .map(([heading, rows]) => (
               <div className="report-section" key={heading}>
@@ -802,7 +847,10 @@ export function MyReportsPage({ person }: Props) {
                   );
                 })}
               </div>
-            ))
+            ))}
+              </>
+            );
+          })()
         )}
         {person.role === "guest" && !!myReports.data?.length && (
           <p className="report-guest-note">
