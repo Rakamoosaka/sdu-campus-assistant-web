@@ -540,7 +540,7 @@ hr {
   font-size: 28px;
   font-weight: 650;
   letter-spacing: -1px;
-  margin-top: 9px;
+  margin-top: 0;
 }
 .search-field {
   display: flex;
@@ -738,7 +738,7 @@ hr {
   font-size: 18px;
   letter-spacing: -0.5px;
   font-weight: 650;
-  margin-top: 7px;
+  margin-top: 0;
 }
 .map-topbar .eyebrow {
   font-size: 11.5px;
@@ -1309,19 +1309,19 @@ hr {
   min-height: 100dvh;
 }
 .page-intro {
-  margin-bottom: 35px;
+  margin-bottom: 24px;
 }
 .page-intro h1 {
-  font-size: 33px;
-  font-weight: 600;
-  letter-spacing: -1.2px;
-  margin-top: 12px;
+  font-size: 30px;
+  font-weight: 650;
+  letter-spacing: -1px;
+  margin-top: 0;
 }
 .page-intro > p {
   font-size: 13.5px;
   color: #62728a;
   line-height: 1.8;
-  margin-top: 12px;
+  margin-top: 4px;
   max-width: 650px;
 }
 .cards-grid {

@@ -5,7 +5,6 @@ import {
   CheckCircle2,
   Clock,
   Construction,
-  Info,
   Link2,
   MapPin,
   MessageSquareText,
@@ -106,14 +105,6 @@ export function AdminReports({
 
   return (
     <section className="admin-section reports-admin">
-      <div className="reports-intro">
-        <Info size={18} />
-        <p>
-          Students and visitors report wrong place details and blocked paths.
-          Fix the problem here and every person who reported it is told
-          automatically in their <strong>My reports</strong> page.
-        </p>
-      </div>
       <div className="reports-summary">
         <div className={counts.todo ? "attention" : ""}>
           <span>Waiting for you</span>

@@ -525,7 +525,6 @@ export function MapWorkspace({
         >
           {!selectedPlace && (
             <div>
-              <span className="eyebrow">YOUR CAMPUS, CONNECTED</span>
               <h2>Where to?</h2>
             </div>
           )}
@@ -889,9 +888,6 @@ export function MapWorkspace({
             </section>
           </div>
         )}
-        <div className="panel-foot">
-          <span className="status-dot" /> Campus catalogue · Schematic map
-        </div>
       </aside>
       <section
         className={"map-canvas" + (routeLegs.length ? " has-route" : "")}
@@ -899,7 +895,6 @@ export function MapWorkspace({
       >
         <div className="map-topbar">
           <div>
-            <span className="eyebrow">SDU UNIVERSITY</span>
             <h2>
               Campus map <span className="map-status">SCHEMATIC</span>
             </h2>

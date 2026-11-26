@@ -731,7 +731,7 @@ test("old profile address opens My reports and the guest account menu offers sig
   await page.goto("/profile");
   await expect(page).toHaveURL(/\/reports$/);
   await expect(
-    page.getByRole("heading", { name: "Problems you reported." }),
+    page.getByRole("heading", { name: "My reports" }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Your account", exact: true }).click();
   const menu = page.getByRole("dialog", { name: "Your account" });

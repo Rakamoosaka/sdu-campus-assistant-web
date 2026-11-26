@@ -48,17 +48,14 @@ interface Props {
   onLogin: () => void;
 }
 export function PageIntro({
-  label,
   title,
   children,
 }: {
-  label: string;
   title: string;
   children?: React.ReactNode;
 }) {
   return (
     <div className="page-intro">
-      <span className="eyebrow">{label}</span>
       <h1>{title}</h1>
       {children && <p>{children}</p>}
     </div>
@@ -113,13 +110,7 @@ export function AssistantPage({ person, openPlace }: Props) {
   }
   return (
     <div className="content-page assistant-page">
-      <PageIntro
-        label="A LITTLE LOCAL KNOWLEDGE"
-        title="A hand finding your way."
-      >
-        Ask about rooms and campus services
-        {features.timetable && " or your next class"}.
-      </PageIntro>
+      <PageIntro title="Assistant" />
       <div className="assistant-toolbar">
         <Button
           variant="ghost"
@@ -316,10 +307,8 @@ export function SavedPage({
 }) {
   return (
     <div className="content-page">
-      <PageIntro label="YOUR SHORTCUTS" title="A few familiar places.">
-        {person.role === "guest"
-          ? "Log in to keep your own collection of campus places."
-          : `${favorites.length} of 5 places saved to your account. Remove a place to make room for another.`}
+      <PageIntro title="Saved places">
+        {person.role !== "guest" && `${favorites.length} of 5 saved`}
       </PageIntro>
       {person.role === "guest" ? (
         <LoginPrompt onLogin={onLogin} />
@@ -387,10 +376,7 @@ export function AnnouncementsPage({ openPlace }: Props) {
   });
   return (
     <div className="content-page">
-      <PageIntro label="AROUND THE CAMPUS" title="Stay in the loop.">
-        News, events and service changes on campus. Seeded presentation content
-        is sample data.
-      </PageIntro>
+      <PageIntro title="Campus news" />
       {news.isPending ? (
         <StateBox />
       ) : news.isError ? (
@@ -462,14 +448,9 @@ export function SchedulePage({ person, onLogin, openPlace, places }: Props) {
   return (
     <div className="content-page">
       <PageIntro
-        label="YOUR DAY, AT A GLANCE"
-        title={
-          person.role === "teacher"
-            ? "Your teaching schedule."
-            : "One class at a time."
-        }
+        title={person.role === "teacher" ? "Teaching schedule" : "Timetable"}
       >
-        Stored sample schedule · All times in Asia/Almaty (UTC+5).
+        Times in Asia/Almaty (UTC+5)
       </PageIntro>
       {person.role === "guest" ? (
         <LoginPrompt onLogin={onLogin} />
@@ -672,10 +653,7 @@ export function MyReportsPage({ person }: Props) {
   });
   return (
     <div className="content-page narrow">
-      <PageIntro label="YOUR REPORTS" title="Problems you reported.">
-        Follow what the campus team did about each report. To report something
-        new, open a place on the map and choose Report.
-      </PageIntro>
+      <PageIntro title="My reports" />
       <section className="report-list" aria-label="Your reports">
         {withdraw.isError && <StateBox error={withdraw.error} />}
         {withdrawnNote && (
@@ -969,9 +947,7 @@ export function AdminPage({ places }: Props) {
   }
   return (
     <div className="content-page">
-      <PageIntro label="CAMPUS ADMINISTRATION" title="Keep campus connected.">
-        Manage real catalogue data, published updates and submitted corrections.
-      </PageIntro>
+      <PageIntro title="Administration" />
       <div className="admin-stats">
         <div>
           <span>Catalogue locations</span>
@@ -1033,9 +1009,7 @@ export function AdminPage({ places }: Props) {
             />
           </div>
           <p className="muted">
-            Edit the details people see for each place. Places, their
-            categories, map positions and route connections come from the
-            campus map file and can't be changed here.
+            Positions and categories come from the map file.
           </p>
           <div className="table-wrap">
             <table>
@@ -1198,10 +1172,7 @@ export function AdminPage({ places }: Props) {
         ))}
       {tab === "Search analytics" && (
         <section className="admin-section">
-          <h2>What people are looking for</h2>
-          <p className="muted">
-            Counts are aggregated from actual database search logs.
-          </p>
+          <h2>Top searches</h2>
           {analytics.isError ? (
             <StateBox
               error={analytics.error}
@@ -1234,10 +1205,6 @@ export function AdminPage({ places }: Props) {
       )}
       {tab === "Roles" && (
         <section className="admin-section">
-          <p className="muted">
-            Roles are enforced by the server on every request, including
-            existing sessions.
-          </p>
           {users.isError ? (
             <StateBox error={users.error} retry={() => users.refetch()} />
           ) : users.isPending ? (
