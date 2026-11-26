@@ -26,6 +26,9 @@ def connection_label(campus: dict, a: str, b: str) -> str:
     edge = next((e for e in graph['edges'] if edge_key(e['a'], e['b']) == edge_key(a, b)), None)
     if edge and edge.get('label'):
         return edge['label']
+    # Reports and closures saved before a map update can name nodes that no longer exist.
+    if a not in graph['node_floors'] or b not in graph['node_floors']:
+        return 'A path from an earlier version of the map (no longer on the map)'
     first, second = nearest_place_name(campus, a), nearest_place_name(campus, b)
     floor = graph['node_floors'][a]
     if first == second:

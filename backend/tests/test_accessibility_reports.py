@@ -256,3 +256,21 @@ def test_guest_reports_move_to_account_on_sign_in(api_client):
     signed_in = c.post('/auth/login', json={'sdu_id': '240103053', 'password': 'Campus123!'}).json()
     mine = c.get('/reports/me', headers={'Authorization': 'Bearer ' + signed_in['access_token']}).json()
     assert [r['id'] for r in mine] == [report['id']]
+
+
+def test_reports_and_closures_from_an_older_map_still_list(api_client):
+    # Rows saved before a map update can name nodes the current map no longer has.
+    from sqlmodel import Session
+    with Session(m.engine) as session:
+        session.add(m.InaccuracyReport(author='240103049', kind='path', message='Old corridor blocked',
+                                       edge_a='f1_old_node_a', edge_b='f1_old_node_b'))
+        session.add(m.PathStatus(edge_a='f1_old_node_a', edge_b='f1_old_node_b', state='closed'))
+        session.commit()
+    c = api_client; admin = login(c, '240000002'); student = login(c)
+    reports = c.get('/admin/reports', headers=admin)
+    assert reports.status_code == 200
+    assert 'earlier version of the map' in reports.json()[0]['connection_label']
+    closures = c.get('/admin/path-status', headers=admin)
+    assert closures.status_code == 200 and 'earlier version' in closures.json()[0]['label']
+    assert c.get('/reports/me', headers=student).status_code == 200
+    assert c.get('/routes', params={'destination': IDS['d201']}).status_code == 200

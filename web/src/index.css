@@ -2886,7 +2886,7 @@ td button {
   font-size: 15px;
   color: #14532d;
 }
-.report-done-head span {
+.report-done-head div > span {
   display: block;
   margin-top: 3px;
   font-size: 13.5px;
