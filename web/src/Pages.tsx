@@ -7,6 +7,8 @@ import {
   Check,
   ChevronRight,
   Clock,
+  Construction,
+  Flag,
   MapPin,
   Plus,
   Send,
@@ -18,6 +20,10 @@ import { Dialog } from "./components/ui/dialog";
 import { StateBox } from "./MapWorkspace";
 import { features } from "./features";
 import { AdminReports } from "./components/AdminReports";
+import { ReportProgress } from "./components/ReportProgress";
+import { Link } from "react-router-dom";
+
+const OPEN_REPORT = ["new", "reviewing"];
 import {
   api,
   get,
@@ -665,7 +671,7 @@ export function MyReportsPage({ person }: Props) {
     <div className="content-page">
       <PageIntro label="YOUR REPORTS" title="Problems you reported.">
         Follow what the campus team did about each report. To report something
-        new, open a place on the map and choose Report a problem.
+        new, open a place on the map and choose Report.
       </PageIntro>
       <section className="report-list" aria-label="Your reports">
         {withdraw.isError && <StateBox error={withdraw.error} />}
@@ -677,82 +683,129 @@ export function MyReportsPage({ person }: Props) {
         ) : myReports.isPending ? (
           <StateBox />
         ) : !myReports.data.length ? (
-          <StateBox empty="No reports yet. Open any place on the map and choose Report a problem." />
+          <div className="reports-empty-state">
+            <span className="reports-empty-icon">
+              <Flag size={22} />
+            </span>
+            <strong>No reports yet</strong>
+            <span>
+              Spotted wrong details or a blocked corridor? Open the place on
+              the map and choose Report.
+            </span>
+            <Button asChild>
+              <Link to="/map">
+                <MapPin size={16} /> Open the map
+              </Link>
+            </Button>
+          </div>
         ) : (
-          myReports.data.map((r) => (
-            <article
-              className={"report-card " + (fresh?.includes(r.id) ? "fresh" : "")}
-              key={r.id}
-            >
-              <header>
-                <strong>
-                  #{r.id} ·{" "}
-                  {r.kind === "path" ? "Blocked path" : "Location information"}
-                  {fresh?.includes(r.id) && (
-                    <span className="new-tag">New update</span>
-                  )}
-                </strong>
-                <span className={"report-status " + r.status}>
-                  {reportStatusLabel(r.status)}
-                </span>
-              </header>
-              <small className="muted">
-                {(r.kind === "path" ? r.connection_label : r.location_name) ||
-                  "Campus"}{" "}
-                · Sent {localTime(r.created_at)}
-                {r.updated_at && ` · Updated ${localTime(r.updated_at)}`}
-              </small>
-              <p>{r.message}</p>
-              {r.path_status && (
-                <p className="muted">
-                  {r.path_status.state === "closed"
-                    ? "Routes currently go around this path"
-                    : "Step-free routes currently avoid this path"}
-                  {r.path_status.reopens_at
-                    ? ` until ${localTime(r.path_status.reopens_at)}.`
-                    : "."}
-                </p>
-              )}
-              {r.resolution_note && (
-                <p className="report-note">
-                  <strong>Campus team:</strong> {r.resolution_note}
-                </p>
-              )}
-              {["new", "reviewing"].includes(r.status) &&
-                (confirmWithdraw === r.id ? (
-                  <div className="row-actions start">
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      disabled={withdraw.isPending}
-                      onClick={() => withdraw.mutate(r.id)}
+          (
+            [
+              ["Open", myReports.data.filter((r) => OPEN_REPORT.includes(r.status))],
+              ["Closed", myReports.data.filter((r) => !OPEN_REPORT.includes(r.status))],
+            ] as const
+          )
+            .filter(([, rows]) => rows.length)
+            .map(([heading, rows]) => (
+              <div className="report-section" key={heading}>
+                <h2>
+                  {heading} <span>{rows.length}</span>
+                </h2>
+                {rows.map((r) => {
+                  const isPath = r.kind === "path";
+                  const isFresh = fresh?.includes(r.id);
+                  return (
+                    <article
+                      className={"report-card" + (isFresh ? " fresh" : "")}
+                      key={r.id}
                     >
-                      Withdraw report
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => setConfirmWithdraw(null)}
-                    >
-                      Keep it
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="row-actions start">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => setConfirmWithdraw(r.id)}
-                    >
-                      Withdraw
-                    </Button>
-                  </div>
-                ))}
-            </article>
-          ))
+                      <header>
+                        <span className={"report-card-icon " + r.kind}>
+                          {isPath ? <Construction size={17} /> : <MapPin size={17} />}
+                        </span>
+                        <div className="report-card-title">
+                          <h3>
+                            {(isPath ? r.connection_label : r.location_name) ||
+                              "Campus"}
+                          </h3>
+                          <small>
+                            {isPath ? "Blocked path" : "Place information"} · #
+                            {r.id} · Sent {localTime(r.created_at)}
+                          </small>
+                        </div>
+                        {isFresh && <span className="new-tag">New update</span>}
+                        <span className={"report-status " + r.status}>
+                          {reportStatusLabel(r.status)}
+                        </span>
+                      </header>
+                      <blockquote className="report-card-message">
+                        <span>You wrote</span>
+                        {r.message}
+                      </blockquote>
+                      <ReportProgress status={r.status} />
+                      {r.resolution_note && (
+                        <div className="report-reply">
+                          <span>
+                            Campus team
+                            {r.updated_at && ` · ${localTime(r.updated_at)}`}
+                          </span>
+                          <p>{r.resolution_note}</p>
+                        </div>
+                      )}
+                      {r.path_status && (
+                        <p className="report-path-state">
+                          <Construction size={14} />
+                          {r.path_status.state === "closed"
+                            ? "Routes currently go around this path"
+                            : "Step-free routes currently avoid this path"}
+                          {r.path_status.reopens_at
+                            ? ` until ${localTime(r.path_status.reopens_at)}.`
+                            : "."}
+                        </p>
+                      )}
+                      {r.status === "withdrawn" && (
+                        <p className="report-path-state">You withdrew this report.</p>
+                      )}
+                      {OPEN_REPORT.includes(r.status) && (
+                        <footer>
+                          {confirmWithdraw === r.id ? (
+                            <>
+                              <span>Withdraw this report?</span>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                disabled={withdraw.isPending}
+                                onClick={() => withdraw.mutate(r.id)}
+                              >
+                                Withdraw report
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => setConfirmWithdraw(null)}
+                              >
+                                Keep it
+                              </Button>
+                            </>
+                          ) : (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => setConfirmWithdraw(r.id)}
+                            >
+                              Withdraw
+                            </Button>
+                          )}
+                        </footer>
+                      )}
+                    </article>
+                  );
+                })}
+              </div>
+            ))
         )}
-        {person.role === "guest" && (
-          <p className="muted text-xs">
+        {person.role === "guest" && !!myReports.data?.length && (
+          <p className="report-guest-note">
             You're using guest mode. Sign in on this device and these reports
             move to your account, so you can keep following them.
           </p>

@@ -614,9 +614,10 @@ test("blocked path report is tracked and resolved by an administrator", async ({
   await login(page);
   await search(page, "D201");
   await page.getByRole("button", { name: "Find route", exact: true }).click();
-  await page
-    .getByRole("button", { name: "Report a blocked path" })
-    .click();
+  await page.getByRole("button", { name: "Report a problem" }).click();
+  await expect(
+    page.getByRole("radio", { name: /blocked/ }),
+  ).toBeChecked();
   await page.getByLabel("Where exactly?").selectOption({ index: 3 });
   await page
     .getByLabel("What did you see?")
@@ -637,9 +638,8 @@ test("blocked path report is tracked and resolved by an administrator", async ({
   await page.getByRole("link", { name: "Administration", exact: true }).click();
   await page.getByRole("button", { name: "Reports", exact: true }).click();
   const row = page
-    .locator(".report-group")
+    .locator(".admin-report")
     .filter({ hasText: "corridor closed for repairs" });
-  await expect(row).toContainText("Reported by 1 person");
   await row.getByRole("button", { name: /Close this path/ }).click();
   await expect(page.getByText(/Path closed\. Routes now go around it/)).toBeVisible();
   await expect(row).toHaveCount(0);
@@ -768,7 +768,7 @@ test("administrator fixes a reported location in one step; reporter can withdraw
   await page.getByRole("link", { name: "Administration", exact: true }).click();
   await page.getByRole("button", { name: "Reports", exact: true }).click();
   const row = page
-    .locator(".report-group")
+    .locator(".admin-report")
     .filter({ hasText: "open until 22:00 now" });
   await row.getByRole("button", { name: /Fix the details/ }).click();
   await expect(page.getByRole("dialog")).toContainText("open until 22:00 now");
@@ -778,7 +778,7 @@ test("administrator fixes a reported location in one step; reporter can withdraw
   await expect(row).toHaveCount(0);
   await page.getByRole("button", { name: /^Withdrawn/ }).click();
   await expect(
-    page.locator(".report-group").filter({ hasText: "sent by mistake" }),
+    page.locator(".admin-report").filter({ hasText: "sent by mistake" }),
   ).toContainText("The reporter withdrew this report.");
   await logout(page);
 
@@ -810,7 +810,7 @@ test("switched-off sections are hidden everywhere", async ({ page }) => {
     page.getByRole("button", { name: "Announcements", exact: true }),
   ).toHaveCount(0);
 });
-test("same-place reports are grouped and declined with one message", async ({
+test("same-place reports get their own cards and are declined one by one", async ({
   page,
 }) => {
   for (const who of ["240103051", "240103052"]) {
@@ -826,18 +826,21 @@ test("same-place reports are grouped and declined with one message", async ({
   await login(page, "240000002");
   await page.getByRole("link", { name: "Administration", exact: true }).click();
   await page.getByRole("button", { name: "Reports", exact: true }).click();
-  const card = page
-    .locator(".report-group")
+  const cards = page
+    .locator(".admin-report")
     .filter({ hasText: "moved upstairs" });
-  await expect(card).toHaveCount(1);
-  await expect(card).toContainText("Reported by 2 people");
-  await card.getByRole("button", { name: "Reply or decline…" }).click();
-  await card
-    .getByLabel("Message to the reporters")
-    .fill("We checked: it is still on the first floor.");
-  await card.getByRole("button", { name: "Decline with this message" }).click();
-  await expect(page.getByText(/the reporters were told why/)).toBeVisible();
-  await expect(card).toHaveCount(0);
+  await expect(cards).toHaveCount(2);
+  await expect(cards.first()).toContainText("also reported in #");
+  for (const who of ["240103051", "240103052"]) {
+    const card = cards.filter({ hasText: who }).first();
+    await card.getByRole("button", { name: "Reply or decline…" }).click();
+    await card
+      .getByLabel("Message to the reporter")
+      .fill("We checked: it is still on the first floor.");
+    await card.getByRole("button", { name: "Decline with this message" }).click();
+    await expect(page.getByText(/the reporter was told why/)).toBeVisible();
+  }
+  await expect(cards).toHaveCount(0);
   await logout(page);
 
   await login(page, "240103052");

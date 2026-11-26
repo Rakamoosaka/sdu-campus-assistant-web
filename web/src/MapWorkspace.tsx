@@ -21,7 +21,6 @@ import {
   ArrowUp,
   ArrowDown,
   Layers,
-  Info,
   Flag,
   ArrowLeft,
   SlidersHorizontal,
@@ -32,6 +31,7 @@ import { Button } from "./components/ui/button";
 import { Dialog } from "./components/ui/dialog";
 import { ShareDestination } from "./components/MapActions";
 import { PathPicker } from "./components/PathPicker";
+import { ReportProgress } from "./components/ReportProgress";
 import { features } from "./features";
 import { searchSavedMap } from "./lib/offlineMap";
 import {
@@ -47,7 +47,6 @@ import {
   type News,
   type PathPart,
   type PathState,
-  reportStatusLabel,
   localTime,
 } from "./lib/api";
 import floor1 from "../../assets/maps/floor-1-background.svg?url";
@@ -684,7 +683,8 @@ export function MapWorkspace({
                 <Button
                   variant="outline"
                   aria-label="Report a problem"
-                  onClick={() => openReport("location")}
+                  // With a route on screen, a blocked corridor is the likelier report.
+                  onClick={() => openReport(routeParts.length ? "path" : "location")}
                 >
                   <Flag size={16} /> Report
                 </Button>
@@ -847,15 +847,6 @@ export function MapWorkspace({
                   {route.status === "schematic_draft" &&
                     " Distance and walking time aren't shown: the schematic has no measured scale."}
                 </p>
-                {route.status === "schematic_draft" && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => openReport("path")}
-                  >
-                    <Flag size={14} /> Report a blocked path
-                  </Button>
-                )}
               </section>
             )}
             <section className="place-about" aria-label="About this place">
@@ -1273,14 +1264,6 @@ export function MapWorkspace({
             </TransformComponent>
           </TransformWrapper>
         </div>
-        <div className="map-caption">
-          <Info size={16} />
-          <span>
-            {floor === 1
-              ? "Traced from the posted evacuation plans. Room doors and lifts are approximate."
-              : "Traced from the evacuation plans. Hatched areas are open to the floor below."}
-          </span>
-        </div>
         <div className="map-controls">
           <Button
             variant="outline"
@@ -1362,21 +1345,40 @@ export function MapWorkspace({
       <Dialog
         open={reportOpen}
         onOpenChange={setReportOpen}
-        title="Report a problem"
-        description={`About ${selectedPlace?.name}. The campus team reviews every report.`}
+        title={reportDone ? "Report sent" : "Report a problem"}
+        description={
+          reportDone
+            ? `Report #${reportDone.id} about ${selectedPlace?.name}`
+            : `About ${selectedPlace?.name}. The campus team reviews every report.`
+        }
       >
         {reportDone ? (
           <div className="report-done" role="status">
-            <p className="success-text">
-              <Check size={16} /> Report #{reportDone.id} received ·{" "}
-              {reportStatusLabel(reportDone.status)}
-            </p>
-            <p>
-              Follow its progress in <Link to="/reports">My reports</Link>.
-              {person.role === "guest" &&
-                " If you sign in on this device later, it moves to your account."}
-            </p>
-            <Button onClick={() => setReportOpen(false)}>Done</Button>
+            <div className="report-done-head">
+              <span className="report-done-icon">
+                <Check size={22} strokeWidth={3} />
+              </span>
+              <div>
+                <strong>Thanks, report #{reportDone.id} received</strong>
+                <span>
+                  The campus team will look into it. You'll see each update in
+                  My reports.
+                </span>
+              </div>
+            </div>
+            <ReportProgress status={reportDone.status} />
+            {person.role === "guest" && (
+              <p className="report-done-note">
+                You're in guest mode. Sign in on this device later and the
+                report moves to your account.
+              </p>
+            )}
+            <div className="report-done-actions">
+              <Button variant="outline" asChild>
+                <Link to="/reports">View my reports</Link>
+              </Button>
+              <Button onClick={() => setReportOpen(false)}>Done</Button>
+            </div>
           </div>
         ) : (
           <form

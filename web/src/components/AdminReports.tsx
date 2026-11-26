@@ -6,6 +6,7 @@ import {
   Clock,
   Construction,
   Info,
+  Link2,
   MapPin,
   MessageSquareText,
   RotateCcw,
@@ -39,7 +40,8 @@ function ago(date: string) {
   return `${days} day${days > 1 ? "s" : ""} ago`;
 }
 
-// Reports about the same place or the same path are handled together.
+// Reports about the same place or path are listed next to each other; fixing
+// the problem resolves all of them on the server.
 const problemKey = (r: Report) =>
   r.kind === "path"
     ? `path:${[r.edge_a, r.edge_b].sort().join("|")}`
@@ -60,9 +62,9 @@ export function AdminReports({
 }) {
   const qc = useQueryClient();
   const [view, setView] = useState("todo"),
-    [replying, setReplying] = useState<string | null>(null),
+    [replying, setReplying] = useState<number | null>(null),
     [reply, setReply] = useState(""),
-    [timing, setTiming] = useState<string | null>(null),
+    [timing, setTiming] = useState<number | null>(null),
     [reopenAt, setReopenAt] = useState("");
   const act = useMutation({
     mutationFn: async (calls: (() => Promise<unknown>)[]) => {
@@ -88,7 +90,7 @@ export function AdminReports({
     else groups.push([r]);
   }
   const counts = {
-    todo: groups.length,
+    todo: open.length,
     resolved: reports.filter((r) => r.status === "resolved").length,
     rejected: reports.filter((r) => r.status === "rejected").length,
     withdrawn: reports.filter((r) => r.status === "withdrawn").length,
@@ -118,7 +120,7 @@ export function AdminReports({
           <strong>{counts.todo}</strong>
           <small>
             {open.length} report{open.length === 1 ? "" : "s"} about{" "}
-            {counts.todo} problem{counts.todo === 1 ? "" : "s"}
+            {groups.length} problem{groups.length === 1 ? "" : "s"}
           </small>
         </div>
         <div>
@@ -181,203 +183,224 @@ export function AdminReports({
       {act.isError && <StateBox error={act.error} />}
 
       {view === "todo" ? (
-        !groups.length ? (
+        !open.length ? (
           <div className="reports-empty">
             <CheckCircle2 size={28} />
             <strong>Nothing to do</strong>
             <span>New reports from students and visitors will appear here.</span>
           </div>
         ) : (
-          groups.map((group) => {
-            const first = group[0];
-            const key = problemKey(first);
-            const isPath = first.kind === "path";
-            const place = places.find((p) => p.id === first.location_id);
-            const answerAll = (status: string, note: string) =>
-              group.map(
-                (r) => () =>
+          groups.flatMap((group) =>
+            group.map((r) => {
+              const key = problemKey(r);
+              const isPath = r.kind === "path";
+              const place = places.find((p) => p.id === r.location_id);
+              const others = group.filter((o) => o.id !== r.id);
+              const alsoResolves = others.length
+                ? ` Also resolves the ${others.length === 1 ? "other report" : `${others.length} other reports`} about this ${isPath ? "path" : "place"}.`
+                : "";
+              const answer = (status: string, note: string) => [
+                () =>
                   api.put(`/admin/reports/${r.id}`, {
                     status,
                     resolution_note: note,
                   }),
-              );
-            const closePath = (state: string) =>
-              run(
-                state === "closed"
-                  ? `Path closed. Routes now go around it, and ${group.length === 1 ? "the reporter was" : "the reporters were"} told.`
-                  : `Path marked not step-free, and ${group.length === 1 ? "the reporter was" : "the reporters were"} told.`,
-                [
-                  () =>
-                    api.post("/admin/path-status", {
-                      edge_a: first.edge_a,
-                      edge_b: first.edge_b,
-                      state,
-                      report_id: first.id,
-                      reopens_at:
-                        timing === key && reopenAt
-                          ? reopenAt + ":00+05:00"
-                          : null,
-                    }),
-                ],
-              );
-            const reviewing = group.every((r) => r.status === "reviewing");
-            return (
-              <article className="report-group" key={key}>
-                <header>
-                  <span className={"kind-badge " + first.kind}>
-                    {isPath ? <Construction size={14} /> : <MapPin size={14} />}
-                    {isPath ? "Blocked path" : "Wrong place information"}
-                  </span>
-                  <span className={"report-status " + (reviewing ? "reviewing" : "new")}>
-                    {reviewing ? "Under review" : "New"}
-                  </span>
-                </header>
-                <h3>
-                  {(isPath ? first.connection_label : first.location_name) ||
-                    "Campus"}
-                </h3>
-                <p className="group-meta">
-                  <Clock size={13} /> Reported by {group.length}{" "}
-                  {group.length === 1 ? "person" : "people"} · first{" "}
-                  {ago(first.created_at)}
-                  {first.route && ` · on the route ${first.route}`}
-                </p>
-                <ul className="report-quotes">
-                  {group.map((r) => (
-                    <li key={r.id}>
-                      <MessageSquareText size={14} />
-                      <div>
-                        <q>{r.message}</q>
-                        <small>
-                          {reporter(r.author)} · {localTime(r.created_at)} · #
-                          {r.id}
-                        </small>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-                <div className="report-decide">
-                  <span className="decide-label">What do you want to do?</span>
-                  {isPath ? (
-                    <div className="decide-options">
-                      <button
-                        className="decide-option primary"
-                        disabled={act.isPending}
-                        onClick={() => closePath("closed")}
-                      >
-                        <strong>Close this path</strong>
-                        <span>Every route goes around it.</span>
-                      </button>
-                      <button
-                        className="decide-option"
-                        disabled={act.isPending}
-                        onClick={() => closePath("not_step_free")}
-                      >
-                        <strong>Mark not step-free</strong>
-                        <span>Only routes that avoid stairs go around it.</span>
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="decide-options">
-                      <button
-                        className="decide-option primary"
-                        disabled={act.isPending || !place}
-                        onClick={() => place && onFix(first, place)}
-                      >
-                        <strong>Fix the details</strong>
-                        <span>
-                          Opens {first.location_name}. Saving resolves this
-                          report.
-                        </span>
-                      </button>
-                    </div>
+              ];
+              const closePath = (state: string) =>
+                run(
+                  (state === "closed"
+                    ? "Path closed. Routes now go around it, and "
+                    : "Path marked not step-free, and ") +
+                    (group.length === 1
+                      ? "the reporter was told."
+                      : `all ${group.length} reporters were told.`),
+                  [
+                    () =>
+                      api.post("/admin/path-status", {
+                        edge_a: r.edge_a,
+                        edge_b: r.edge_b,
+                        state,
+                        report_id: r.id,
+                        reopens_at:
+                          timing === r.id && reopenAt
+                            ? reopenAt + ":00+05:00"
+                            : null,
+                      }),
+                  ],
+                );
+              const reviewing = r.status === "reviewing";
+              return (
+                <article
+                  className={"admin-report" + (others.length ? " related" : "")}
+                  key={r.id}
+                  data-problem={key}
+                >
+                  <header>
+                    <span className={"kind-badge " + r.kind}>
+                      {isPath ? <Construction size={14} /> : <MapPin size={14} />}
+                      {isPath ? "Blocked path" : "Wrong place information"}
+                    </span>
+                    <span className={"report-status " + (reviewing ? "reviewing" : "new")}>
+                      {reviewing ? "Under review" : "New"}
+                    </span>
+                  </header>
+                  <h3>
+                    {(isPath ? r.connection_label : r.location_name) || "Campus"}
+                  </h3>
+                  <p className="group-meta">
+                    <Clock size={13} /> {reporter(r.author)} · {ago(r.created_at)}{" "}
+                    · #{r.id}
+                    {r.route && ` · on the route ${r.route}`}
+                  </p>
+                  <blockquote className="report-message">
+                    <MessageSquareText size={15} />
+                    <q>{r.message}</q>
+                  </blockquote>
+                  {!!others.length && (
+                    <p className="report-related">
+                      <Link2 size={13} /> Same {isPath ? "path" : "place"} also
+                      reported in {others.map((o) => `#${o.id}`).join(", ")}
+                    </p>
                   )}
-                  {isPath &&
-                    (timing === key ? (
-                      <label className="reopen-field">
-                        Reopen automatically on (Asia/Almaty time)
-                        <input
-                          type="datetime-local"
-                          value={reopenAt}
-                          onChange={(e) => setReopenAt(e.target.value)}
-                        />
-                      </label>
-                    ) : (
-                      <button
-                        className="link-button"
-                        onClick={() => {
-                          setTiming(key);
-                          setReopenAt("");
-                        }}
-                      >
-                        + Reopen it automatically at a set time
-                      </button>
-                    ))}
-                  {replying === key ? (
-                    <div className="reply-box">
-                      <label>
-                        Message to {group.length === 1 ? "the reporter" : "the reporters"}
-                        <textarea
-                          maxLength={1000}
-                          value={reply}
-                          placeholder="e.g. We checked, and the hours shown are correct."
-                          onChange={(e) => setReply(e.target.value)}
-                        />
-                      </label>
-                      <div className="row-actions start">
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          disabled={act.isPending || !reply.trim()}
-                          onClick={() =>
-                            run(`Report declined, and ${group.length === 1 ? "the reporter was" : "the reporters were"} told why.`, answerAll("rejected", reply))
-                          }
+                  <div className="report-decide">
+                    <span className="decide-label">What do you want to do?</span>
+                    {isPath ? (
+                      <div className="decide-options">
+                        <button
+                          className="decide-option primary"
+                          disabled={act.isPending}
+                          onClick={() => closePath("closed")}
                         >
-                          Decline with this message
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          disabled={act.isPending || !reply.trim()}
-                          onClick={() =>
-                            run("Message sent. The report stays open.", answerAll("reviewing", reply))
-                          }
+                          <strong>Close this path</strong>
+                          <span>Every route goes around it.{alsoResolves}</span>
+                        </button>
+                        <button
+                          className="decide-option"
+                          disabled={act.isPending}
+                          onClick={() => closePath("not_step_free")}
                         >
-                          Send and keep open
-                        </Button>
-                        <Button size="sm" variant="ghost" onClick={() => setReplying(null)}>
-                          Cancel
-                        </Button>
+                          <strong>Mark not step-free</strong>
+                          <span>
+                            Only routes that avoid stairs go around it.
+                            {alsoResolves}
+                          </span>
+                        </button>
                       </div>
-                    </div>
-                  ) : (
-                    <div className="secondary-actions">
-                      {!reviewing && (
+                    ) : (
+                      <div className="decide-options">
+                        <button
+                          className="decide-option primary"
+                          disabled={act.isPending || !place}
+                          onClick={() => place && onFix(r, place)}
+                        >
+                          <strong>Fix the details</strong>
+                          <span>
+                            Opens {r.location_name}. Saving resolves this
+                            report.{alsoResolves}
+                          </span>
+                        </button>
+                      </div>
+                    )}
+                    {isPath &&
+                      (timing === r.id ? (
+                        <label className="reopen-field">
+                          Reopen automatically on (Asia/Almaty time)
+                          <input
+                            type="datetime-local"
+                            value={reopenAt}
+                            onChange={(e) => setReopenAt(e.target.value)}
+                          />
+                        </label>
+                      ) : (
                         <button
                           className="link-button"
-                          disabled={act.isPending}
-                          onClick={() =>
-                            run(`Marked as under review. ${group.length === 1 ? "The reporter" : "The reporters"} can see it.`, answerAll("reviewing", first.resolution_note))
-                          }
+                          onClick={() => {
+                            setTiming(r.id);
+                            setReopenAt("");
+                          }}
                         >
-                          Mark as under review
+                          + Reopen it automatically at a set time
                         </button>
-                      )}
-                      <button
-                        className="link-button"
-                        onClick={() => {
-                          setReplying(key);
-                          setReply("");
-                        }}
-                      >
-                        Reply or decline…
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </article>
-            );
-          })
+                      ))}
+                    {replying === r.id ? (
+                      <div className="reply-box">
+                        <label>
+                          Message to the reporter
+                          <textarea
+                            maxLength={1000}
+                            value={reply}
+                            placeholder="e.g. We checked, and the hours shown are correct."
+                            onChange={(e) => setReply(e.target.value)}
+                          />
+                        </label>
+                        <div className="row-actions start">
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            disabled={act.isPending || !reply.trim()}
+                            onClick={() =>
+                              run(
+                                "Report declined, and the reporter was told why.",
+                                answer("rejected", reply),
+                              )
+                            }
+                          >
+                            Decline with this message
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={act.isPending || !reply.trim()}
+                            onClick={() =>
+                              run(
+                                "Message sent. The report stays open.",
+                                answer("reviewing", reply),
+                              )
+                            }
+                          >
+                            Send and keep open
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => setReplying(null)}
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="secondary-actions">
+                        {!reviewing && (
+                          <button
+                            className="link-button"
+                            disabled={act.isPending}
+                            onClick={() =>
+                              run(
+                                "Marked as under review. The reporter can see it.",
+                                answer("reviewing", r.resolution_note),
+                              )
+                            }
+                          >
+                            Mark as under review
+                          </button>
+                        )}
+                        <button
+                          className="link-button"
+                          onClick={() => {
+                            setReplying(r.id);
+                            setReply("");
+                          }}
+                        >
+                          Reply or decline…
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </article>
+              );
+            }),
+          )
         )
       ) : (
         (() => {
@@ -391,7 +414,7 @@ export function AdminReports({
               </div>
             );
           return shown.map((r) => (
-            <article className="report-group done" key={r.id}>
+            <article className="admin-report done" key={r.id}>
               <header>
                 <span className={"kind-badge " + r.kind}>
                   {r.kind === "path" ? <Construction size={14} /> : <MapPin size={14} />}
