@@ -460,6 +460,23 @@ NEW_COLUMNS = {
 }
 
 
+def drop_paths_off_the_map(session: Session) -> None:
+    """Delete path reports and closures whose path is not on the current campus map.
+
+    They come from an earlier map: nobody can find those corridors any more, and routes never use them.
+    """
+    nodes = CAMPUS_MAP['routing']['node_floors']
+    def gone(a: str | None, b: str | None) -> bool:
+        return bool(a or b) and (a not in nodes or b not in nodes)
+    for row in session.exec(select(PathStatus)).all():
+        if gone(row.edge_a, row.edge_b):
+            session.delete(row)
+    for row in session.exec(select(InaccuracyReport).where(InaccuracyReport.kind == "path")).all():
+        if gone(row.edge_a, row.edge_b):
+            session.delete(row)
+    session.commit()
+
+
 def seed_database() -> None:
     SQLModel.metadata.create_all(engine)
     # create_all does not add columns to existing tables, so add the newer ones in place.
@@ -470,6 +487,7 @@ def seed_database() -> None:
                 if name not in existing:
                     connection.execute(text(f"ALTER TABLE {table} ADD COLUMN {name} {definition}"))
     with Session(engine) as session:
+        drop_paths_off_the_map(session)
         if session.exec(select(RoleOverride)).first() is None:
             session.add_all([
                 RoleOverride(email="240000001@sdu.edu.kz", role="teacher"),

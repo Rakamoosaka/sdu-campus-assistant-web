@@ -274,3 +274,20 @@ def test_reports_and_closures_from_an_older_map_still_list(api_client):
     assert closures.status_code == 200 and 'earlier version' in closures.json()[0]['label']
     assert c.get('/reports/me', headers=student).status_code == 200
     assert c.get('/routes', params={'destination': IDS['d201']}).status_code == 200
+
+
+def test_startup_drops_path_reports_and_closures_from_an_older_map(api_client):
+    from sqlmodel import Session, select
+    c = api_client; student = login(c)
+    route = c.get('/routes', params={'destination': IDS['d201']}).json()
+    current = route['connections'][2]
+    kept = c.post('/reports', headers=student, json={'kind': 'path', 'message': 'Still on the map',
+                                                    'edge_a': current['a'], 'edge_b': current['b']}).json()
+    with Session(m.engine) as session:
+        session.add(m.InaccuracyReport(author='240103049', kind='path', message='Old corridor', edge_a='f1_old_a', edge_b='f1_old_b'))
+        session.add(m.PathStatus(edge_a='f1_old_a', edge_b='f1_old_b', state='closed'))
+        session.commit()
+    m.seed_database()  # what happens when the server starts
+    with Session(m.engine) as session:
+        assert [r.id for r in session.exec(select(m.InaccuracyReport)).all()] == [kept['id']]
+        assert session.exec(select(m.PathStatus)).all() == []
